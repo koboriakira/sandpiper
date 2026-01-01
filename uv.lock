@@ -440,6 +440,19 @@ wheels = [
 ]
 
 [[package]]
+name = "lotion"
+version = "0.9.4"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "notion-client" },
+    { name = "requests" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/12/a9/01a990faa545b83944601ffdbd5ad1f14a05a59d9f997d029e3019c1dd7e/lotion-0.9.4.tar.gz", hash = "sha256:7927677af1e55fac7e96e1f8341a02d61222015a38e0be3f05e202810d81227a", size = 36589, upload-time = "2025-01-15T04:57:10.25Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/89/2f/074de44d99d517fed1c9493583e126757e3f99e14c8c03243788b5c1453b/lotion-0.9.4-py3-none-any.whl", hash = "sha256:10801c123d1d6f27952c411674d69e51f78512c4fae2c3e71b1e931bae1997ed", size = 61417, upload-time = "2025-01-15T04:57:07.843Z" },
+]
+
+[[package]]
 name = "markdown"
 version = "3.10"
 source = { registry = "https://pypi.org/simple" }
@@ -703,6 +716,18 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/24/bf/d1bda4f6168e0b2e9e5958945e01910052158313224ada5ce1fb2e1113b8/nodeenv-1.10.0.tar.gz", hash = "sha256:996c191ad80897d076bdfba80a41994c2b47c68e224c542b48feba42ba00f8bb", size = 55611, upload-time = "2025-12-20T14:08:54.006Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/88/b2/d0896bdcdc8d28a7fc5717c305f1a861c26e18c05047949fb371034d98bd/nodeenv-1.10.0-py2.py3-none-any.whl", hash = "sha256:5bb13e3eed2923615535339b3c620e76779af4cb4c6a90deccc9e36b274d3827", size = 23438, upload-time = "2025-12-20T14:08:52.782Z" },
+]
+
+[[package]]
+name = "notion-client"
+version = "2.2.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "httpx" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/cd/95/6e0d1cb377a296ecc940ad6c8662b6c18cada6b69cec1742295e9228a7d1/notion-client-2.2.1.tar.gz", hash = "sha256:3827e381ccb5a21aeb606686787edfb6c7a10681cb3507c4d606a1918e791061", size = 19857, upload-time = "2023-12-28T11:31:37.347Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/22/5e/977505b17c5528cffaaf561de46f58fa546345ae75866e3985039aaa991d/notion_client-2.2.1-py2.py3-none-any.whl", hash = "sha256:4ecf9ec527a124462f7bd407d9c9ead9853a9b2c8f00e56f3fa8fb15106ad871", size = 13983, upload-time = "2023-12-28T11:31:34.498Z" },
 ]
 
 [[package]]
@@ -1144,6 +1169,8 @@ version = "0.2.0"
 source = { editable = "." }
 dependencies = [
     { name = "httpx" },
+    { name = "lotion" },
+    { name = "notion-client" },
     { name = "pydantic" },
     { name = "rich" },
     { name = "typer" },
@@ -1175,6 +1202,8 @@ test = [
 [package.metadata]
 requires-dist = [
     { name = "httpx", specifier = ">=0.25.0" },
+    { name = "lotion", specifier = ">=0.9.4" },
+    { name = "notion-client", specifier = "==2.2.1" },
     { name = "pydantic", specifier = ">=2.5.0" },
     { name = "rich", specifier = ">=13.0.0" },
     { name = "typer", specifier = ">=0.9.0" },
