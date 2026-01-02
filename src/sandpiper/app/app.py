@@ -1,30 +1,41 @@
 from sandpiper.app.message_dispatcher import MessageDispatcher
 from sandpiper.perform.application.handle_todo_started import HandleTodoStarted
 from sandpiper.perform.infrastructure.notion_todo_repository import NotionTodoRepository as PerformNotionTodoRepository
+from sandpiper.plan.application.create_repeat_task import CreateRepeatTask
 from sandpiper.plan.application.create_todo import CreateToDo
 from sandpiper.plan.infrastructure.notion_todo_repository import NotionTodoRepository as PlanNotionTodoRepository
+from sandpiper.plan.query.routine_query import NotionRoutineQuery
 from sandpiper.shared.event.todo_created import TodoStarted
 from sandpiper.shared.infrastructure.event_bus import EventBus
 
 
 class SandPiperApp:
-    def __init__(self, create_todo: CreateToDo):
+    def __init__(self, create_todo: CreateToDo, create_repeat_task: CreateRepeatTask) -> None:
         self.create_todo = create_todo
+        self.create_repeat_task = create_repeat_task
 
 
 def bootstrap() -> SandPiperApp:
     event_bus = EventBus()
 
+    # infrastructure setup
+    routine_query = NotionRoutineQuery()
+    plan_notion_todo_repository = PlanNotionTodoRepository()
+    perform_notion_todo_repository = PerformNotionTodoRepository()
+
     # Subscribe event handlers
-    handle_todo_started = HandleTodoStarted(PerformNotionTodoRepository())
+    handle_todo_started = HandleTodoStarted(perform_notion_todo_repository)
     event_bus.subscribe(TodoStarted, handle_todo_started)
     dispatcher = MessageDispatcher(event_bus)
 
     # Create application services
-    create_todo = CreateToDo(
-        dispatcher=dispatcher,
-        todo_repository=PlanNotionTodoRepository(),
-    )
     return SandPiperApp(
-        create_todo=create_todo,
+        create_todo=CreateToDo(
+            dispatcher=dispatcher,
+            todo_repository=plan_notion_todo_repository,
+        ),
+        create_repeat_task=CreateRepeatTask(
+            routine_query=routine_query,
+            todo_repository=plan_notion_todo_repository,
+        ),
     )

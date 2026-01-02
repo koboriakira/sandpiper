@@ -3,9 +3,7 @@ from datetime import date
 
 from sandpiper.plan.domain.todo import ToDo, ToDoKind
 from sandpiper.plan.domain.todo_repository import TodoRepository
-from sandpiper.plan.infrastructure.notion_todo_repository import NotionTodoRepository
-from sandpiper.plan.query.routine_query import NotionRoutineQuery, RoutineQuery
-from sandpiper.shared.utils.date_utils import jst_today
+from sandpiper.plan.query.routine_query import RoutineQuery
 
 
 @dataclass
@@ -13,9 +11,9 @@ class CreateRepeatTask:
     routine_query: RoutineQuery
     todo_repository: TodoRepository
 
-    def __init__(self):
-        self.routine_query = NotionRoutineQuery()
-        self.todo_repository = NotionTodoRepository()
+    def __init__(self, routine_query: RoutineQuery, todo_repository: TodoRepository) -> None:
+        self.routine_query = routine_query
+        self.todo_repository = todo_repository
 
     def execute(self, basis_date: date):
         # Create the main task
@@ -40,9 +38,3 @@ class CreateRepeatTask:
                 kind=ToDoKind.REPEAT,
             )
             _inserted_todo = self.todo_repository.save(todo)
-
-
-if __name__ == "__main__":
-    # uv run python -m src.sandpiper.plan.application.create_repeat_task
-    creator = CreateRepeatTask()
-    creator.execute(jst_today())
