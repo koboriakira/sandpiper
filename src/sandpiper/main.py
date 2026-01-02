@@ -55,6 +55,16 @@ def create_repeat_project_tasks() -> None:
 
 
 @app.command()
+def get_todo_log() -> None:
+    """完了したToDoタスクのログを取得します"""
+    result = sandpiper_app.get_todo_log.execute()
+    for todo in result:
+        console.print(
+            f"- {todo.title} ({todo.perform_range[0].strftime('%Y-%m-%d %H:%M')} - {todo.perform_range[1].strftime('%Y-%m-%d %H:%M')})"
+        )
+
+
+@app.command()
 def create_repeat_tasks(
     basis_date: str = typer.Option(..., help="繰り返しタスクを作成する基準日 (YYYY-MM-DD形式)"),
 ) -> None:
