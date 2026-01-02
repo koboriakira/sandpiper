@@ -7,13 +7,12 @@ from pydantic import BaseModel
 
 from sandpiper.app.app import SandPiperApp
 from sandpiper.routers.dependency.deps import get_sandpiper_app
-from sandpiper.routers.dependency.verify_authorization import verify_authorization
 
-# このルーターの全エンドポイントでverify_authorizationを実行
 router = APIRouter(
     prefix="/notion",
     tags=["notion"],
-    dependencies=[Depends(verify_authorization)],
+    # このルーターでは全エンドポイントでのverify_authorizationを実行しない
+    # dependencies=[Depends(verify_authorization)],
 )
 
 
