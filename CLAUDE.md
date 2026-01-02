@@ -6,6 +6,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 2026年の最新Python開発テンプレートプロジェクト。uv、ruff、pytest、mypy、Claude Code hooks、pre-commitを使用したモダンなPython開発環境を提供。
 
+### 主な機能
+- **CLI**: typerによる使いやすいコマンドラインインターフェース
+- **Web API**: FastAPIによるモダンなREST API（自動ドキュメント生成、型安全、高速）
+- **両立**: CLIとWeb APIの両方の使い方をサポート
+
 ### Claude Code統合機能
 - **サブエージェント**: 専門領域別のAI支援（GitHub、コードレビュー、テスト、開発ワークフロー）
 - **スラッシュコマンド**: 開発タスクの自動化コマンド
@@ -28,6 +33,17 @@ uv run pytest                    # 基本テスト実行
 uv run pytest --cov             # カバレッジ付きテスト
 uv run pytest -v                # 詳細モード
 uv run pytest tests/test_*.py   # 特定のテストファイル
+
+# FastAPI開発サーバー起動
+# 開発モード（セキュリティ制限緩和、APIドキュメント有効）
+ENVIRONMENT=development uv run uvicorn sandpiper.api:app --reload
+ENVIRONMENT=development uv run uvicorn sandpiper.api:app --reload --port 8000
+
+# 本番モード（セキュアな設定、APIドキュメント無効）
+ENVIRONMENT=production ALLOWED_ORIGINS=https://yourdomain.com uv run uvicorn sandpiper.api:app
+
+# 全インターフェースでリッスン
+uv run uvicorn sandpiper.api:app --host 0.0.0.0
 
 # コード品質チェック
 uv run ruff check .              # リンティング
@@ -59,10 +75,15 @@ uv remove package-name           # パッケージ削除
 src/sandpiper/         # メインアプリケーションコード
 ├── __init__.py                  # パッケージ初期化・バージョン情報
 ├── main.py                      # CLIエントリーポイント（typer使用）
-└── utils.py                     # 共通ユーティリティ関数
+├── api.py                       # FastAPIアプリケーション
+├── utils.py                     # 共通ユーティリティ関数
+└── routers/                     # FastAPIルーター
+    ├── __init__.py
+    └── hello.py                 # 挨拶APIエンドポイント
 
 tests/                           # テストコード（pytest）
 ├── test_main.py                 # CLIアプリケーションテスト
+├── test_api.py                  # FastAPI APIテスト
 └── test_utils.py                # ユーティリティテスト
 ```
 
@@ -75,6 +96,66 @@ tests/                           # テストコード（pytest）
 - 依存関係グループ（dev、test、docs）
 
 ## 開発ワークフロー
+
+### FastAPI開発
+
+#### 環境変数による設定切り替え
+FastAPIアプリケーションは環境変数で動作モードを切り替えられます：
+
+**開発モード（デフォルトで開発時に推奨）:**
+```bash
+# 開発モード設定
+export ENVIRONMENT=development
+# または
+ENVIRONMENT=development uv run uvicorn sandpiper.api:app --reload
+
+# 特徴:
+# - すべてのオリジンからのCORS許可（allow_origins=["*"]）
+# - APIドキュメント有効（/docs, /redoc）
+# - 詳細なログ出力
+```
+
+**本番モード（デプロイ時）:**
+```bash
+# 本番モード設定
+export ENVIRONMENT=production
+export ALLOWED_ORIGINS=https://yourdomain.com,https://app.yourdomain.com
+# または
+ENVIRONMENT=production ALLOWED_ORIGINS=https://yourdomain.com uv run uvicorn sandpiper.api:app
+
+# 特徴:
+# - 指定されたオリジンのみCORS許可
+# - APIドキュメント無効化（セキュリティ）
+# - セキュアな設定
+```
+
+**環境変数一覧:**
+| 変数名 | デフォルト | 説明 |
+|--------|-----------|------|
+| `ENVIRONMENT` | `production` | 環境設定（`development`, `dev`, `local`, `production`） |
+| `DEBUG` | `false` | デバッグモード（`true`, `1`, `yes`で有効） |
+| `ALLOWED_ORIGINS` | なし | 許可するオリジン（カンマ区切り） |
+
+#### 開発フロー
+```bash
+# 1. APIサーバー起動（開発モード）
+ENVIRONMENT=development uv run uvicorn sandpiper.api:app --reload
+
+# 2. ブラウザでAPIドキュメントを確認
+# http://localhost:8000/docs (Swagger UI)
+# http://localhost:8000/redoc (ReDoc)
+
+# 3. APIテスト実行
+ENVIRONMENT=development uv run pytest tests/test_api.py -v
+
+# 4. エンドポイント追加
+# - routers/に新しいルーターファイル作成
+# - api.pyでルーター登録
+# - テスト作成・実行
+
+# 5. コード品質チェック
+uv run ruff check . && uv run ruff format . && uv run mypy
+```
 
 ### 新機能開発
 1. テスト作成: `tests/test_*.py`
@@ -195,6 +276,8 @@ git commit -m "ci: CI設定改善"
 - `httpx`: 非同期HTTPクライアント
 - `rich`: 美しいターミナル出力
 - `typer`: CLIアプリケーション構築
+- `fastapi`: モダンなWeb APIフレームワーク
+- `uvicorn`: ASGI サーバー
 
 ### 開発依存関係
 - `pytest`: テストフレームワーク + プラグイン
