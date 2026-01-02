@@ -9,7 +9,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from . import __version__
-from .routers import health
+from .routers import health, notion
 
 # 環境設定
 ENVIRONMENT = os.getenv("ENVIRONMENT", "production")  # デフォルトは本番環境
@@ -86,3 +86,4 @@ async def root() -> JSONResponse:
 
 # ルーターを登録
 app.include_router(health.router, prefix="/api", tags=["Health"])
+app.include_router(notion.router, prefix="/api")
