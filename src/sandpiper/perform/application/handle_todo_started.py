@@ -11,5 +11,5 @@ class HandleTodoStarted:
     def __call__(self, event: TodoStarted):
         print(f"ToDo started with page ID: {event.page_id}")
         todo = self._todo_repository.find(event.page_id)
-        todo.inprogress()
+        todo.start()
         self._todo_repository.save(todo)

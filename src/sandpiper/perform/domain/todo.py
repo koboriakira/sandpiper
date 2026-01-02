@@ -15,9 +15,8 @@ class ToDo:
     log_start_datetime: datetime | None = None
     log_end_datetime: datetime | None = None
 
-    def inprogress(self) -> None:
+    def start(self) -> None:
         self.status = ToDoStatusEnum.IN_PROGRESS
-        if self.section is None:
-            self.section = TaskChuteSection.new()
+        self.section = TaskChuteSection.new()
         self.log_start_datetime = jst_now()
         self.log_end_datetime = None
