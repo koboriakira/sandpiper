@@ -26,11 +26,14 @@ class NotionProjectTaskQuery(ProjectTaskQuery):
             project_relations = item.get_relation("プロジェクト").id_list
             if len(project_relations) == 0:
                 continue
+
+            is_next = item.get_checkbox("次やる").checked
             project_task = ProjectTaskDto(
                 page_id=item.id,
                 title=item.get_title_text(),
                 status=status,
                 project_page_id=project_relations[0],
+                is_next=is_next,
             )
             project_dtos.append(project_task)
         return project_dtos

@@ -6,4 +6,6 @@ def group_next_project_tasks_by_project(project_task_dtos: list[ProjectTaskDto])
     for task in project_task_dtos:
         if task.project_page_id not in project_task_dict:
             project_task_dict[task.project_page_id] = task
+        if task.is_next:
+            project_task_dict[task.project_page_id] = task
     return project_task_dict

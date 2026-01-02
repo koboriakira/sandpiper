@@ -10,6 +10,7 @@ class ProjectTaskDto:
     title: str
     status: ToDoStatusEnum
     project_page_id: str
+    is_next: bool
 
     def to_todo_model(self) -> ToDo:
         return ToDo(
