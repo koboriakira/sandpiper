@@ -33,15 +33,14 @@ class CreateRepeatTask:
                 continue
 
             # Todoを作成する
+            print(f"Create repeat task: {routine_dto.title}")
             todo = ToDo(
                 title=routine_dto.title,
                 status=ToDoStatus.TODO,
                 section=routine_dto.section,
                 kind=ToDoKind.REPEAT,
             )
-            print(todo)
             _inserted_todo = self.todo_repository.save(todo)
-            print(f"Created repeat task: {todo.title}")
 
 
 if __name__ == "__main__":

@@ -23,5 +23,5 @@ class ToDoStatus(Enum):
 class ToDo:
     title: str
     status: ToDoStatus
-    section: TaskChuteSection
-    kind: ToDoKind
+    section: TaskChuteSection | None = None
+    kind: ToDoKind | None = None

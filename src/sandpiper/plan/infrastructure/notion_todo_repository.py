@@ -26,23 +26,28 @@ class TodoSection(Select): ...
 class TodoPage(BasePage):
     name: TodoName
     status: TodoStatus
-    kind: TodoKind
-    section: TodoSection
+    kind: TodoKind | None = None
+    section: TodoSection | None = None
 
     @staticmethod
     def generate(todo: ToDo) -> "TodoPage":
-        t_name = TodoName.from_plain_text(todo.title)
-        t_status = TodoStatus.from_status_name(todo.status.value)
-        t_kind = TodoKind.from_name(todo.kind.value)
-        t_section = TodoSection.from_name(todo.section.value)
-        return TodoPage.create(properties=[t_name, t_status, t_kind, t_section])
+        properties = [TodoName.from_plain_text(todo.title), TodoStatus.from_status_name(todo.status.value)]
+        t_kind = TodoKind.from_name(todo.kind.value) if todo.kind else None
+        if t_kind:
+            properties.append(t_kind)
+        t_section = TodoSection.from_name(todo.section.value) if todo.section else None
+        if t_section:
+            properties.append(t_section)
+        return TodoPage.create(properties=properties)
 
     def to_domain(self) -> ToDo:
+        section = self.get_select("セクション")
+        kind = self.get_select("タスク種別")
         return ToDo(
             title=self.get_title_text(),
             status=ToDoStatus(self.status.status_name),
-            kind=ToDoKind(self.kind.selected_name),
-            section=TaskChuteSection(self.section.selected_name),
+            kind=ToDoKind(kind.selected_name) if kind else None,
+            section=TaskChuteSection(section.selected_name) if section else None,
         )
 
 
