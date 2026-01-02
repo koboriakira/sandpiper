@@ -2,7 +2,14 @@ from lotion import BasePage, Lotion, notion_database
 
 from sandpiper.plan.domain.todo import InsertedToDo, ToDo, ToDoKind, ToDoStatus
 from sandpiper.shared.notion.database_config import DatabaseId
-from sandpiper.shared.notion.notion_props import TodoKind, TodoName, TodoSection, TodoStatus
+from sandpiper.shared.notion.notion_props import (
+    TodoKind,
+    TodoName,
+    TodoProjectProp,
+    TodoProjectTaskProp,
+    TodoSection,
+    TodoStatus,
+)
 from sandpiper.shared.valueobject.task_chute_section import TaskChuteSection
 
 
@@ -12,6 +19,8 @@ class TodoPage(BasePage):
     status: TodoStatus
     kind: TodoKind | None = None
     section: TodoSection | None = None
+    project_relation: TodoProjectProp | None = None
+    project_task_relation: TodoProjectTaskProp | None = None
 
     @staticmethod
     def generate(todo: ToDo) -> "TodoPage":
@@ -25,15 +34,23 @@ class TodoPage(BasePage):
         t_section = TodoSection.from_name(todo.section.value) if todo.section else None
         if t_section:
             properties.append(t_section)
+        if todo.project_page_id:
+            properties.append(TodoProjectProp.from_id(todo.project_page_id))
+        if todo.project_task_page_id:
+            properties.append(TodoProjectTaskProp.from_id(todo.project_task_page_id))
         return TodoPage.create(properties=properties)
 
     def to_domain(self) -> ToDo:
         section = self.get_select("セクション")
         kind = self.get_select("タスク種別")
+        project = self.get_relation("プロジェクト").id_list
+        project_task = self.get_relation("プロジェクトタスク").id_list
         return ToDo(
             title=self.get_title_text(),
             kind=ToDoKind(kind.selected_name) if kind else None,
             section=TaskChuteSection(section.selected_name) if section else None,
+            project_page_id=project[0] if project else None,
+            project_task_page_id=project_task[0] if project_task else None,
         )
 
 

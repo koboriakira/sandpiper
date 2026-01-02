@@ -1,18 +1,26 @@
 from sandpiper.app.message_dispatcher import MessageDispatcher
 from sandpiper.perform.application.handle_todo_started import HandleTodoStarted
 from sandpiper.perform.infrastructure.notion_todo_repository import NotionTodoRepository as PerformNotionTodoRepository
+from sandpiper.plan.application.create_repeat_project_task import CreateRepeatProjectTask
 from sandpiper.plan.application.create_repeat_task import CreateRepeatTask
 from sandpiper.plan.application.create_todo import CreateToDo
 from sandpiper.plan.infrastructure.notion_todo_repository import NotionTodoRepository as PlanNotionTodoRepository
+from sandpiper.plan.query.project_task_query import NotionProjectTaskQuery
 from sandpiper.plan.query.routine_query import NotionRoutineQuery
 from sandpiper.shared.event.todo_created import TodoStarted
 from sandpiper.shared.infrastructure.event_bus import EventBus
 
 
 class SandPiperApp:
-    def __init__(self, create_todo: CreateToDo, create_repeat_task: CreateRepeatTask) -> None:
+    def __init__(
+        self,
+        create_todo: CreateToDo,
+        create_repeat_task: CreateRepeatTask,
+        create_repeat_project_task: CreateRepeatProjectTask,
+    ) -> None:
         self.create_todo = create_todo
         self.create_repeat_task = create_repeat_task
+        self.create_repeat_project_task = create_repeat_project_task
 
 
 def bootstrap() -> SandPiperApp:
@@ -20,6 +28,7 @@ def bootstrap() -> SandPiperApp:
 
     # infrastructure setup
     routine_query = NotionRoutineQuery()
+    project_task_query = NotionProjectTaskQuery()
     plan_notion_todo_repository = PlanNotionTodoRepository()
     perform_notion_todo_repository = PerformNotionTodoRepository()
 
@@ -36,6 +45,10 @@ def bootstrap() -> SandPiperApp:
         ),
         create_repeat_task=CreateRepeatTask(
             routine_query=routine_query,
+            todo_repository=plan_notion_todo_repository,
+        ),
+        create_repeat_project_task=CreateRepeatProjectTask(
+            project_task_query=project_task_query,
             todo_repository=plan_notion_todo_repository,
         ),
     )

@@ -49,6 +49,12 @@ def create_todo(title: str, start: bool = typer.Option(False, help="タスクを
 
 
 @app.command()
+def create_repeat_project_tasks() -> None:
+    """繰り返しのプロジェクトタスクを作成します"""
+    sandpiper_app.create_repeat_project_task.execute()
+
+
+@app.command()
 def create_repeat_tasks(
     basis_date: str = typer.Option(..., help="繰り返しタスクを作成する基準日 (YYYY-MM-DD形式)"),
 ) -> None:

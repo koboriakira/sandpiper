@@ -24,6 +24,8 @@ class ToDo:
     title: str
     section: TaskChuteSection | None = None
     kind: ToDoKind | None = None
+    project_page_id: str | None = None
+    project_task_page_id: str | None = None
 
 
 @dataclass

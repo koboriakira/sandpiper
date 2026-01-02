@@ -1,5 +1,5 @@
 from lotion import notion_prop
-from lotion.properties import Date, Select, Status, Title
+from lotion.properties import Date, Relation, Select, Status, Title
 
 
 @notion_prop("名前")
@@ -20,3 +20,11 @@ class TodoLogDate(Date): ...
 
 @notion_prop("タスク種別")
 class TodoKind(Select): ...
+
+
+@notion_prop("プロジェクト")
+class TodoProjectProp(Relation): ...
+
+
+@notion_prop("プロジェクトタスク")
+class TodoProjectTaskProp(Relation): ...
