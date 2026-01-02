@@ -62,7 +62,7 @@ def get_todo_log() -> None:
     result = sandpiper_app.get_todo_log.execute()
     for todo in result:
         console.print(
-            f"- {todo.title} ({todo.perform_range[0].strftime('%Y-%m-%d %H:%M')} - {todo.perform_range[1].strftime('%Y-%m-%d %H:%M')})"
+            f"- 【{todo.kind.value}】{todo.title} ({todo.perform_range[0].strftime('%Y-%m-%d %H:%M')} - {todo.perform_range[1].strftime('%Y-%m-%d %H:%M')})"
         )
 
 
