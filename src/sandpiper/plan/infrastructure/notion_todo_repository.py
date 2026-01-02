@@ -1,4 +1,5 @@
 from lotion import BasePage, Lotion, notion_database
+from lotion.block.rich_text.rich_text_builder import RichTextBuilder
 
 from sandpiper.plan.domain.todo import InsertedToDo, ToDo, ToDoKind, ToDoStatus
 from sandpiper.shared.notion.database_config import DatabaseId
@@ -10,6 +11,7 @@ from sandpiper.shared.notion.notion_props import (
     TodoSection,
     TodoStatus,
 )
+from sandpiper.shared.utils.date_utils import jst_today
 from sandpiper.shared.valueobject.task_chute_section import TaskChuteSection
 
 
@@ -34,10 +36,11 @@ class TodoPage(BasePage):
         t_section = TodoSection.from_name(todo.section.value) if todo.section else None
         if t_section:
             properties.append(t_section)
-        if todo.project_page_id:
+        if todo.project_page_id and todo.project_task_page_id:
             properties.append(TodoProjectProp.from_id(todo.project_page_id))
-        if todo.project_task_page_id:
             properties.append(TodoProjectTaskProp.from_id(todo.project_task_page_id))
+            rich_text_builder = RichTextBuilder.create().add_text(todo.title).add_date_mention(start=jst_today())
+            properties.append(TodoName.from_rich_text(rich_text_builder.build()))
         return TodoPage.create(properties=properties)
 
     def to_domain(self) -> ToDo:
