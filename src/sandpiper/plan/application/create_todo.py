@@ -3,7 +3,6 @@ from dataclasses import dataclass
 from sandpiper.app.message_dispatcher import MessageDispatcher
 from sandpiper.plan.domain.todo import ToDo, ToDoKind
 from sandpiper.plan.domain.todo_repository import TodoRepository
-from sandpiper.plan.infrastructure.notion_todo_repository import NotionTodoRepository
 from sandpiper.shared.event.todo_created import TodoStarted
 from sandpiper.shared.valueobject.task_chute_section import TaskChuteSection
 
@@ -20,9 +19,9 @@ class CreateToDo:
     _dispatcher: MessageDispatcher
     _todo_repository: TodoRepository
 
-    def __init__(self, dispatcher: MessageDispatcher):
+    def __init__(self, dispatcher: MessageDispatcher, todo_repository: TodoRepository):
         self._dispatcher = dispatcher
-        self._todo_repository = NotionTodoRepository()
+        self._todo_repository = todo_repository
 
     def execute(self, request: CreateNewToDoRequest, enableStart: bool = False):
         todo = ToDo(

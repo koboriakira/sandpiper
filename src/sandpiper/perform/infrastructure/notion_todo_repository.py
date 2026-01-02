@@ -1,26 +1,10 @@
-from lotion import BasePage, Lotion, notion_database, notion_prop
-from lotion.properties import Date, Select, Status, Title
+from lotion import BasePage, Lotion, notion_database
 
 from sandpiper.perform.domain.todo import ToDo
 from sandpiper.shared.notion.database_config import DatabaseId
+from sandpiper.shared.notion.notion_props import TodoLogDate, TodoName, TodoSection, TodoStatus
 from sandpiper.shared.valueobject.task_chute_section import TaskChuteSection
 from sandpiper.shared.valueobject.todo_status_enum import ToDoStatusEnum
-
-
-@notion_prop("名前")
-class TodoName(Title): ...
-
-
-@notion_prop("ステータス")
-class TodoStatus(Status): ...
-
-
-@notion_prop("セクション")
-class TodoSection(Select): ...
-
-
-@notion_prop("実施期間")
-class TodoLogDate(Date): ...
 
 
 @notion_database(DatabaseId.TODO)

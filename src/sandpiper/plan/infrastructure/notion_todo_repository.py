@@ -1,25 +1,9 @@
-from lotion import BasePage, Lotion, notion_database, notion_prop
-from lotion.properties import Select, Status, Title
+from lotion import BasePage, Lotion, notion_database
 
 from sandpiper.plan.domain.todo import InsertedToDo, ToDo, ToDoKind, ToDoStatus
 from sandpiper.shared.notion.database_config import DatabaseId
+from sandpiper.shared.notion.notion_props import TodoKind, TodoName, TodoSection, TodoStatus
 from sandpiper.shared.valueobject.task_chute_section import TaskChuteSection
-
-
-@notion_prop("名前")
-class TodoName(Title): ...
-
-
-@notion_prop("ステータス")
-class TodoStatus(Status): ...
-
-
-@notion_prop("タスク種別")
-class TodoKind(Select): ...
-
-
-@notion_prop("セクション")
-class TodoSection(Select): ...
 
 
 @notion_database(DatabaseId.TODO)
