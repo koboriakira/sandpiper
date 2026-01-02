@@ -1,7 +1,7 @@
 from lotion import BasePage, Lotion, notion_database, notion_prop
 from lotion.properties import Select, Status, Title
 
-from sandpiper.plan.domain.todo import ToDo, ToDoKind, ToDoStatus
+from sandpiper.plan.domain.todo import InsertedToDo, ToDo, ToDoKind, ToDoStatus
 from sandpiper.shared.notion.database_config import DatabaseId
 from sandpiper.shared.valueobject.task_chute_section import TaskChuteSection
 
@@ -31,7 +31,10 @@ class TodoPage(BasePage):
 
     @staticmethod
     def generate(todo: ToDo) -> "TodoPage":
-        properties = [TodoName.from_plain_text(todo.title), TodoStatus.from_status_name(todo.status.value)]
+        properties = [
+            TodoName.from_plain_text(todo.title),
+            TodoStatus.from_status_name("ToDo"),
+        ]
         t_kind = TodoKind.from_name(todo.kind.value) if todo.kind else None
         if t_kind:
             properties.append(t_kind)
@@ -45,7 +48,6 @@ class TodoPage(BasePage):
         kind = self.get_select("タスク種別")
         return ToDo(
             title=self.get_title_text(),
-            status=ToDoStatus(self.status.status_name),
             kind=ToDoKind(kind.selected_name) if kind else None,
             section=TaskChuteSection(section.selected_name) if section else None,
         )
@@ -55,9 +57,15 @@ class NotionTodoRepository:
     def __init__(self):
         self.client = Lotion.get_instance()
 
-    def save(self, todo: ToDo) -> None:
+    def save(self, todo: ToDo) -> InsertedToDo:
         notion_todo = TodoPage.generate(todo)
-        self.client.create_page(notion_todo)
+        page = self.client.create_page(notion_todo)
+        return InsertedToDo(
+            id=page.id,
+            title=todo.title,
+            section=todo.section,
+            kind=todo.kind,
+        )
 
     def fetch(self) -> list[ToDo]:
         notion_pages = self.client.search_pages(

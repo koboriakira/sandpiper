@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from datetime import date
 
-from sandpiper.plan.domain.todo import ToDo, ToDoKind, ToDoStatus
+from sandpiper.plan.domain.todo import ToDo, ToDoKind
 from sandpiper.plan.domain.todo_repository import TodoRepository
 from sandpiper.plan.infrastructure.notion_todo_repository import NotionTodoRepository
 from sandpiper.plan.query.routine_query import NotionRoutineQuery, RoutineQuery
@@ -36,7 +36,6 @@ class CreateRepeatTask:
             print(f"Create repeat task: {routine_dto.title}")
             todo = ToDo(
                 title=routine_dto.title,
-                status=ToDoStatus.TODO,
                 section=routine_dto.section,
                 kind=ToDoKind.REPEAT,
             )

@@ -22,6 +22,13 @@ class ToDoStatus(Enum):
 @dataclass
 class ToDo:
     title: str
-    status: ToDoStatus
+    section: TaskChuteSection | None = None
+    kind: ToDoKind | None = None
+
+
+@dataclass
+class InsertedToDo:
+    id: str
+    title: str
     section: TaskChuteSection | None = None
     kind: ToDoKind | None = None
