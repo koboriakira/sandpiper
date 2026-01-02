@@ -20,3 +20,7 @@ class ToDo:
         self.section = TaskChuteSection.new()
         self.log_start_datetime = jst_now()
         self.log_end_datetime = None
+
+    def complete(self) -> None:
+        self.status = ToDoStatusEnum.DONE
+        self.log_end_datetime = jst_now()

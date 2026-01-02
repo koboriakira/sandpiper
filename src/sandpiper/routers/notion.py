@@ -30,3 +30,14 @@ async def start_todo(
     base_page = BasePage.from_data(request.data)
     sandpiper_app.start_todo.execute(page_id=base_page.id)
     return JSONResponse(content={"page_id": base_page.id})
+
+
+@router.post("/todo/complete")
+async def complete_todo(
+    request: NotionWebhookRequest,
+    sandpiper_app: SandPiperApp = Depends(get_sandpiper_app),
+) -> JSONResponse:
+    """Todoタスクを完了する"""
+    base_page = BasePage.from_data(request.data)
+    sandpiper_app.complete_todo.execute(page_id=base_page.id)
+    return JSONResponse(content={"page_id": base_page.id})
