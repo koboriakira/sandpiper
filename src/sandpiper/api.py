@@ -8,6 +8,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
+from sandpiper.app.app import bootstrap
+
 from . import __version__
 from .routers import health, notion
 
@@ -28,7 +30,16 @@ async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
     print(f"🚀 FastAPIアプリケーション起動 [{env_label}]")
     if IS_DEVELOPMENT:
         print("⚠️  開発モード: セキュリティ制限が緩和されています")
+    print("設定中のSandpiperアプリケーションを初期化...")
+    app.state.sandpiper_app = bootstrap()
+    print("Sandpiperアプリケーションの初期化が完了しました")
+
+    # yieldは非同期コンテキストマネージャーの境界線
+    # yieldより前: アプリケーション起動時に1回だけ実行される処理（初期化）
+    # yieldより後: アプリケーション終了時に1回だけ実行される処理（クリーンアップ）
+    # yield中: アプリケーションが稼働している期間（リクエストを受け付ける）
     yield
+
     # 終了時の処理
     print("👋 FastAPIアプリケーション終了")
 

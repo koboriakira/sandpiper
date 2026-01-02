@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 
+from sandpiper.routers.dependency.deps import get_sandpiper_app
 from sandpiper.routers.dependency.verify_authorization import verify_authorization
 
 # このルーターの全エンドポイントでverify_authorizationを実行
@@ -28,12 +29,13 @@ class PageResponse(BaseModel):
 
 
 @router.get("/databases", response_model=DatabaseListResponse)
-async def list_databases() -> JSONResponse:
-    """Notionデータベース一覧を取得（ダミー実装）
+async def list_databases(sandpiper_app=Depends(get_sandpiper_app)) -> JSONResponse:
+    """Notionデータベース一覧を取得(ダミー実装)
 
     このエンドポイントはルーターレベルのdependencyにより
     自動的に認証チェックが行われます。
     """
+    print(sandpiper_app)
     return JSONResponse(content={"databases": ["Database 1", "Database 2", "Database 3"]})
 
 
