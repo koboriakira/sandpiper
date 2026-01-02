@@ -4,7 +4,7 @@ from lotion.block.rich_text.rich_text_builder import RichTextBuilder
 from sandpiper.plan.domain.todo import InsertedToDo, ToDo, ToDoKind, ToDoStatus
 from sandpiper.shared.notion.database_config import DatabaseId
 from sandpiper.shared.notion.notion_props import (
-    TodoKind,
+    TodoKindProp,
     TodoName,
     TodoProjectProp,
     TodoProjectTaskProp,
@@ -19,7 +19,7 @@ from sandpiper.shared.valueobject.task_chute_section import TaskChuteSection
 class TodoPage(BasePage):
     name: TodoName
     status: TodoStatus
-    kind: TodoKind | None = None
+    kind: TodoKindProp | None = None
     section: TodoSection | None = None
     project_relation: TodoProjectProp | None = None
     project_task_relation: TodoProjectTaskProp | None = None
@@ -30,7 +30,7 @@ class TodoPage(BasePage):
             TodoName.from_plain_text(todo.title),
             TodoStatus.from_status_name("ToDo"),
         ]
-        t_kind = TodoKind.from_name(todo.kind.value) if todo.kind else None
+        t_kind = TodoKindProp.from_name(todo.kind.value) if todo.kind else None
         if t_kind:
             properties.append(t_kind)
         t_section = TodoSection.from_name(todo.section.value) if todo.section else None
