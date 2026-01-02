@@ -1,28 +1,10 @@
-from dataclasses import dataclass
 from typing import Protocol
 
 from lotion import Lotion
 
-from sandpiper.plan.domain.todo import ToDo, ToDoKind
+from sandpiper.plan.query.project_task_dto import ProjectTaskDto
 from sandpiper.shared.notion.database_config import DatabaseId
 from sandpiper.shared.valueobject.todo_status_enum import ToDoStatusEnum
-
-
-@dataclass
-class ProjectTaskDto:
-    page_id: str
-    title: str
-    status: ToDoStatusEnum
-    project_page_id: str
-
-    def to_todo_model(self) -> ToDo:
-        return ToDo(
-            title=self.title,
-            section=None,
-            kind=ToDoKind.PROJECT,
-            project_page_id=self.project_page_id,
-            project_task_page_id=self.page_id,
-        )
 
 
 class ProjectTaskQuery(Protocol):
