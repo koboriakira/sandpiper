@@ -8,7 +8,7 @@ class CreateRepeatProjectTask:
         self.project_task_query = project_task_query
         self.todo_repository = todo_repository
 
-    def execute(self) -> None:
+    def execute(self, is_tomorrow: bool) -> None:
         # 各プロジェクトごとにプロジェクトタスクをひとつ取得する
         project_task_dtos = self.project_task_query.fetch_undone_project_tasks()
         grouped_tasks = group_next_project_tasks_by_project(project_task_dtos)
@@ -18,5 +18,5 @@ class CreateRepeatProjectTask:
             todo = project_task.to_todo_model()
             print(todo)
             # ToDoを保存
-            _inserted_todo = self.todo_repository.save(todo)
+            _inserted_todo = self.todo_repository.save(todo, {"is_tomorrow": is_tomorrow})
             print(f"Create repeat project task: {todo.title}")

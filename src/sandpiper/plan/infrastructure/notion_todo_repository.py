@@ -11,7 +11,7 @@ from sandpiper.shared.notion.notion_props import (
     TodoSection,
     TodoStatus,
 )
-from sandpiper.shared.utils.date_utils import jst_today
+from sandpiper.shared.utils.date_utils import jst_today, jst_tommorow
 from sandpiper.shared.valueobject.task_chute_section import TaskChuteSection
 
 
@@ -25,7 +25,7 @@ class TodoPage(BasePage):
     project_task_relation: TodoProjectTaskProp | None = None
 
     @staticmethod
-    def generate(todo: ToDo) -> "TodoPage":
+    def generate(todo: ToDo, options: dict) -> "TodoPage":
         properties = [
             TodoName.from_plain_text(todo.title),
             TodoStatus.from_status_name("ToDo"),
@@ -39,7 +39,8 @@ class TodoPage(BasePage):
         if todo.project_page_id and todo.project_task_page_id:
             properties.append(TodoProjectProp.from_id(todo.project_page_id))
             properties.append(TodoProjectTaskProp.from_id(todo.project_task_page_id))
-            rich_text_builder = RichTextBuilder.create().add_text(todo.title).add_date_mention(start=jst_today())
+            start_day = jst_tommorow() if options.get("is_tomorrow") else jst_today()
+            rich_text_builder = RichTextBuilder.create().add_text(todo.title).add_date_mention(start=start_day)
             properties.append(TodoName.from_rich_text(rich_text_builder.build()))
         return TodoPage.create(properties=properties)
 
@@ -61,8 +62,8 @@ class NotionTodoRepository:
     def __init__(self):
         self.client = Lotion.get_instance()
 
-    def save(self, todo: ToDo) -> InsertedToDo:
-        notion_todo = TodoPage.generate(todo)
+    def save(self, todo: ToDo, options: dict | None = None) -> InsertedToDo:
+        notion_todo = TodoPage.generate(todo, options=options or {})
         page = self.client.create_page(notion_todo)
         return InsertedToDo(
             id=page.id,
