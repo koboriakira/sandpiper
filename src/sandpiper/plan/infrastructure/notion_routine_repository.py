@@ -1,20 +1,17 @@
-from typing import Protocol
-
 from lotion import Lotion
 
-from sandpiper.plan.query.routine_dto import RoutineDto
+from sandpiper.plan.domain.routine import Routine
+from sandpiper.plan.domain.routine_cycle import RoutineCycle
+from sandpiper.plan.domain.routine_repository import RoutineRepository
+from sandpiper.shared.notion.notion_props import RoutineNextDate
 from sandpiper.shared.valueobject.task_chute_section import TaskChuteSection
 
 
-class RoutineQuery(Protocol):
-    def fetch(self) -> list[RoutineDto]: ...
-
-
-class NotionRoutineQuery(RoutineQuery):
+class NotionRoutineRepository(RoutineRepository):
     def __init__(self):
         self.client = Lotion.get_instance()
 
-    def fetch(self) -> list[RoutineDto]:
+    def fetch(self) -> list[Routine]:
         items = self.client.retrieve_database("d21db86c92034ff498999d62354e8fe1")
         routines = []
         for item in items:
@@ -22,18 +19,18 @@ class NotionRoutineQuery(RoutineQuery):
             if not start_date:
                 continue
             section_name = item.get_select("セクション").selected_name
-            routine = RoutineDto(
+            cycle = item.get_select("周期").selected_name
+            routine = Routine(
+                id=item.id,
                 title=item.get_title_text(),
                 date=start_date,
                 section=TaskChuteSection(section_name),
+                cycle=RoutineCycle(cycle),
             )
             routines.append(routine)
         return routines
 
-
-if __name__ == "__main__":
-    # uv run python -m src.sandpiper.todo.query.routine_query
-    query = NotionRoutineQuery()
-    routines = query.fetch()
-    for routine in routines:
-        print(routine)
+    def update(self, routine: Routine) -> None:
+        page = self.client.retrieve_page(routine.id)
+        page.set_prop(RoutineNextDate.from_start_date(routine.date))
+        self.client.update(page)

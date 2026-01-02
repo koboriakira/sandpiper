@@ -1,6 +1,8 @@
 from lotion import notion_prop
 from lotion.properties import Date, Relation, Select, Status, Title
 
+# ToDo関連のプロパティ
+
 
 @notion_prop("名前")
 class TodoName(Title): ...
@@ -28,3 +30,8 @@ class TodoProjectProp(Relation): ...
 
 @notion_prop("プロジェクトタスク")
 class TodoProjectTaskProp(Relation): ...
+
+
+# ルーティン関連のプロパティ
+@notion_prop("次回実行日")
+class RoutineNextDate(Date): ...

@@ -51,8 +51,8 @@ class TodoPage(BasePage):
         project_task = self.get_relation("プロジェクトタスク").id_list
         return ToDo(
             title=self.get_title_text(),
-            kind=ToDoKind(kind.selected_name) if kind else None,
-            section=TaskChuteSection(section.selected_name) if section else None,
+            kind=ToDoKind(kind.selected_name) if kind.selected_name else None,
+            section=TaskChuteSection(section.selected_name) if section.selected_name else None,
             project_page_id=project[0] if project else None,
             project_task_page_id=project_task[0] if project_task else None,
         )

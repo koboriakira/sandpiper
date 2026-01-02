@@ -6,9 +6,9 @@ from sandpiper.perform.infrastructure.notion_todo_repository import NotionTodoRe
 from sandpiper.plan.application.create_repeat_project_task import CreateRepeatProjectTask
 from sandpiper.plan.application.create_repeat_task import CreateRepeatTask
 from sandpiper.plan.application.create_todo import CreateToDo
+from sandpiper.plan.infrastructure.notion_routine_repository import NotionRoutineRepository
 from sandpiper.plan.infrastructure.notion_todo_repository import NotionTodoRepository as PlanNotionTodoRepository
 from sandpiper.plan.query.project_task_query import NotionProjectTaskQuery
-from sandpiper.plan.query.routine_query import NotionRoutineQuery
 from sandpiper.review.application.get_todo_log import GetTodoLog
 from sandpiper.review.query.todo_query import NotionTodoQuery
 from sandpiper.shared.event.todo_created import TodoStarted
@@ -37,11 +37,11 @@ def bootstrap() -> SandPiperApp:
     event_bus = EventBus()
 
     # infrastructure setup
-    routine_query = NotionRoutineQuery()
     project_task_query = NotionProjectTaskQuery()
     todo_query = NotionTodoQuery()
     plan_notion_todo_repository = PlanNotionTodoRepository()
     perform_notion_todo_repository = PerformNotionTodoRepository()
+    routine_repository = NotionRoutineRepository()
 
     # Subscribe event handlers
     handle_todo_started = HandleTodoStarted(perform_notion_todo_repository)
@@ -55,7 +55,7 @@ def bootstrap() -> SandPiperApp:
             todo_repository=plan_notion_todo_repository,
         ),
         create_repeat_task=CreateRepeatTask(
-            routine_query=routine_query,
+            routine_repository=routine_repository,
             todo_repository=plan_notion_todo_repository,
         ),
         create_repeat_project_task=CreateRepeatProjectTask(
