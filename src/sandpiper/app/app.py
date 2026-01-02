@@ -1,5 +1,6 @@
 from sandpiper.app.message_dispatcher import MessageDispatcher
 from sandpiper.perform.application.handle_todo_started import HandleTodoStarted
+from sandpiper.perform.application.start_todo import StartTodo
 from sandpiper.perform.infrastructure.notion_todo_repository import NotionTodoRepository as PerformNotionTodoRepository
 from sandpiper.plan.application.create_repeat_project_task import CreateRepeatProjectTask
 from sandpiper.plan.application.create_repeat_task import CreateRepeatTask
@@ -20,11 +21,13 @@ class SandPiperApp:
         create_repeat_task: CreateRepeatTask,
         create_repeat_project_task: CreateRepeatProjectTask,
         get_todo_log: GetTodoLog,
+        start_todo: StartTodo,
     ) -> None:
         self.create_todo = create_todo
         self.create_repeat_task = create_repeat_task
         self.create_repeat_project_task = create_repeat_project_task
         self.get_todo_log = get_todo_log
+        self.start_todo = start_todo
 
 
 def bootstrap() -> SandPiperApp:
@@ -58,5 +61,8 @@ def bootstrap() -> SandPiperApp:
         ),
         get_todo_log=GetTodoLog(
             todo_query=todo_query,
+        ),
+        start_todo=StartTodo(
+            todo_repository=perform_notion_todo_repository,
         ),
     )
