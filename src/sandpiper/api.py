@@ -4,6 +4,7 @@ import os
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
+from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -20,6 +21,10 @@ ALLOWED_ORIGINS = os.getenv("ALLOWED_ORIGINS", "").split(",") if os.getenv("ALLO
 
 # 開発環境判定
 IS_DEVELOPMENT = ENVIRONMENT.lower() in ("development", "dev", "local") or DEBUG
+
+if IS_DEVELOPMENT:
+    print("⚙️ .envファイルから環境変数を読み込み")
+    load_dotenv()
 
 
 @asynccontextmanager

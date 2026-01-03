@@ -1,6 +1,9 @@
 """メインアプリケーション"""
 
+from datetime import UTC
+
 import typer
+from dotenv import load_dotenv
 from rich.console import Console
 from rich.panel import Panel
 
@@ -8,6 +11,9 @@ from sandpiper.app.app import bootstrap
 from sandpiper.plan.application.create_todo import CreateNewToDoRequest
 
 from . import __version__
+
+# .envファイルから環境変数を読み込み
+load_dotenv()
 
 app = typer.Typer(
     name="sandpiper",
@@ -128,14 +134,14 @@ def get_github_activity(
 ) -> None:
     """GitHubの活動ログを取得します"""
     import json as _json
-    from datetime import datetime, timezone
+    from datetime import datetime
 
     # 日付パース
     target_date = None
     if date:
         try:
             date_obj = datetime.strptime(date, "%Y-%m-%d")
-            target_date = date_obj.replace(tzinfo=timezone.utc)
+            target_date = date_obj.replace(tzinfo=UTC)
         except ValueError:
             console.print("[red]エラー: 日付の形式が正しくありません。YYYY-MM-DD形式で指定してください。[/red]")
             raise typer.Exit(code=1)
