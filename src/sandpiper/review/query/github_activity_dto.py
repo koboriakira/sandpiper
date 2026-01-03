@@ -1,4 +1,4 @@
-"""GitHub活動ログのDTO（Data Transfer Object）"""
+"""GitHub活動ログのDTO(Data Transfer Object)"""
 
 from dataclasses import dataclass
 from datetime import datetime

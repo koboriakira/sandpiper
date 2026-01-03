@@ -49,7 +49,7 @@ class GitHubClient:
 
         Args:
             events: イベントのイテレータ
-            target_date: 対象日付（UTC）
+            target_date: 対象日付(UTC)
 
         Returns:
             フィルタリングされたイベントのリスト
@@ -58,7 +58,7 @@ class GitHubClient:
         end_of_day = start_of_day + timedelta(days=1)
 
         filtered_events = []
-        # 最新90件のイベントをチェック（GitHub APIの制限）
+        # 最新90件のイベントをチェック(GitHub APIの制限)
         for event in list(events)[:90]:
             event_date = event.created_at
             if start_of_day <= event_date < end_of_day:

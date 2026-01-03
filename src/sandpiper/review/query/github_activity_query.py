@@ -16,7 +16,7 @@ from sandpiper.shared.infrastructure.github_client import GitHubClient
 
 
 class GitHubActivityQuery:
-    """GitHub APIからデータを取得するクエリクラス（CQRS: 読み取り専門）"""
+    """GitHub APIからデータを取得するクエリクラス(CQRS: 読み取り専門)"""
 
     def __init__(self, client: GitHubClient) -> None:
         """
@@ -37,7 +37,7 @@ class GitHubActivityQuery:
 
         Args:
             username: GitHubユーザー名
-            target_date: 対象日付（UTC）
+            target_date: 対象日付(UTC)
 
         Returns:
             GitHub活動ログDTO
