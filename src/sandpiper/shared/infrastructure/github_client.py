@@ -1,7 +1,7 @@
 """GitHub API クライアント"""
 
 import os
-from collections.abc import Iterator
+from collections.abc import Iterable
 from datetime import datetime, timedelta
 
 from github import Auth, Github
@@ -26,7 +26,7 @@ class GitHubClient:
         auth = Auth.Token(self.token)
         self._github = Github(auth=auth)
 
-    def get_user_events(self, username: str) -> Iterator[Event]:
+    def get_user_events(self, username: str) -> Iterable[Event]:
         """
         ユーザーの公開イベントを取得
 
@@ -41,7 +41,7 @@ class GitHubClient:
 
     def filter_events_by_date(
         self,
-        events: Iterator[Event],
+        events: Iterable[Event],
         target_date: datetime,
     ) -> list[Event]:
         """
