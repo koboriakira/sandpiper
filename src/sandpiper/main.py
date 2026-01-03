@@ -57,13 +57,49 @@ def create_repeat_project_tasks(
 
 
 @app.command()
-def get_todo_log() -> None:
+@app.command()
+def get_todo_log(
+    json: bool = typer.Option(False, "--json", help="JSON形式で出力する"),
+    markdown: bool = typer.Option(False, "--markdown", help="Markdown形式で出力する"),
+) -> None:
     """完了したToDoタスクのログを取得します"""
+    import json as _json
+
     result = sandpiper_app.get_todo_log.execute()
-    for todo in result:
-        prefix = f"【{todo.kind.value} {todo.project_name}】" if todo.project_name else f"【{todo.kind.value}】"
-        suffix_daterange = f" ({todo.perform_range[0].strftime('%Y-%m-%d %H:%M')} - {todo.perform_range[1].strftime('%Y-%m-%d %H:%M')})"
-        console.print(f"- {prefix}{todo.title}{suffix_daterange}")
+    if json:
+
+        def todo_to_dict(todo):
+            return {
+                "title": todo.title,
+                "kind": getattr(todo.kind, "value", str(todo.kind)),
+                "project_name": todo.project_name,
+                "perform_range": [
+                    todo.perform_range[0].strftime("%Y-%m-%d %H:%M"),
+                    todo.perform_range[1].strftime("%Y-%m-%d %H:%M"),
+                ]
+                if getattr(todo, "perform_range", None)
+                else None,
+            }
+
+        todos_json = [todo_to_dict(todo) for todo in result]
+        console.print(_json.dumps(todos_json, ensure_ascii=False, indent=2))
+    elif markdown:
+        lines = ["| タイトル | 種別 | プロジェクト | 実施期間 |", "| --- | --- | --- | --- |"]
+        for todo in result:
+            title = todo.title.replace("|", "\\|")
+            kind = getattr(todo.kind, "value", str(todo.kind))
+            project = todo.project_name.replace("|", "\\|") if todo.project_name else ""
+            if getattr(todo, "perform_range", None):
+                daterange = f"{todo.perform_range[0].strftime('%Y-%m-%d %H:%M')} - {todo.perform_range[1].strftime('%Y-%m-%d %H:%M')}"
+            else:
+                daterange = ""
+            lines.append(f"| {title} | {kind} | {project} | {daterange} |")
+        console.print("\n".join(lines))
+    else:
+        for todo in result:
+            prefix = f"【{todo.kind.value} {todo.project_name}】" if todo.project_name else f"【{todo.kind.value}】"
+            suffix_daterange = f" ({todo.perform_range[0].strftime('%Y-%m-%d %H:%M')} - {todo.perform_range[1].strftime('%Y-%m-%d %H:%M')})"
+            console.print(f"- {prefix}{todo.title}{suffix_daterange}")
 
 
 @app.command()
