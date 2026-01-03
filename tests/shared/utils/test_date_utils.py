@@ -1,4 +1,5 @@
 from datetime import date, datetime, timezone, timedelta
+from unittest.mock import patch
 import pytest
 
 from sandpiper.shared.utils.date_utils import (
@@ -51,6 +52,21 @@ class TestJSTUtils:
     def test_jst_today_with_previous_day_logic_false(self):
         result = jst_today(is_previous_day_until_2am=False)
         assert isinstance(result, date)
+
+    @patch('sandpiper.shared.utils.date_utils.jst_now')
+    def test_jst_today_with_previous_day_logic_after_2am(self, mock_jst_now):
+        """2時以降でのjst_today()でis_previous_day_until_2am=Trueの場合をテスト（47行目のelse部分）"""
+        # Arrange - 2時以降の時刻をモック（例：3時）
+        mock_time = datetime(2024, 1, 15, 3, 0, 0)
+        mock_jst_now.return_value = mock_time
+        
+        # Act
+        result = jst_today(is_previous_day_until_2am=True)
+        
+        # Assert
+        # 2時以降なので前日にはならず、当日のdate()が返される（else部分）
+        assert result == date(2024, 1, 15)
+        mock_jst_now.assert_called_once()
 
     def test_jst_tommorow(self):
         today_dt = jst_today_datetime()
