@@ -28,6 +28,8 @@ dependencies = [
     "fastapi>=0.128.0",
     "uvicorn[standard]>=0.40.0",
     "slack-sdk>=3.39.0",
+    "pygithub>=2.8.1",
+    "python-dotenv>=1.2.1",
 ]
 
 [dependency-groups]

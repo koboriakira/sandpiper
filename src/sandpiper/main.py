@@ -118,5 +118,157 @@ def create_repeat_tasks(
     sandpiper_app.create_repeat_task.execute(basis_date=date_obj)
 
 
+@app.command()
+def get_github_activity(
+    date: str = typer.Option(None, help="対象日 (YYYY-MM-DD形式)"),
+    username: str = typer.Option("koboriakira", help="GitHubユーザー名"),
+    json: bool = typer.Option(False, "--json", help="JSON形式で出力する"),
+    markdown: bool = typer.Option(False, "--markdown", help="Markdown形式で出力する"),
+) -> None:
+    """GitHubの活動ログを取得します"""
+    import json as _json
+    from datetime import datetime, timezone
+
+    # 日付パース
+    target_date = None
+    if date:
+        try:
+            date_obj = datetime.strptime(date, "%Y-%m-%d")
+            target_date = date_obj.replace(tzinfo=timezone.utc)
+        except ValueError:
+            console.print("[red]エラー: 日付の形式が正しくありません。YYYY-MM-DD形式で指定してください。[/red]")
+            raise typer.Exit(code=1)
+
+    # GitHub活動ログ取得
+    try:
+        result = sandpiper_app.get_github_activity.execute(
+            username=username,
+            target_date=target_date,
+        )
+    except ValueError as e:
+        console.print(f"[red]エラー: {e}[/red]")
+        console.print("[yellow]GITHUB_TOKEN環境変数が設定されているか確認してください。[/yellow]")
+        raise typer.Exit(code=1)
+
+    # 出力
+    if json:
+        activity_dict = {
+            "date": result.date,
+            "username": result.username,
+            "summary": {
+                "total_events": result.summary.total_events,
+                "commits_count": result.summary.commits_count,
+                "pull_requests_count": result.summary.pull_requests_count,
+                "issues_count": result.summary.issues_count,
+                "reviews_count": result.summary.reviews_count,
+            },
+            "commits": [
+                {
+                    "sha": commit.sha,
+                    "message": commit.message,
+                    "repo": commit.repo,
+                    "committed_at": commit.committed_at.isoformat(),
+                }
+                for commit in result.commits
+            ],
+            "pull_requests": [
+                {
+                    "number": pr.number,
+                    "title": pr.title,
+                    "action": pr.action,
+                    "repo": pr.repo,
+                    "created_at": pr.created_at.isoformat(),
+                }
+                for pr in result.pull_requests
+            ],
+            "issues": [
+                {
+                    "number": issue.number,
+                    "title": issue.title,
+                    "action": issue.action,
+                    "repo": issue.repo,
+                    "created_at": issue.created_at.isoformat(),
+                }
+                for issue in result.issues
+            ],
+            "reviews": [
+                {
+                    "pr_number": review.pr_number,
+                    "state": review.state,
+                    "repo": review.repo,
+                    "created_at": review.created_at.isoformat(),
+                }
+                for review in result.reviews
+            ],
+        }
+        console.print(_json.dumps(activity_dict, ensure_ascii=False, indent=2))
+    elif markdown:
+        console.print(f"# GitHub Activity Log - {result.date}")
+        console.print(f"**User:** {result.username}\n")
+        console.print("## Summary")
+        console.print(f"- Total Events: {result.summary.total_events}")
+        console.print(f"- Commits: {result.summary.commits_count}")
+        console.print(f"- Pull Requests: {result.summary.pull_requests_count}")
+        console.print(f"- Issues: {result.summary.issues_count}")
+        console.print(f"- Reviews: {result.summary.reviews_count}\n")
+
+        if result.commits:
+            console.print("## Commits")
+            for commit in result.commits:
+                console.print(f"- [{commit.repo}] `{commit.sha}`: {commit.message[:50]}")
+            console.print()
+
+        if result.pull_requests:
+            console.print("## Pull Requests")
+            for pr in result.pull_requests:
+                console.print(f"- [{pr.repo}] #{pr.number}: {pr.title} ({pr.action})")
+            console.print()
+
+        if result.issues:
+            console.print("## Issues")
+            for issue in result.issues:
+                console.print(f"- [{issue.repo}] #{issue.number}: {issue.title} ({issue.action})")
+            console.print()
+
+        if result.reviews:
+            console.print("## Reviews")
+            for review in result.reviews:
+                console.print(f"- [{review.repo}] PR #{review.pr_number}: {review.state}")
+            console.print()
+    else:
+        console.print(f"[bold cyan]📅 GitHub Activity Log - {result.date}[/bold cyan]")
+        console.print(f"[bold]👤 User:[/bold] {result.username}\n")
+        console.print("[bold green]📈 Summary:[/bold green]")
+        console.print(f"  - Total Events: {result.summary.total_events}")
+        console.print(f"  - Commits: {result.summary.commits_count}")
+        console.print(f"  - Pull Requests: {result.summary.pull_requests_count}")
+        console.print(f"  - Issues: {result.summary.issues_count}")
+        console.print(f"  - Reviews: {result.summary.reviews_count}\n")
+
+        if result.commits:
+            console.print("[bold blue]💻 Commits:[/bold blue]")
+            for commit in result.commits:
+                console.print(f"  - [{commit.repo}] {commit.sha}: {commit.message[:50]}")
+            console.print()
+
+        if result.pull_requests:
+            console.print("[bold magenta]🔀 Pull Requests:[/bold magenta]")
+            for pr in result.pull_requests:
+                console.print(f"  - [{pr.repo}] #{pr.number}: {pr.title} ({pr.action})")
+            console.print()
+
+        if result.issues:
+            console.print("[bold yellow]🐛 Issues:[/bold yellow]")
+            for issue in result.issues:
+                console.print(f"  - [{issue.repo}] #{issue.number}: {issue.title} ({issue.action})")
+            console.print()
+
+        if result.reviews:
+            console.print("[bold]👀 Reviews:[/bold]")
+            for review in result.reviews:
+                console.print(f"  - [{review.repo}] PR #{review.pr_number}: {review.state}")
+            console.print()
+
+
 if __name__ == "__main__":
     app()
