@@ -1,6 +1,6 @@
 from typing import Protocol
 
-from lotion import Lotion
+from lotion import Lotion  # type: ignore[import-untyped]
 
 from sandpiper.plan.query.project_task_dto import ProjectTaskDto
 from sandpiper.shared.notion.database_config import DatabaseId
@@ -12,7 +12,7 @@ class ProjectTaskQuery(Protocol):
 
 
 class NotionProjectTaskQuery(ProjectTaskQuery):
-    def __init__(self):
+    def __init__(self) -> None:
         self.client = Lotion.get_instance()
 
     def fetch_undone_project_tasks(self) -> list[ProjectTaskDto]:

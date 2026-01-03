@@ -43,7 +43,7 @@ class SandPiperApp:
 
 
 def bootstrap() -> SandPiperApp:
-    event_bus = EventBus()
+    event_bus = EventBus()  # type: ignore[no-untyped-call]
 
     # infrastructure setup
     project_task_query = NotionProjectTaskQuery()  # type: ignore[no-untyped-call]

@@ -221,9 +221,6 @@ class RoutineCycle(Enum):
                     return third_thursday
                 year, month = add_a_month(basis_date)
                 return get_first_thursday(year, month)
-            case _:
-                msg = f"RoutineCycle not found: {self}"
-                raise ValueError(msg)
 
     @staticmethod
     def from_text(text: str) -> "RoutineCycle":
