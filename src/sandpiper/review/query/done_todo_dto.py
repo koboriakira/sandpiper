@@ -10,3 +10,4 @@ class DoneTodoDto:
     title: str
     perform_range: tuple[datetime, datetime]
     kind: ToDoKind
+    project_name: str = ""

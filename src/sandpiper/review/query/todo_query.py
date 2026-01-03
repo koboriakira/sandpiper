@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Protocol
 
-from lotion import Lotion
+from lotion import BasePage, Lotion
 
 from sandpiper.plan.domain.todo import ToDoKind
 from sandpiper.review.query.done_todo_dto import DoneTodoDto
@@ -19,6 +19,11 @@ class NotionTodoQuery:
 
     def fetch_done_todos(self) -> list[DoneTodoDto]:
         items = self.client.retrieve_database(DatabaseId.TODO)
+        project_list = self.client.retrieve_database(DatabaseId.PROJECT)
+
+        projects: dict[str, BasePage] = {}
+        for project in project_list:
+            projects[project.id] = project
 
         result = []
         for item in items:
@@ -33,6 +38,16 @@ class NotionTodoQuery:
                 continue
 
             kind = ToDoKind(kind_name)
+            project_name = ""
+            if kind == ToDoKind.PROJECT:
+                # プロジェクトタスクの場合、関連するプロジェクトのステータスを確認
+                project_page_id_list = item.get_relation("プロジェクト").id_list
+                if not project_page_id_list:
+                    continue
+                project_page_id = project_page_id_list[0]
+                project = projects[project_page_id]
+                project_name = project.get_title_text()
+
             todo = DoneTodoDto(
                 page_id=item.id,
                 title=item.get_title_text(),
@@ -41,6 +56,7 @@ class NotionTodoQuery:
                     datetime.fromisoformat(perform_range.end),
                 ),
                 kind=kind,
+                project_name=project_name,
             )
             result.append(todo)
         return result

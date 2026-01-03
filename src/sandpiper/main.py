@@ -61,9 +61,9 @@ def get_todo_log() -> None:
     """完了したToDoタスクのログを取得します"""
     result = sandpiper_app.get_todo_log.execute()
     for todo in result:
-        console.print(
-            f"- 【{todo.kind.value}】{todo.title} ({todo.perform_range[0].strftime('%Y-%m-%d %H:%M')} - {todo.perform_range[1].strftime('%Y-%m-%d %H:%M')})"
-        )
+        prefix = f"【{todo.kind.value} {todo.project_name}】" if todo.project_name else f"【{todo.kind.value}】"
+        suffix_daterange = f" ({todo.perform_range[0].strftime('%Y-%m-%d %H:%M')} - {todo.perform_range[1].strftime('%Y-%m-%d %H:%M')})"
+        console.print(f"- {prefix}{todo.title}{suffix_daterange}")
 
 
 @app.command()
