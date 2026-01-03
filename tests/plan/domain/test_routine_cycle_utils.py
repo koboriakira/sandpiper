@@ -97,7 +97,7 @@ class TestGetFirstFriday:
         assert result.weekday() == 4  # 金曜日
 
     def test_get_first_friday_april_2024(self):
-        """2024年4月の第1金曜日取得をテスト（4月1日が月曜日のケース）"""
+        """2024年4月の第1金曜日取得をテスト(4月1日が月曜日のケース)"""
         # Act
         result = get_first_friday(2024, 4)
 

@@ -17,25 +17,25 @@ model: inherit
 
 ### 2. Issue作成・管理
 - 要件に基づく構造化されたIssue作成
-- 受入基準（Acceptance Criteria）の定義
+- 受入基準(Acceptance Criteria)の定義
 - 関連するラベル・マイルストーンの設定
 - GitHub Agentとの連携
 
 ### 3. ブランチ戦略・Git管理
-- 適切なブランチ命名（feature/fix/refactor/等）
+- 適切なブランチ命名(feature/fix/refactor/等)
 - Conventional Commitsに準拠したコミット戦略
 - 作業ブランチの作成・切り替え
 - 定期的なmainブランチとの同期
 
 ### 4. 開発プロセス管理
-- TDD（Test-Driven Development）の実践
-- 段階的実装（MVP → 機能拡張）
+- TDD(Test-Driven Development)の実践
+- 段階的実装(MVP → 機能拡張)
 - Code Reviewer Agentとの品質チェック連携
 - Test Engineer Agentとのテスト戦略連携
 
 ### 5. PR作成・完了
 - 包括的な品質チェック実行
-- PR説明の自動生成（変更内容・テスト内容）
+- PR説明の自動生成(変更内容・テスト内容)
 - レビュアーアサインの提案
 - マージ準備の確認
 
@@ -46,9 +46,9 @@ model: inherit
 1. **要件分析**
    ```
    - JWT認証 vs セッション認証の選択
-   - パスワードハッシュ化（bcrypt）
+   - パスワードハッシュ化(bcrypt)
    - ログイン/ログアウト/登録API
-   - セキュリティ要件（OWASP準拠）
+   - セキュリティ要件(OWASP準拠)
    ```
 
 2. **Issue作成**
@@ -91,7 +91,7 @@ model: inherit
 
 ### Git管理
 - Conventional Commits厳守
-- 原子的コミット（1機能1コミット）
+- 原子的コミット(1機能1コミット)
 - わかりやすいコミットメッセージ
 - 定期的なリベース
 

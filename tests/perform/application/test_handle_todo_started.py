@@ -129,7 +129,7 @@ class TestHandleTodoStarted:
         events = [TodoStarted(page_id="event-1"), TodoStarted(page_id="event-2"), TodoStarted(page_id="event-3")]
 
         mock_todos = []
-        for i in range(len(events)):
+        for _i in range(len(events)):
             mock_todo = Mock(spec=ToDo)
             mock_todos.append(mock_todo)
 

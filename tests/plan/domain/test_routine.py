@@ -45,7 +45,7 @@ class TestRoutine:
         assert "cycle" in routine.__dataclass_fields__
 
     def test_next_cycle_with_default_basis_date(self):
-        """デフォルトのbasis_date（self.date）でのnext_cycleをテスト"""
+        """デフォルトのbasis_date(self.date)でのnext_cycleをテスト"""
         # Arrange - 毎日のサイクルを使用
         daily_cycle = RoutineCycle.DAILY
         routine = Routine(
@@ -134,7 +134,7 @@ class TestRoutine:
         """異なるサイクルタイプでのnext_cycleをテスト"""
         base_date = date(2024, 1, 15)  # 月曜日
 
-        # 週次サイクル（火・木）
+        # 週次サイクル(火・木)
         weekly_routine = Routine(
             id="weekly-test",
             title="週次テスト",
@@ -152,7 +152,7 @@ class TestRoutine:
 
     def test_next_cycle_complex_scenario(self):
         """複雑なシナリオでのnext_cycleをテスト"""
-        # Arrange - 週次（水曜日）
+        # Arrange - 週次(水曜日)
         weekly_cycle = RoutineCycle.WEEKLY_WED
         routine = Routine(
             id="weekly-complex",

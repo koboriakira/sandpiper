@@ -149,20 +149,20 @@ class TestCLI:
 
     @patch("sandpiper.main.sandpiper_app.get_todo_log.execute")
     def test_get_todo_log_markdown_without_perform_range(self, mock_execute) -> None:
-        """perform_rangeがない場合のMarkdown出力をテスト（95行目のelse部分）"""
+        """perform_rangeがない場合のMarkdown出力をテスト(95行目のelse部分)"""
         # perform_rangeがないToDoオブジェクトをモック
         mock_todo = Mock()
         mock_todo.title = "期間なしタスク"
         mock_todo.kind = Mock()
         mock_todo.kind.value = "NORMAL"
         mock_todo.project_name = "テストプロジェクト"
-        # perform_rangeが存在しない（None）状態をシミュレート
+        # perform_rangeが存在しない(None)状態をシミュレート
         mock_todo.perform_range = None
         mock_execute.return_value = [mock_todo]
 
         result = self.runner.invoke(app, ["get-todo-log", "--markdown"])
         assert result.exit_code == 0
-        # 期間が空文字列になることを確認（95行目のelse部分）
+        # 期間が空文字列になることを確認(95行目のelse部分)
         assert "| 期間なしタスク | NORMAL | テストプロジェクト |  |" in result.stdout
         mock_execute.assert_called_once()
 

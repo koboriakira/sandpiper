@@ -52,7 +52,7 @@
 - 初期プロジェクト作成
 - uv、ruff、pytest、mypy統合
 - release-pleaseによる自動リリース管理
-- CLIアプリケーション（typer + rich）
+- CLIアプリケーション(typer + rich)
 - 包括的なテストスイート
 - GitHub Actions CI/CDパイプライン
 - pre-commit品質管理フック

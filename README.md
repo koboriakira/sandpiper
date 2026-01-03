@@ -63,18 +63,18 @@ uv run my-new-project --help  # アプリケーション確認
 
 ## セットアップ
 
-### uvを使用（推奨）
+### uvを使用(推奨)
 
 ```bash
-# uvのインストール（まだの場合）
+# uvのインストール(まだの場合)
 curl -LsSf https://astral.sh/uv/install.sh | sh
 
 # プロジェクトのセットアップ
 uv sync
 
 # 品質管理ツールのセットアップ
-uv run pre-commit install              # Git hooks（手動開発時）
-# Claude Code hooks（AI統合）は .claude/settings.local.json で設定済み
+uv run pre-commit install              # Git hooks(手動開発時)
+# Claude Code hooks(AI統合)は .claude/settings.local.json で設定済み
 ```
 
 ### 従来の方法
@@ -92,7 +92,7 @@ pre-commit install
 # テスト実行
 uv run pytest
 
-# テスト（カバレッジ付き）
+# テスト(カバレッジ付き)
 uv run pytest --cov
 
 # コードフォーマット
@@ -105,7 +105,7 @@ uv run ruff check .
 uv run mypy
 
 # 品質チェック実行
-.claude/scripts/pre-commit-replacement.sh   # Claude Code hooks（推奨）
+.claude/scripts/pre-commit-replacement.sh   # Claude Code hooks(推奨)
 uv run pre-commit run --all-files           # 従来のpre-commit
 
 # アプリケーション実行
@@ -142,8 +142,8 @@ sandpiper/
 
 GitHub Actionsによる自動化：
 
-- マルチプラットフォーム（Linux、Windows、macOS）
-- 複数Python バージョン（3.12、3.13）
+- マルチプラットフォーム(Linux、Windows、macOS)
+- 複数Python バージョン(3.12、3.13)
 - テスト、リンティング、型チェック
 - セキュリティ監査
 

@@ -16,7 +16,7 @@ class TestNotionTodoQuery:
         return mock_client
 
     @pytest.fixture
-    def query(self, mock_lotion_client):
+    def query(self, _mock_lotion_client):
         return NotionTodoQuery()
 
     def test_fetch_done_todos_empty_result(self, query, mock_lotion_client):

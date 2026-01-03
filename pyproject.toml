@@ -148,12 +148,12 @@ disable_error_code = ["misc"]
 [tool.coverage.run]
 source = ["src"]
 omit = [
-    "*/tests/*", 
+    "*/tests/*",
     "*/test_*.py",
-    # API・エンドポイント層（統合テストでカバー）
+    # API・エンドポイント層(統合テストでカバー)
     "src/sandpiper/api.py",
     "src/sandpiper/routers/*",
-    # インフラストラクチャ層（外部依存・統合テストでカバー）  
+    # インフラストラクチャ層(外部依存・統合テストでカバー)
     "src/sandpiper/**/notion_*_repository.py",
     # 設定・初期化ファイル
     "src/sandpiper/routers/__init__.py",

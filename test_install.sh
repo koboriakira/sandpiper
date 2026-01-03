@@ -32,11 +32,11 @@ test_basic_installation() {
     mkdir -p .github/workflows
     cp -r ../.github/workflows/* .github/workflows/ || true
 
-    # インストール実行（uv syncなしバージョン）
+    # インストール実行(uv syncなしバージョン)
     echo "📦 インストール実行: ./install.sh $TEST_PROJECT"
 
     # install.shを編集してuv syncをスキップ
-    sed -i.bak 's/uv sync/echo "✅ uv sync スキップ（テストモード）"/' install.sh
+    sed -i.bak 's/uv sync/echo "✅ uv sync スキップ(テストモード)"/' install.sh
 
     ./install.sh "$TEST_PROJECT"
 

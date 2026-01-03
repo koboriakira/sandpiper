@@ -87,7 +87,7 @@ class TestProjectTaskDto:
 
     def test_to_todo_model_with_is_next_variations(self):
         """is_nextフィールドの異なる値でのto_todo_model()をテスト"""
-        # is_nextの値をテスト（ToDoモデルには影響しないが、DTOの動作確認）
+        # is_nextの値をテスト(ToDoモデルには影響しないが、DTOの動作確認)
         test_cases = [True, False]
 
         for is_next in test_cases:
