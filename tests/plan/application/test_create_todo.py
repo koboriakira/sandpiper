@@ -39,9 +39,7 @@ class TestCreateToDo:
         self.mock_repository.save.return_value = mock_todo
 
         request = CreateNewToDoRequest(
-            title="プロジェクトタスク",
-            kind=ToDoKind.PROJECT,
-            section=TaskChuteSection.B_10_13
+            title="プロジェクトタスク", kind=ToDoKind.PROJECT, section=TaskChuteSection.B_10_13
         )
 
         # Act
@@ -95,11 +93,7 @@ class TestCreateToDo:
         mock_todo.id = "test-id-456"
         self.mock_repository.save.return_value = mock_todo
 
-        request = CreateNewToDoRequest(
-            title="詳細タスク",
-            kind=ToDoKind.REPEAT,
-            section=TaskChuteSection.E_19_22
-        )
+        request = CreateNewToDoRequest(title="詳細タスク", kind=ToDoKind.REPEAT, section=TaskChuteSection.E_19_22)
 
         # Act
         self.create_todo.execute(request)
@@ -136,11 +130,7 @@ class TestCreateNewToDoRequest:
 
     def test_create_request_with_all_fields(self):
         # Act
-        request = CreateNewToDoRequest(
-            title="完全タスク",
-            kind=ToDoKind.PROJECT,
-            section=TaskChuteSection.C_13_17
-        )
+        request = CreateNewToDoRequest(title="完全タスク", kind=ToDoKind.PROJECT, section=TaskChuteSection.C_13_17)
 
         # Assert
         assert request.title == "完全タスク"

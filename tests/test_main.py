@@ -33,7 +33,7 @@ class TestCLI:
         assert result.exit_code == 0
         assert __version__ in result.stdout
 
-    @patch('sandpiper.main.sandpiper_app.create_todo.execute')
+    @patch("sandpiper.main.sandpiper_app.create_todo.execute")
     def test_create_todo_basic(self, mock_execute) -> None:
         """基本的なToDo作成をテスト"""
         result = self.runner.invoke(app, ["create-todo", "テストタスク"])
@@ -45,7 +45,7 @@ class TestCLI:
         assert call_args[1]["request"].title == "テストタスク"
         assert call_args[1]["enableStart"] is False
 
-    @patch('sandpiper.main.sandpiper_app.create_todo.execute')
+    @patch("sandpiper.main.sandpiper_app.create_todo.execute")
     def test_create_todo_with_start(self, mock_execute) -> None:
         """開始フラグ付きToDo作成をテスト"""
         result = self.runner.invoke(app, ["create-todo", "開始タスク", "--start"])
@@ -57,21 +57,21 @@ class TestCLI:
         assert call_args[1]["request"].title == "開始タスク"
         assert call_args[1]["enableStart"] is True
 
-    @patch('sandpiper.main.sandpiper_app.create_repeat_project_task.execute')
+    @patch("sandpiper.main.sandpiper_app.create_repeat_project_task.execute")
     def test_create_repeat_project_tasks_default(self, mock_execute) -> None:
         """デフォルトの繰り返しプロジェクトタスク作成をテスト"""
         result = self.runner.invoke(app, ["create-repeat-project-tasks"])
         assert result.exit_code == 0
         mock_execute.assert_called_once_with(is_tomorrow=False)
 
-    @patch('sandpiper.main.sandpiper_app.create_repeat_project_task.execute')
+    @patch("sandpiper.main.sandpiper_app.create_repeat_project_task.execute")
     def test_create_repeat_project_tasks_tomorrow(self, mock_execute) -> None:
         """明日用の繰り返しプロジェクトタスク作成をテスト"""
         result = self.runner.invoke(app, ["create-repeat-project-tasks", "--tomorrow"])
         assert result.exit_code == 0
         mock_execute.assert_called_once_with(is_tomorrow=True)
 
-    @patch('sandpiper.main.sandpiper_app.get_todo_log.execute')
+    @patch("sandpiper.main.sandpiper_app.get_todo_log.execute")
     def test_get_todo_log_default(self, mock_execute) -> None:
         """デフォルトのToDOログ取得をテスト"""
         # モックのToDOデータを設定
@@ -80,8 +80,8 @@ class TestCLI:
         mock_todo.kind.value = "単発"
         mock_todo.project_name = "テストプロジェクト"
         mock_todo.perform_range = (
-            Mock(**{'strftime.return_value': '2024-01-15 10:00'}),
-            Mock(**{'strftime.return_value': '2024-01-15 11:00'})
+            Mock(**{"strftime.return_value": "2024-01-15 10:00"}),
+            Mock(**{"strftime.return_value": "2024-01-15 11:00"}),
         )
         mock_execute.return_value = [mock_todo]
 
@@ -90,7 +90,7 @@ class TestCLI:
         assert "テストタスク" in result.stdout
         mock_execute.assert_called_once()
 
-    @patch('sandpiper.main.sandpiper_app.get_todo_log.execute')
+    @patch("sandpiper.main.sandpiper_app.get_todo_log.execute")
     def test_get_todo_log_json(self, mock_execute) -> None:
         """JSON形式でのToDOログ取得をテスト"""
         # モックのToDOデータを設定
@@ -99,8 +99,8 @@ class TestCLI:
         mock_todo.kind.value = "プロジェクト"
         mock_todo.project_name = "JSONプロジェクト"
         mock_todo.perform_range = (
-            Mock(**{'strftime.return_value': '2024-01-15 09:00'}),
-            Mock(**{'strftime.return_value': '2024-01-15 10:00'})
+            Mock(**{"strftime.return_value": "2024-01-15 09:00"}),
+            Mock(**{"strftime.return_value": "2024-01-15 10:00"}),
         )
         mock_execute.return_value = [mock_todo]
 
@@ -110,7 +110,7 @@ class TestCLI:
         assert "JSONプロジェクト" in result.stdout
         mock_execute.assert_called_once()
 
-    @patch('sandpiper.main.sandpiper_app.get_todo_log.execute')
+    @patch("sandpiper.main.sandpiper_app.get_todo_log.execute")
     def test_get_todo_log_markdown(self, mock_execute) -> None:
         """Markdown形式でのToDOログ取得をテスト"""
         # モックのToDOデータを設定
@@ -119,8 +119,8 @@ class TestCLI:
         mock_todo.kind.value = "リピート"
         mock_todo.project_name = "Markdownプロジェクト"
         mock_todo.perform_range = (
-            Mock(**{'strftime.return_value': '2024-01-15 08:00'}),
-            Mock(**{'strftime.return_value': '2024-01-15 09:00'})
+            Mock(**{"strftime.return_value": "2024-01-15 08:00"}),
+            Mock(**{"strftime.return_value": "2024-01-15 09:00"}),
         )
         mock_execute.return_value = [mock_todo]
 
@@ -130,7 +130,7 @@ class TestCLI:
         assert "Markdownタスク" in result.stdout
         mock_execute.assert_called_once()
 
-    @patch('sandpiper.main.sandpiper_app.get_todo_log.execute')
+    @patch("sandpiper.main.sandpiper_app.get_todo_log.execute")
     def test_get_todo_log_without_perform_range(self, mock_execute) -> None:
         """実施期間なしのToDOログ取得をテスト"""
         # perform_rangeがないモックのToDOデータを設定
@@ -147,7 +147,7 @@ class TestCLI:
         assert "期間なしタスク" in result.stdout
         mock_execute.assert_called_once()
 
-    @patch('sandpiper.main.sandpiper_app.get_todo_log.execute')
+    @patch("sandpiper.main.sandpiper_app.get_todo_log.execute")
     def test_get_todo_log_markdown_without_perform_range(self, mock_execute) -> None:
         """perform_rangeがない場合のMarkdown出力をテスト（95行目のelse部分）"""
         # perform_rangeがないToDoオブジェクトをモック
@@ -166,7 +166,7 @@ class TestCLI:
         assert "| 期間なしタスク | NORMAL | テストプロジェクト |  |" in result.stdout
         mock_execute.assert_called_once()
 
-    @patch('sandpiper.main.sandpiper_app.create_repeat_task.execute')
+    @patch("sandpiper.main.sandpiper_app.create_repeat_task.execute")
     def test_create_repeat_tasks_valid_date(self, mock_execute) -> None:
         """有効な日付での繰り返しタスク作成をテスト"""
         result = self.runner.invoke(app, ["create-repeat-tasks", "--basis-date", "2024-01-15"])
@@ -175,6 +175,7 @@ class TestCLI:
 
         # 呼び出し引数の日付を確認
         from datetime import date
+
         call_args = mock_execute.call_args
         assert call_args[1]["basis_date"] == date(2024, 1, 15)
 

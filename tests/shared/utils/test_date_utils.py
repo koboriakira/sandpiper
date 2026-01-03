@@ -18,14 +18,17 @@ from sandpiper.shared.utils.date_utils import __is_datatime as _is_datetime
 
 
 class TestDateType:
-    @pytest.mark.parametrize("value, expected", [
-        ("2024-01-15", DateType.DATE),
-        ("2024-01-15T10:30:00", DateType.DATETIME),
-        ("2024-01-15T10:30:00+09:00", DateType.DATETIME),
-        ("invalid", DateType.NONE),
-        ("", DateType.NONE),
-        ("2024-13-01", DateType.NONE),  # 不正な日付
-    ])
+    @pytest.mark.parametrize(
+        "value, expected",
+        [
+            ("2024-01-15", DateType.DATE),
+            ("2024-01-15T10:30:00", DateType.DATETIME),
+            ("2024-01-15T10:30:00+09:00", DateType.DATETIME),
+            ("invalid", DateType.NONE),
+            ("", DateType.NONE),
+            ("2024-13-01", DateType.NONE),  # 不正な日付
+        ],
+    )
     def test_get_datetype(self, value: str, expected: DateType):
         result = DateType.get_datetype(value)
         assert result == expected
@@ -54,7 +57,7 @@ class TestJSTUtils:
         result = jst_today(is_previous_day_until_2am=False)
         assert isinstance(result, date)
 
-    @patch('sandpiper.shared.utils.date_utils.jst_now')
+    @patch("sandpiper.shared.utils.date_utils.jst_now")
     def test_jst_today_with_previous_day_logic_after_2am(self, mock_jst_now):
         """2時以降でのjst_today()でis_previous_day_until_2am=Trueの場合をテスト（47行目のelse部分）"""
         # Arrange - 2時以降の時刻をモック（例：3時）

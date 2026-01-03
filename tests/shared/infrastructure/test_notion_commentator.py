@@ -6,7 +6,7 @@ from sandpiper.shared.infrastructure.notion_commentator import NotionCommentator
 
 
 class TestNotionCommentator:
-    @patch('sandpiper.shared.infrastructure.notion_commentator.Lotion')
+    @patch("sandpiper.shared.infrastructure.notion_commentator.Lotion")
     def test_init(self, mock_lotion_class):
         """NotionCommentatorの初期化をテスト"""
         # Arrange
@@ -20,7 +20,7 @@ class TestNotionCommentator:
         assert commentator.client == mock_client
         mock_lotion_class.get_instance.assert_called_once()
 
-    @patch('sandpiper.shared.infrastructure.notion_commentator.Lotion')
+    @patch("sandpiper.shared.infrastructure.notion_commentator.Lotion")
     def test_comment_success(self, mock_lotion_class):
         """コメント投稿の成功をテスト"""
         # Arrange
@@ -37,7 +37,7 @@ class TestNotionCommentator:
         # Assert
         mock_client.append_comment.assert_called_once_with(page_id, message)
 
-    @patch('sandpiper.shared.infrastructure.notion_commentator.Lotion')
+    @patch("sandpiper.shared.infrastructure.notion_commentator.Lotion")
     def test_comment_empty_message(self, mock_lotion_class):
         """空のメッセージでのコメント投稿をテスト"""
         # Arrange
@@ -54,7 +54,7 @@ class TestNotionCommentator:
         # Assert
         mock_client.append_comment.assert_called_once_with(page_id, message)
 
-    @patch('sandpiper.shared.infrastructure.notion_commentator.Lotion')
+    @patch("sandpiper.shared.infrastructure.notion_commentator.Lotion")
     def test_comment_long_message(self, mock_lotion_class):
         """長いメッセージでのコメント投稿をテスト"""
         # Arrange
@@ -71,7 +71,7 @@ class TestNotionCommentator:
         # Assert
         mock_client.append_comment.assert_called_once_with(page_id, message)
 
-    @patch('sandpiper.shared.infrastructure.notion_commentator.Lotion')
+    @patch("sandpiper.shared.infrastructure.notion_commentator.Lotion")
     def test_comment_with_special_characters(self, mock_lotion_class):
         """特殊文字を含むメッセージでのコメント投稿をテスト"""
         # Arrange
@@ -88,7 +88,7 @@ class TestNotionCommentator:
         # Assert
         mock_client.append_comment.assert_called_once_with(page_id, message)
 
-    @patch('sandpiper.shared.infrastructure.notion_commentator.Lotion')
+    @patch("sandpiper.shared.infrastructure.notion_commentator.Lotion")
     def test_comment_multiple_calls(self, mock_lotion_class):
         """複数回のコメント投稿をテスト"""
         # Arrange
@@ -107,7 +107,7 @@ class TestNotionCommentator:
         mock_client.append_comment.assert_any_call("page-2", "メッセージ2")
         mock_client.append_comment.assert_any_call("page-3", "メッセージ3")
 
-    @patch('sandpiper.shared.infrastructure.notion_commentator.Lotion')
+    @patch("sandpiper.shared.infrastructure.notion_commentator.Lotion")
     def test_comment_with_api_error(self, mock_lotion_class):
         """Notion API エラー時のテスト"""
         # Arrange
@@ -122,7 +122,7 @@ class TestNotionCommentator:
 
         mock_client.append_comment.assert_called_once()
 
-    @patch('sandpiper.shared.infrastructure.notion_commentator.Lotion')
+    @patch("sandpiper.shared.infrastructure.notion_commentator.Lotion")
     def test_client_reuse(self, mock_lotion_class):
         """クライアントインスタンスが再利用されることをテスト"""
         # Arrange
@@ -139,7 +139,7 @@ class TestNotionCommentator:
         assert commentator1.client == mock_client
         assert commentator2.client == mock_client
 
-    @patch('sandpiper.shared.infrastructure.notion_commentator.Lotion')
+    @patch("sandpiper.shared.infrastructure.notion_commentator.Lotion")
     def test_comment_parameter_validation(self, mock_lotion_class):
         """コメント投稿時のパラメータ検証をテスト"""
         # Arrange

@@ -10,7 +10,7 @@ class TestSlackNoticeMessanger:
         self.channel_id = "test-channel"
         self.test_token = "test-token"
 
-    @patch('sandpiper.shared.infrastructure.slack_notice_messanger.WebClient')
+    @patch("sandpiper.shared.infrastructure.slack_notice_messanger.WebClient")
     def test_init_with_token(self, mock_web_client):
         """トークン指定での初期化をテスト"""
         # Arrange
@@ -25,8 +25,8 @@ class TestSlackNoticeMessanger:
         assert messanger._client == mock_client
         mock_web_client.assert_called_once_with(token=self.test_token)
 
-    @patch.dict('os.environ', {'SLACK_BOT_TOKEN': 'env-token'})
-    @patch('sandpiper.shared.infrastructure.slack_notice_messanger.WebClient')
+    @patch.dict("os.environ", {"SLACK_BOT_TOKEN": "env-token"})
+    @patch("sandpiper.shared.infrastructure.slack_notice_messanger.WebClient")
     def test_init_with_env_token(self, mock_web_client):
         """環境変数からのトークン取得での初期化をテスト"""
         # Arrange
@@ -39,10 +39,10 @@ class TestSlackNoticeMessanger:
         # Assert
         assert messanger._channel_id == self.channel_id
         assert messanger._client == mock_client
-        mock_web_client.assert_called_once_with(token='env-token')
+        mock_web_client.assert_called_once_with(token="env-token")
 
-    @patch.dict('os.environ', {}, clear=True)  # 環境変数をクリア
-    @patch('sandpiper.shared.infrastructure.slack_notice_messanger.WebClient')
+    @patch.dict("os.environ", {}, clear=True)  # 環境変数をクリア
+    @patch("sandpiper.shared.infrastructure.slack_notice_messanger.WebClient")
     def test_init_with_no_token(self, mock_web_client):
         """トークンなしでの初期化をテスト"""
         # Arrange
@@ -57,7 +57,7 @@ class TestSlackNoticeMessanger:
         assert messanger._client == mock_client
         mock_web_client.assert_called_once_with(token=None)
 
-    @patch('sandpiper.shared.infrastructure.slack_notice_messanger.WebClient')
+    @patch("sandpiper.shared.infrastructure.slack_notice_messanger.WebClient")
     def test_send_message_success(self, mock_web_client):
         """メッセージ送信の成功をテスト"""
         # Arrange
@@ -71,12 +71,9 @@ class TestSlackNoticeMessanger:
 
         # Assert
         expected_text = "<@U04PQMBCFNE> テストメッセージ"
-        mock_client.chat_postMessage.assert_called_once_with(
-            channel=self.channel_id,
-            text=expected_text
-        )
+        mock_client.chat_postMessage.assert_called_once_with(channel=self.channel_id, text=expected_text)
 
-    @patch('sandpiper.shared.infrastructure.slack_notice_messanger.WebClient')
+    @patch("sandpiper.shared.infrastructure.slack_notice_messanger.WebClient")
     def test_send_empty_message(self, mock_web_client):
         """空のメッセージ送信をテスト"""
         # Arrange
@@ -89,12 +86,9 @@ class TestSlackNoticeMessanger:
 
         # Assert
         expected_text = "<@U04PQMBCFNE> "
-        mock_client.chat_postMessage.assert_called_once_with(
-            channel=self.channel_id,
-            text=expected_text
-        )
+        mock_client.chat_postMessage.assert_called_once_with(channel=self.channel_id, text=expected_text)
 
-    @patch('sandpiper.shared.infrastructure.slack_notice_messanger.WebClient')
+    @patch("sandpiper.shared.infrastructure.slack_notice_messanger.WebClient")
     def test_send_long_message(self, mock_web_client):
         """長いメッセージ送信をテスト"""
         # Arrange
@@ -108,12 +102,9 @@ class TestSlackNoticeMessanger:
 
         # Assert
         expected_text = f"<@U04PQMBCFNE> {long_message}"
-        mock_client.chat_postMessage.assert_called_once_with(
-            channel=self.channel_id,
-            text=expected_text
-        )
+        mock_client.chat_postMessage.assert_called_once_with(channel=self.channel_id, text=expected_text)
 
-    @patch('sandpiper.shared.infrastructure.slack_notice_messanger.WebClient')
+    @patch("sandpiper.shared.infrastructure.slack_notice_messanger.WebClient")
     def test_send_message_with_special_characters(self, mock_web_client):
         """特殊文字を含むメッセージ送信をテスト"""
         # Arrange
@@ -127,12 +118,9 @@ class TestSlackNoticeMessanger:
 
         # Assert
         expected_text = f"<@U04PQMBCFNE> {special_message}"
-        mock_client.chat_postMessage.assert_called_once_with(
-            channel=self.channel_id,
-            text=expected_text
-        )
+        mock_client.chat_postMessage.assert_called_once_with(channel=self.channel_id, text=expected_text)
 
-    @patch('sandpiper.shared.infrastructure.slack_notice_messanger.WebClient')
+    @patch("sandpiper.shared.infrastructure.slack_notice_messanger.WebClient")
     def test_send_multiple_messages(self, mock_web_client):
         """複数メッセージ送信をテスト"""
         # Arrange
@@ -147,20 +135,11 @@ class TestSlackNoticeMessanger:
 
         # Assert
         assert mock_client.chat_postMessage.call_count == 3
-        mock_client.chat_postMessage.assert_any_call(
-            channel=self.channel_id,
-            text="<@U04PQMBCFNE> メッセージ1"
-        )
-        mock_client.chat_postMessage.assert_any_call(
-            channel=self.channel_id,
-            text="<@U04PQMBCFNE> メッセージ2"
-        )
-        mock_client.chat_postMessage.assert_any_call(
-            channel=self.channel_id,
-            text="<@U04PQMBCFNE> メッセージ3"
-        )
+        mock_client.chat_postMessage.assert_any_call(channel=self.channel_id, text="<@U04PQMBCFNE> メッセージ1")
+        mock_client.chat_postMessage.assert_any_call(channel=self.channel_id, text="<@U04PQMBCFNE> メッセージ2")
+        mock_client.chat_postMessage.assert_any_call(channel=self.channel_id, text="<@U04PQMBCFNE> メッセージ3")
 
-    @patch('sandpiper.shared.infrastructure.slack_notice_messanger.WebClient')
+    @patch("sandpiper.shared.infrastructure.slack_notice_messanger.WebClient")
     def test_send_with_api_error(self, mock_web_client):
         """Slack API エラー時のテスト"""
         # Arrange
@@ -175,7 +154,7 @@ class TestSlackNoticeMessanger:
 
         mock_client.chat_postMessage.assert_called_once()
 
-    @patch('sandpiper.shared.infrastructure.slack_notice_messanger.WebClient')
+    @patch("sandpiper.shared.infrastructure.slack_notice_messanger.WebClient")
     def test_mention_user_id_consistency(self, mock_web_client):
         """ユーザーIDメンションの一貫性をテスト"""
         # Arrange
@@ -189,12 +168,9 @@ class TestSlackNoticeMessanger:
         # Assert
         # U04PQMBCFNE が一貫して使われることを確認
         expected_text = "<@U04PQMBCFNE> 任意のメッセージ"
-        mock_client.chat_postMessage.assert_called_once_with(
-            channel=self.channel_id,
-            text=expected_text
-        )
+        mock_client.chat_postMessage.assert_called_once_with(channel=self.channel_id, text=expected_text)
 
-    @patch('sandpiper.shared.infrastructure.slack_notice_messanger.WebClient')
+    @patch("sandpiper.shared.infrastructure.slack_notice_messanger.WebClient")
     def test_different_channels(self, mock_web_client):
         """異なるチャンネルでの動作をテスト"""
         # Arrange
@@ -211,11 +187,5 @@ class TestSlackNoticeMessanger:
 
         # Assert
         assert mock_client.chat_postMessage.call_count == 2
-        mock_client.chat_postMessage.assert_any_call(
-            channel=channel1,
-            text="<@U04PQMBCFNE> チャンネル1メッセージ"
-        )
-        mock_client.chat_postMessage.assert_any_call(
-            channel=channel2,
-            text="<@U04PQMBCFNE> チャンネル2メッセージ"
-        )
+        mock_client.chat_postMessage.assert_any_call(channel=channel1, text="<@U04PQMBCFNE> チャンネル1メッセージ")
+        mock_client.chat_postMessage.assert_any_call(channel=channel2, text="<@U04PQMBCFNE> チャンネル2メッセージ")

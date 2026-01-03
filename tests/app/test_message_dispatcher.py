@@ -32,6 +32,7 @@ class TestMessageDispatcher:
 
     def test_publish_object_message(self):
         """オブジェクトメッセージ発行をテスト"""
+
         # Arrange
         class TestEvent:
             def __init__(self, data):

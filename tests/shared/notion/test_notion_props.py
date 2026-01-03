@@ -150,9 +150,14 @@ class TestNotionPropDecorator:
             assert cls is not None
             # クラス名が正しく設定されていることを確認
             assert cls.__name__ in [
-                'TodoName', 'TodoStatus', 'TodoSection', 'TodoLogDate',
-                'TodoKindProp', 'TodoProjectProp', 'TodoProjectTaskProp',
-                'RoutineNextDate'
+                "TodoName",
+                "TodoStatus",
+                "TodoSection",
+                "TodoLogDate",
+                "TodoKindProp",
+                "TodoProjectProp",
+                "TodoProjectTaskProp",
+                "RoutineNextDate",
             ]
 
     def test_all_classes_are_property_types(self):
@@ -180,9 +185,14 @@ class TestNotionPropDecorator:
         expected_module = "sandpiper.shared.notion.notion_props"
 
         classes_to_check = [
-            TodoName, TodoStatus, TodoSection, TodoLogDate,
-            TodoKindProp, TodoProjectProp, TodoProjectTaskProp,
-            RoutineNextDate
+            TodoName,
+            TodoStatus,
+            TodoSection,
+            TodoLogDate,
+            TodoKindProp,
+            TodoProjectProp,
+            TodoProjectTaskProp,
+            RoutineNextDate,
         ]
 
         for cls in classes_to_check:

@@ -7,12 +7,14 @@ from sandpiper.shared.infrastructure.event_bus import EventBus
 
 class DummyEvent:
     """テスト用のイベントクラス"""
+
     def __init__(self, data: str):
         self.data = data
 
 
 class AnotherDummyEvent:
     """別のテスト用のイベントクラス"""
+
     def __init__(self, value: int):
         self.value = value
 

@@ -40,12 +40,9 @@ class TestGetTodoLog:
         todo_dto = DoneTodoDto(
             page_id="test-1",
             title="テストタスク",
-            perform_range=(
-                datetime(2024, 1, 15, 10, 0),
-                datetime(2024, 1, 15, 11, 0)
-            ),
+            perform_range=(datetime(2024, 1, 15, 10, 0), datetime(2024, 1, 15, 11, 0)),
             kind=ToDoKind.SINGLE,
-            project_name="テストプロジェクト"
+            project_name="テストプロジェクト",
         )
         self.mock_query.fetch_done_todos.return_value = [todo_dto]
 
@@ -65,30 +62,30 @@ class TestGetTodoLog:
             title="後のタスク",
             perform_range=(
                 datetime(2024, 1, 15, 14, 0),  # 後の時刻
-                datetime(2024, 1, 15, 15, 0)
+                datetime(2024, 1, 15, 15, 0),
             ),
             kind=ToDoKind.SINGLE,
-            project_name=""
+            project_name="",
         )
         todo2 = DoneTodoDto(
             page_id="test-2",
             title="前のタスク",
             perform_range=(
                 datetime(2024, 1, 15, 10, 0),  # 前の時刻
-                datetime(2024, 1, 15, 11, 0)
+                datetime(2024, 1, 15, 11, 0),
             ),
             kind=ToDoKind.PROJECT,
-            project_name="プロジェクトA"
+            project_name="プロジェクトA",
         )
         todo3 = DoneTodoDto(
             page_id="test-3",
             title="中間のタスク",
             perform_range=(
                 datetime(2024, 1, 15, 12, 0),  # 中間の時刻
-                datetime(2024, 1, 15, 13, 0)
+                datetime(2024, 1, 15, 13, 0),
             ),
             kind=ToDoKind.INTERRUPTION,
-            project_name=""
+            project_name="",
         )
 
         # 順序を逆にして設定
@@ -116,14 +113,14 @@ class TestGetTodoLog:
             title="タスクA",
             perform_range=(same_start_time, datetime(2024, 1, 15, 11, 0)),
             kind=ToDoKind.SINGLE,
-            project_name=""
+            project_name="",
         )
         todo2 = DoneTodoDto(
             page_id="test-2",
             title="タスクB",
             perform_range=(same_start_time, datetime(2024, 1, 15, 12, 0)),
             kind=ToDoKind.PROJECT,
-            project_name="プロジェクト"
+            project_name="プロジェクト",
         )
 
         self.mock_query.fetch_done_todos.return_value = [todo1, todo2]
@@ -156,12 +153,9 @@ class TestGetTodoLog:
         original_todo = DoneTodoDto(
             page_id="preserve-test",
             title="データ保持テスト",
-            perform_range=(
-                datetime(2024, 1, 15, 9, 30),
-                datetime(2024, 1, 15, 10, 45)
-            ),
+            perform_range=(datetime(2024, 1, 15, 9, 30), datetime(2024, 1, 15, 10, 45)),
             kind=ToDoKind.REPEAT,
-            project_name="保持プロジェクト"
+            project_name="保持プロジェクト",
         )
         self.mock_query.fetch_done_todos.return_value = [original_todo]
 
@@ -172,10 +166,7 @@ class TestGetTodoLog:
         returned_todo = result[0]
         assert returned_todo.page_id == "preserve-test"
         assert returned_todo.title == "データ保持テスト"
-        assert returned_todo.perform_range == (
-            datetime(2024, 1, 15, 9, 30),
-            datetime(2024, 1, 15, 10, 45)
-        )
+        assert returned_todo.perform_range == (datetime(2024, 1, 15, 9, 30), datetime(2024, 1, 15, 10, 45))
         assert returned_todo.kind == ToDoKind.REPEAT
         assert returned_todo.project_name == "保持プロジェクト"
 
@@ -189,20 +180,20 @@ class TestGetTodoLog:
             title="今日のタスク",
             perform_range=(
                 datetime(2024, 1, 15, 23, 0),  # 今日の深夜
-                datetime(2024, 1, 16, 1, 0)
+                datetime(2024, 1, 16, 1, 0),
             ),
             kind=ToDoKind.SINGLE,
-            project_name=""
+            project_name="",
         )
         todo_tomorrow = DoneTodoDto(
             page_id="tomorrow",
             title="明日のタスク",
             perform_range=(
-                datetime(2024, 1, 16, 9, 0),   # 翌日の朝
-                datetime(2024, 1, 16, 10, 0)
+                datetime(2024, 1, 16, 9, 0),  # 翌日の朝
+                datetime(2024, 1, 16, 10, 0),
             ),
             kind=ToDoKind.PROJECT,
-            project_name="翌日プロジェクト"
+            project_name="翌日プロジェクト",
         )
 
         # 順序を逆にして設定
@@ -213,7 +204,7 @@ class TestGetTodoLog:
 
         # Assert
         assert len(result) == 2
-        assert result[0] == todo_today    # 15日23:00 (先)
-        assert result[1] == todo_tomorrow # 16日9:00 (後)
+        assert result[0] == todo_today  # 15日23:00 (先)
+        assert result[1] == todo_tomorrow  # 16日9:00 (後)
 
         self.mock_query.fetch_done_todos.assert_called_once()

@@ -12,7 +12,7 @@ class TestProjectTaskDto:
             title="プロジェクトタスク",
             status=ToDoStatusEnum.TODO,
             project_page_id="project-page-456",
-            is_next=True
+            is_next=True,
         )
 
         # Assert
@@ -30,12 +30,12 @@ class TestProjectTaskDto:
             title="テストタスク",
             status=ToDoStatusEnum.IN_PROGRESS,
             project_page_id="test-project",
-            is_next=False
+            is_next=False,
         )
 
         # Assert
-        assert hasattr(dto, '__dataclass_fields__')
-        expected_fields = {'page_id', 'title', 'status', 'project_page_id', 'is_next'}
+        assert hasattr(dto, "__dataclass_fields__")
+        expected_fields = {"page_id", "title", "status", "project_page_id", "is_next"}
         actual_fields = set(dto.__dataclass_fields__.keys())
         assert actual_fields == expected_fields
 
@@ -47,7 +47,7 @@ class TestProjectTaskDto:
             title="変換テストタスク",
             status=ToDoStatusEnum.DONE,
             project_page_id="project-789",
-            is_next=False
+            is_next=False,
         )
 
         # Act
@@ -64,11 +64,7 @@ class TestProjectTaskDto:
     def test_to_todo_model_different_statuses(self):
         """異なるステータスでのto_todo_model()をテスト"""
         # 複数のステータスをテスト
-        test_cases = [
-            ToDoStatusEnum.TODO,
-            ToDoStatusEnum.IN_PROGRESS,
-            ToDoStatusEnum.DONE
-        ]
+        test_cases = [ToDoStatusEnum.TODO, ToDoStatusEnum.IN_PROGRESS, ToDoStatusEnum.DONE]
 
         for status in test_cases:
             # Arrange
@@ -77,7 +73,7 @@ class TestProjectTaskDto:
                 title=f"タスク-{status.value}",
                 status=status,
                 project_page_id="project-test",
-                is_next=True
+                is_next=True,
             )
 
             # Act
@@ -101,7 +97,7 @@ class TestProjectTaskDto:
                 title="Next フラグテスト",
                 status=ToDoStatusEnum.TODO,
                 project_page_id="project-next",
-                is_next=is_next
+                is_next=is_next,
             )
 
             # Act
@@ -121,7 +117,7 @@ class TestProjectTaskDto:
             title="ID保持テスト",
             status=ToDoStatusEnum.IN_PROGRESS,
             project_page_id="unique-project-id",
-            is_next=True
+            is_next=True,
         )
 
         # Act
@@ -142,7 +138,7 @@ class TestProjectTaskDto:
             title="同じタスク",
             status=ToDoStatusEnum.TODO,
             project_page_id="same-project",
-            is_next=True
+            is_next=True,
         )
 
         dto2 = ProjectTaskDto(
@@ -150,7 +146,7 @@ class TestProjectTaskDto:
             title="同じタスク",
             status=ToDoStatusEnum.TODO,
             project_page_id="same-project",
-            is_next=True
+            is_next=True,
         )
 
         # Assert
@@ -160,11 +156,7 @@ class TestProjectTaskDto:
         """ProjectTaskDtoの非等価性をテスト"""
         # Arrange
         dto1 = ProjectTaskDto(
-            page_id="id-1",
-            title="タスク1",
-            status=ToDoStatusEnum.TODO,
-            project_page_id="project-1",
-            is_next=True
+            page_id="id-1", title="タスク1", status=ToDoStatusEnum.TODO, project_page_id="project-1", is_next=True
         )
 
         dto2 = ProjectTaskDto(
@@ -172,7 +164,7 @@ class TestProjectTaskDto:
             title="タスク2",
             status=ToDoStatusEnum.IN_PROGRESS,
             project_page_id="project-2",
-            is_next=False
+            is_next=False,
         )
 
         # Assert
@@ -181,13 +173,7 @@ class TestProjectTaskDto:
     def test_to_todo_model_with_empty_strings(self):
         """空文字列でのto_todo_model()をテスト"""
         # Arrange
-        dto = ProjectTaskDto(
-            page_id="",
-            title="",
-            status=ToDoStatusEnum.TODO,
-            project_page_id="",
-            is_next=False
-        )
+        dto = ProjectTaskDto(page_id="", title="", status=ToDoStatusEnum.TODO, project_page_id="", is_next=False)
 
         # Act
         todo = dto.to_todo_model()

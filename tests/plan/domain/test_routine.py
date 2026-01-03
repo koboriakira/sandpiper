@@ -13,7 +13,7 @@ class TestRoutine:
             title="テストルーティン",
             date=date(2024, 1, 15),
             section=TaskChuteSection.A_07_10,
-            cycle=self.test_cycle
+            cycle=self.test_cycle,
         )
 
     def test_routine_creation(self):
@@ -33,16 +33,16 @@ class TestRoutine:
             title="Test Title",
             date=date(2024, 2, 1),
             section=TaskChuteSection.B_10_13,
-            cycle=RoutineCycle.WEEKLY_TUE_FRI
+            cycle=RoutineCycle.WEEKLY_TUE_FRI,
         )
 
         # Assert
-        assert hasattr(routine, '__dataclass_fields__')
-        assert 'id' in routine.__dataclass_fields__
-        assert 'title' in routine.__dataclass_fields__
-        assert 'date' in routine.__dataclass_fields__
-        assert 'section' in routine.__dataclass_fields__
-        assert 'cycle' in routine.__dataclass_fields__
+        assert hasattr(routine, "__dataclass_fields__")
+        assert "id" in routine.__dataclass_fields__
+        assert "title" in routine.__dataclass_fields__
+        assert "date" in routine.__dataclass_fields__
+        assert "section" in routine.__dataclass_fields__
+        assert "cycle" in routine.__dataclass_fields__
 
     def test_next_cycle_with_default_basis_date(self):
         """デフォルトのbasis_date（self.date）でのnext_cycleをテスト"""
@@ -53,7 +53,7 @@ class TestRoutine:
             title="毎日のルーティン",
             date=date(2024, 1, 15),
             section=TaskChuteSection.C_13_17,
-            cycle=daily_cycle
+            cycle=daily_cycle,
         )
 
         # Act
@@ -76,7 +76,7 @@ class TestRoutine:
             title="週次ルーティン",
             date=date(2024, 1, 15),  # 月曜日
             section=TaskChuteSection.D_17_19,
-            cycle=weekly_cycle
+            cycle=weekly_cycle,
         )
 
         explicit_basis = date(2024, 1, 20)  # 土曜日
@@ -102,7 +102,7 @@ class TestRoutine:
             title="保持テスト",
             date=original_date,
             section=TaskChuteSection.E_19_22,
-            cycle=RoutineCycle.DAILY
+            cycle=RoutineCycle.DAILY,
         )
 
         # Act
@@ -121,7 +121,7 @@ class TestRoutine:
             title="Noneベーステスト",
             date=date(2024, 1, 12),
             section=TaskChuteSection.F_22_24,
-            cycle=RoutineCycle.DAILY
+            cycle=RoutineCycle.DAILY,
         )
 
         # Act
@@ -140,7 +140,7 @@ class TestRoutine:
             title="週次テスト",
             date=base_date,
             section=TaskChuteSection.A_07_10,
-            cycle=RoutineCycle.WEEKLY_TUE_FRI
+            cycle=RoutineCycle.WEEKLY_TUE_FRI,
         )
 
         # Act
@@ -159,7 +159,7 @@ class TestRoutine:
             title="週次複雑ルーティン",
             date=date(2024, 1, 15),  # 月曜日
             section=TaskChuteSection.G_24_07,
-            cycle=weekly_cycle
+            cycle=weekly_cycle,
         )
 
         # Act
@@ -181,7 +181,7 @@ class TestRoutine:
             title="等価テスト",
             date=date(2024, 1, 20),
             section=TaskChuteSection.B_10_13,
-            cycle=RoutineCycle.DAILY
+            cycle=RoutineCycle.DAILY,
         )
 
         routine2 = Routine(
@@ -189,7 +189,7 @@ class TestRoutine:
             title="等価テスト",
             date=date(2024, 1, 20),
             section=TaskChuteSection.B_10_13,
-            cycle=RoutineCycle.DAILY
+            cycle=RoutineCycle.DAILY,
         )
 
         # Assert - dataclassの自動equality
@@ -203,7 +203,7 @@ class TestRoutine:
             title="不変性テスト",
             date=date(2024, 1, 5),
             section=TaskChuteSection.C_13_17,
-            cycle=RoutineCycle.DAILY
+            cycle=RoutineCycle.DAILY,
         )
 
         # Act

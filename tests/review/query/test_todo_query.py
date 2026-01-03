@@ -12,7 +12,7 @@ class TestNotionTodoQuery:
     @pytest.fixture
     def mock_lotion_client(self, monkeypatch):
         mock_client = Mock(spec=Lotion)
-        monkeypatch.setattr(Lotion, 'get_instance', lambda: mock_client)
+        monkeypatch.setattr(Lotion, "get_instance", lambda: mock_client)
         return mock_client
 
     @pytest.fixture
@@ -39,7 +39,7 @@ class TestNotionTodoQuery:
 
         mock_lotion_client.retrieve_database.side_effect = [
             [mock_todo],  # TODO database
-            []  # PROJECT database
+            [],  # PROJECT database
         ]
 
         # Act
@@ -59,10 +59,7 @@ class TestNotionTodoQuery:
         mock_date_range.end = None
         mock_todo.get_date.return_value = mock_date_range
 
-        mock_lotion_client.retrieve_database.side_effect = [
-            [mock_todo],
-            []
-        ]
+        mock_lotion_client.retrieve_database.side_effect = [[mock_todo], []]
 
         # Act
         result = query.fetch_done_todos()
@@ -81,10 +78,7 @@ class TestNotionTodoQuery:
         mock_select.selected_name = None
         mock_todo.get_select.return_value = mock_select
 
-        mock_lotion_client.retrieve_database.side_effect = [
-            [mock_todo],
-            []
-        ]
+        mock_lotion_client.retrieve_database.side_effect = [[mock_todo], []]
 
         # Act
         result = query.fetch_done_todos()
@@ -101,10 +95,7 @@ class TestNotionTodoQuery:
         mock_todo.get_title_text.return_value = "テストタスク"
         mock_todo.id = "test-todo-id"
 
-        mock_lotion_client.retrieve_database.side_effect = [
-            [mock_todo],
-            []
-        ]
+        mock_lotion_client.retrieve_database.side_effect = [[mock_todo], []]
 
         # Act
         result = query.fetch_done_todos()
@@ -138,10 +129,7 @@ class TestNotionTodoQuery:
         mock_project.id = "project-123"
         mock_project.get_title_text.return_value = "テストプロジェクト"
 
-        mock_lotion_client.retrieve_database.side_effect = [
-            [mock_todo],
-            [mock_project]
-        ]
+        mock_lotion_client.retrieve_database.side_effect = [[mock_todo], [mock_project]]
 
         # Act
         result = query.fetch_done_todos()
@@ -166,10 +154,7 @@ class TestNotionTodoQuery:
         mock_relation.id_list = []
         mock_todo.get_relation.return_value = mock_relation
 
-        mock_lotion_client.retrieve_database.side_effect = [
-            [mock_todo],
-            []
-        ]
+        mock_lotion_client.retrieve_database.side_effect = [[mock_todo], []]
 
         # Act
         result = query.fetch_done_todos()
@@ -193,10 +178,7 @@ class TestNotionTodoQuery:
         mock_todo2.get_title_text.return_value = "タスク2"
         mock_todo2.id = "todo-2"
 
-        mock_lotion_client.retrieve_database.side_effect = [
-            [mock_todo1, mock_todo2],
-            []
-        ]
+        mock_lotion_client.retrieve_database.side_effect = [[mock_todo1, mock_todo2], []]
 
         # Act
         result = query.fetch_done_todos()

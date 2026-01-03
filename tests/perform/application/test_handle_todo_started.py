@@ -25,7 +25,7 @@ class TestHandleTodoStarted:
         # Assert
         assert handler._todo_repository == mock_repo
 
-    @patch('builtins.print')
+    @patch("builtins.print")
     def test_call_success(self, mock_print):
         """正常なToDo開始処理をテスト"""
         # Arrange
@@ -44,15 +44,11 @@ class TestHandleTodoStarted:
         mock_todo.start.assert_called_once()
         self.mock_repository.save.assert_called_once_with(mock_todo)
 
-    @patch('builtins.print')
+    @patch("builtins.print")
     def test_call_with_different_page_ids(self, mock_print):
         """異なるページIDでの処理をテスト"""
         # Arrange
-        test_cases = [
-            "page-001",
-            "another-page-xyz",
-            "complex-page-id-with-numbers-123"
-        ]
+        test_cases = ["page-001", "another-page-xyz", "complex-page-id-with-numbers-123"]
 
         for page_id in test_cases:
             # Reset mocks for each iteration
@@ -126,15 +122,11 @@ class TestHandleTodoStarted:
         mock_todo.start.assert_called_once()
         self.mock_repository.save.assert_called_once_with(mock_todo)
 
-    @patch('builtins.print')
+    @patch("builtins.print")
     def test_call_multiple_events(self, mock_print):
         """複数のイベント処理をテスト"""
         # Arrange
-        events = [
-            TodoStarted(page_id="event-1"),
-            TodoStarted(page_id="event-2"),
-            TodoStarted(page_id="event-3")
-        ]
+        events = [TodoStarted(page_id="event-1"), TodoStarted(page_id="event-2"), TodoStarted(page_id="event-3")]
 
         mock_todos = []
         for i in range(len(events)):
@@ -163,7 +155,7 @@ class TestHandleTodoStarted:
         actual_calls = [call.args[0] for call in mock_print.call_args_list]
         assert actual_calls == expected_calls
 
-    @patch('builtins.print')
+    @patch("builtins.print")
     def test_call_with_empty_page_id(self, mock_print):
         """空のページIDでの処理をテスト"""
         # Arrange
