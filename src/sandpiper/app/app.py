@@ -6,11 +6,13 @@ from sandpiper.perform.infrastructure.notion_todo_repository import NotionTodoRe
 from sandpiper.plan.application.create_repeat_project_task import CreateRepeatProjectTask
 from sandpiper.plan.application.create_repeat_task import CreateRepeatTask
 from sandpiper.plan.application.create_todo import CreateToDo
+from sandpiper.plan.application.handle_completed_task import HandleCompletedTask
 from sandpiper.plan.infrastructure.notion_routine_repository import NotionRoutineRepository
 from sandpiper.plan.infrastructure.notion_todo_repository import NotionTodoRepository as PlanNotionTodoRepository
 from sandpiper.plan.query.project_task_query import NotionProjectTaskQuery
 from sandpiper.review.application.get_todo_log import GetTodoLog
 from sandpiper.review.query.todo_query import NotionTodoQuery
+from sandpiper.shared.event.todo_completed import TodoCompleted
 from sandpiper.shared.event.todo_created import TodoStarted
 from sandpiper.shared.infrastructure.event_bus import EventBus
 
@@ -46,6 +48,10 @@ def bootstrap() -> SandPiperApp:
     # Subscribe event handlers
     handle_todo_started = HandleTodoStarted(perform_notion_todo_repository)
     event_bus.subscribe(TodoStarted, handle_todo_started)
+    handle_todo_completed = HandleCompletedTask(plan_notion_todo_repository)
+    event_bus.subscribe(TodoCompleted, handle_todo_completed)
+
+    # Create message dispatcher
     dispatcher = MessageDispatcher(event_bus)
 
     # Create application services
@@ -70,5 +76,6 @@ def bootstrap() -> SandPiperApp:
         ),
         complete_todo=CompleteTodo(
             todo_repository=perform_notion_todo_repository,
+            dispatcher=dispatcher,
         ),
     )

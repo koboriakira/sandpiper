@@ -1,3 +1,4 @@
+from datetime import datetime
 from enum import Enum
 
 from sandpiper.shared.utils.date_utils import jst_now
@@ -13,9 +14,9 @@ class TaskChuteSection(Enum):
     G_24_07 = "G_24_07"
 
     @staticmethod
-    def new() -> "TaskChuteSection":
+    def new(dt: datetime | None = None) -> "TaskChuteSection":
         """新しいセクションを返す"""
-        current_hour = jst_now().hour
+        current_hour = (dt if dt is not None else jst_now()).hour
         if 7 <= current_hour < 10:
             return TaskChuteSection.A_07_10
         if 10 <= current_hour < 13:
