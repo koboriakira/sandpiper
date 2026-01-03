@@ -67,8 +67,9 @@ def get_todo_log(
 
     result = sandpiper_app.get_todo_log.execute()
     if json:
+        from typing import Any
 
-        def todo_to_dict(todo):
+        def todo_to_dict(todo: Any) -> dict[str, Any]:
             return {
                 "title": todo.title,
                 "kind": getattr(todo.kind, "value", str(todo.kind)),

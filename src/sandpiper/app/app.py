@@ -41,11 +41,11 @@ def bootstrap() -> SandPiperApp:
     event_bus = EventBus()
 
     # infrastructure setup
-    project_task_query = NotionProjectTaskQuery()
+    project_task_query = NotionProjectTaskQuery()  # type: ignore[no-untyped-call]
     todo_query = NotionTodoQuery()
-    plan_notion_todo_repository = PlanNotionTodoRepository()
-    perform_notion_todo_repository = PerformNotionTodoRepository()
-    routine_repository = NotionRoutineRepository()
+    plan_notion_todo_repository = PlanNotionTodoRepository()  # type: ignore[no-untyped-call]
+    perform_notion_todo_repository = PerformNotionTodoRepository()  # type: ignore[no-untyped-call]
+    routine_repository = NotionRoutineRepository()  # type: ignore[no-untyped-call]
     default_notice_messanger = SlackNoticeMessanger(channel_id="C04Q3AV4TA5")
     commentator = NotionCommentator()
 

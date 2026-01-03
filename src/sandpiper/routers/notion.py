@@ -1,8 +1,10 @@
 """Notion API関連のエンドポイント"""
 
+from typing import Any
+
 from fastapi import APIRouter, Depends
 from fastapi.responses import JSONResponse
-from lotion import BasePage
+from lotion import BasePage  # type: ignore[import-untyped]
 from pydantic import BaseModel
 
 from sandpiper.app.app import SandPiperApp
@@ -17,8 +19,8 @@ router = APIRouter(
 
 
 class NotionWebhookRequest(BaseModel):
-    source: dict
-    data: dict
+    source: dict[str, Any]
+    data: dict[str, Any]
 
 
 @router.post("/todo/start")
