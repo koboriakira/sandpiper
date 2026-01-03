@@ -1,8 +1,9 @@
 from datetime import datetime
+
 import pytest
 
-from sandpiper.shared.valueobject.task_chute_section import TaskChuteSection
 from sandpiper.shared.utils.date_utils import JST
+from sandpiper.shared.valueobject.task_chute_section import TaskChuteSection
 
 
 class TestTaskChuteSection:
@@ -70,20 +71,20 @@ class TestTaskChuteSection:
     def test_boundary_at_7am(self):
         dt_6_59 = datetime(2024, 1, 15, 6, 59, 59, tzinfo=JST)
         dt_7_00 = datetime(2024, 1, 15, 7, 0, 0, tzinfo=JST)
-        
+
         assert TaskChuteSection.new(dt_6_59) == TaskChuteSection.G_24_07
         assert TaskChuteSection.new(dt_7_00) == TaskChuteSection.A_07_10
 
     def test_boundary_at_10am(self):
         dt_9_59 = datetime(2024, 1, 15, 9, 59, 59, tzinfo=JST)
         dt_10_00 = datetime(2024, 1, 15, 10, 0, 0, tzinfo=JST)
-        
+
         assert TaskChuteSection.new(dt_9_59) == TaskChuteSection.A_07_10
         assert TaskChuteSection.new(dt_10_00) == TaskChuteSection.B_10_13
 
     def test_boundary_at_midnight(self):
         dt_23_59 = datetime(2024, 1, 15, 23, 59, 59, tzinfo=JST)
         dt_00_00 = datetime(2024, 1, 16, 0, 0, 0, tzinfo=JST)  # 翌日の0時
-        
+
         assert TaskChuteSection.new(dt_23_59) == TaskChuteSection.F_22_24
         assert TaskChuteSection.new(dt_00_00) == TaskChuteSection.G_24_07

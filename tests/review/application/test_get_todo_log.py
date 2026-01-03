@@ -1,5 +1,6 @@
 from datetime import datetime
 from unittest.mock import Mock
+
 import pytest
 
 from sandpiper.plan.domain.todo import ToDoKind
@@ -16,19 +17,19 @@ class TestGetTodoLog:
     def test_init(self):
         """GetTodoLogの初期化をテスト"""
         query = Mock(spec=TodoQuery)
-        
+
         get_todo_log = GetTodoLog(query)
-        
+
         assert get_todo_log.todo_query == query
 
     def test_execute_empty_result(self):
         """空の結果でのexecuteをテスト"""
         # Arrange
         self.mock_query.fetch_done_todos.return_value = []
-        
+
         # Act
         result = self.get_todo_log.execute()
-        
+
         # Assert
         assert result == []
         self.mock_query.fetch_done_todos.assert_called_once()
@@ -47,10 +48,10 @@ class TestGetTodoLog:
             project_name="テストプロジェクト"
         )
         self.mock_query.fetch_done_todos.return_value = [todo_dto]
-        
+
         # Act
         result = self.get_todo_log.execute()
-        
+
         # Assert
         assert len(result) == 1
         assert result[0] == todo_dto
@@ -89,27 +90,27 @@ class TestGetTodoLog:
             kind=ToDoKind.INTERRUPTION,
             project_name=""
         )
-        
+
         # 順序を逆にして設定
         self.mock_query.fetch_done_todos.return_value = [todo1, todo2, todo3]
-        
+
         # Act
         result = self.get_todo_log.execute()
-        
+
         # Assert
         assert len(result) == 3
         # perform_range[0]の昇順でソートされていることを確認
         assert result[0] == todo2  # 10:00 (最も早い)
         assert result[1] == todo3  # 12:00 (中間)
         assert result[2] == todo1  # 14:00 (最も遅い)
-        
+
         self.mock_query.fetch_done_todos.assert_called_once()
 
     def test_execute_same_start_time_multiple_todos(self):
         """同じ開始時刻の複数ToDoでのテスト"""
         # Arrange - 同じ開始時刻の3つのタスク
         same_start_time = datetime(2024, 1, 15, 10, 0)
-        
+
         todo1 = DoneTodoDto(
             page_id="test-1",
             title="タスクA",
@@ -124,29 +125,29 @@ class TestGetTodoLog:
             kind=ToDoKind.PROJECT,
             project_name="プロジェクト"
         )
-        
+
         self.mock_query.fetch_done_todos.return_value = [todo1, todo2]
-        
+
         # Act
         result = self.get_todo_log.execute()
-        
+
         # Assert
         assert len(result) == 2
         # 同じ開始時刻の場合、安定ソートされる（元の順序が保持される）
         assert result[0] == todo1
         assert result[1] == todo2
-        
+
         self.mock_query.fetch_done_todos.assert_called_once()
 
     def test_execute_query_raises_exception(self):
         """todo_queryでの例外処理をテスト"""
         # Arrange
         self.mock_query.fetch_done_todos.side_effect = Exception("Query failed")
-        
+
         # Act & Assert
         with pytest.raises(Exception, match="Query failed"):
             self.get_todo_log.execute()
-        
+
         self.mock_query.fetch_done_todos.assert_called_once()
 
     def test_execute_preserve_original_data(self):
@@ -163,10 +164,10 @@ class TestGetTodoLog:
             project_name="保持プロジェクト"
         )
         self.mock_query.fetch_done_todos.return_value = [original_todo]
-        
+
         # Act
         result = self.get_todo_log.execute()
-        
+
         # Assert
         returned_todo = result[0]
         assert returned_todo.page_id == "preserve-test"
@@ -177,7 +178,7 @@ class TestGetTodoLog:
         )
         assert returned_todo.kind == ToDoKind.REPEAT
         assert returned_todo.project_name == "保持プロジェクト"
-        
+
         self.mock_query.fetch_done_todos.assert_called_once()
 
     def test_execute_cross_day_sorting(self):
@@ -194,7 +195,7 @@ class TestGetTodoLog:
             project_name=""
         )
         todo_tomorrow = DoneTodoDto(
-            page_id="tomorrow", 
+            page_id="tomorrow",
             title="明日のタスク",
             perform_range=(
                 datetime(2024, 1, 16, 9, 0),   # 翌日の朝
@@ -203,16 +204,16 @@ class TestGetTodoLog:
             kind=ToDoKind.PROJECT,
             project_name="翌日プロジェクト"
         )
-        
+
         # 順序を逆にして設定
         self.mock_query.fetch_done_todos.return_value = [todo_tomorrow, todo_today]
-        
+
         # Act
         result = self.get_todo_log.execute()
-        
+
         # Assert
         assert len(result) == 2
         assert result[0] == todo_today    # 15日23:00 (先)
         assert result[1] == todo_tomorrow # 16日9:00 (後)
-        
+
         self.mock_query.fetch_done_todos.assert_called_once()

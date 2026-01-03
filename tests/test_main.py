@@ -1,8 +1,8 @@
 """main.pyのテスト"""
 
 from unittest.mock import Mock, patch
+
 from typer.testing import CliRunner
-import pytest
 
 from sandpiper import __version__
 from sandpiper.main import app
@@ -39,7 +39,7 @@ class TestCLI:
         result = self.runner.invoke(app, ["create-todo", "テストタスク"])
         assert result.exit_code == 0
         mock_execute.assert_called_once()
-        
+
         # 呼び出し引数を確認
         call_args = mock_execute.call_args
         assert call_args[1]["request"].title == "テストタスク"
@@ -51,7 +51,7 @@ class TestCLI:
         result = self.runner.invoke(app, ["create-todo", "開始タスク", "--start"])
         assert result.exit_code == 0
         mock_execute.assert_called_once()
-        
+
         # 呼び出し引数を確認
         call_args = mock_execute.call_args
         assert call_args[1]["request"].title == "開始タスク"
@@ -84,7 +84,7 @@ class TestCLI:
             Mock(**{'strftime.return_value': '2024-01-15 11:00'})
         )
         mock_execute.return_value = [mock_todo]
-        
+
         result = self.runner.invoke(app, ["get-todo-log"])
         assert result.exit_code == 0
         assert "テストタスク" in result.stdout
@@ -103,7 +103,7 @@ class TestCLI:
             Mock(**{'strftime.return_value': '2024-01-15 10:00'})
         )
         mock_execute.return_value = [mock_todo]
-        
+
         result = self.runner.invoke(app, ["get-todo-log", "--json"])
         assert result.exit_code == 0
         assert "JSONタスク" in result.stdout
@@ -123,7 +123,7 @@ class TestCLI:
             Mock(**{'strftime.return_value': '2024-01-15 09:00'})
         )
         mock_execute.return_value = [mock_todo]
-        
+
         result = self.runner.invoke(app, ["get-todo-log", "--markdown"])
         assert result.exit_code == 0
         assert "| タイトル | 種別 | プロジェクト | 実施期間 |" in result.stdout
@@ -139,9 +139,9 @@ class TestCLI:
         mock_todo.kind.value = "差し込み"
         mock_todo.project_name = ""
         # perform_rangeがないことをシミュレート
-        del mock_todo.perform_range  
+        del mock_todo.perform_range
         mock_execute.return_value = [mock_todo]
-        
+
         result = self.runner.invoke(app, ["get-todo-log", "--json"])
         assert result.exit_code == 0
         assert "期間なしタスク" in result.stdout
@@ -159,7 +159,7 @@ class TestCLI:
         # perform_rangeが存在しない（None）状態をシミュレート
         mock_todo.perform_range = None
         mock_execute.return_value = [mock_todo]
-        
+
         result = self.runner.invoke(app, ["get-todo-log", "--markdown"])
         assert result.exit_code == 0
         # 期間が空文字列になることを確認（95行目のelse部分）
@@ -172,7 +172,7 @@ class TestCLI:
         result = self.runner.invoke(app, ["create-repeat-tasks", "--basis-date", "2024-01-15"])
         assert result.exit_code == 0
         mock_execute.assert_called_once()
-        
+
         # 呼び出し引数の日付を確認
         from datetime import date
         call_args = mock_execute.call_args

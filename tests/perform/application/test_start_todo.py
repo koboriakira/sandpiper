@@ -1,4 +1,5 @@
 from unittest.mock import Mock
+
 import pytest
 
 from sandpiper.perform.application.start_todo import StartTodo
@@ -13,9 +14,9 @@ class TestStartTodo:
     def test_init(self):
         """StartTodoの初期化をテスト"""
         repository = Mock(spec=TodoRepository)
-        
+
         start_todo = StartTodo(repository)
-        
+
         assert start_todo._todo_repository == repository
 
     def test_execute_start_todo_success(self):
@@ -24,10 +25,10 @@ class TestStartTodo:
         page_id = "test-page-id"
         mock_todo = Mock()
         self.mock_repository.find.return_value = mock_todo
-        
+
         # Act
         self.start_todo.execute(page_id)
-        
+
         # Assert
         self.mock_repository.find.assert_called_once_with(page_id)
         mock_todo.start.assert_called_once()
@@ -38,11 +39,11 @@ class TestStartTodo:
         # Arrange
         page_id = "test-page-find-exception"
         self.mock_repository.find.side_effect = Exception("Todo not found")
-        
+
         # Act & Assert
         with pytest.raises(Exception, match="Todo not found"):
             self.start_todo.execute(page_id)
-        
+
         # findのみ呼ばれ、他は呼ばれないことを確認
         self.mock_repository.find.assert_called_once_with(page_id)
         self.mock_repository.save.assert_not_called()
@@ -54,11 +55,11 @@ class TestStartTodo:
         mock_todo = Mock()
         mock_todo.start.side_effect = Exception("Start failed")
         self.mock_repository.find.return_value = mock_todo
-        
+
         # Act & Assert
         with pytest.raises(Exception, match="Start failed"):
             self.start_todo.execute(page_id)
-        
+
         # findは呼ばれたが、saveは呼ばれないことを確認
         self.mock_repository.find.assert_called_once_with(page_id)
         mock_todo.start.assert_called_once()
@@ -71,11 +72,11 @@ class TestStartTodo:
         mock_todo = Mock()
         self.mock_repository.find.return_value = mock_todo
         self.mock_repository.save.side_effect = Exception("Save failed")
-        
+
         # Act & Assert
         with pytest.raises(Exception, match="Save failed"):
             self.start_todo.execute(page_id)
-        
+
         # start()は呼ばれることを確認
         self.mock_repository.find.assert_called_once_with(page_id)
         mock_todo.start.assert_called_once()
@@ -88,22 +89,22 @@ class TestStartTodo:
         page_id2 = "test-page-2"
         mock_todo1 = Mock()
         mock_todo2 = Mock()
-        
+
         # 異なるページIDで異なるtoDoが返されるようにモック設定
         self.mock_repository.find.side_effect = lambda pid: mock_todo1 if pid == page_id1 else mock_todo2
-        
+
         # Act
         self.start_todo.execute(page_id1)
         self.start_todo.execute(page_id2)
-        
+
         # Assert
         assert self.mock_repository.find.call_count == 2
         self.mock_repository.find.assert_any_call(page_id1)
         self.mock_repository.find.assert_any_call(page_id2)
-        
+
         mock_todo1.start.assert_called_once()
         mock_todo2.start.assert_called_once()
-        
+
         assert self.mock_repository.save.call_count == 2
         self.mock_repository.save.assert_any_call(mock_todo1)
         self.mock_repository.save.assert_any_call(mock_todo2)
@@ -114,16 +115,16 @@ class TestStartTodo:
         page_id = "test-page-multiple"
         mock_todo = Mock()
         self.mock_repository.find.return_value = mock_todo
-        
+
         # Act
         self.start_todo.execute(page_id)
         self.start_todo.execute(page_id)
-        
+
         # Assert
         assert self.mock_repository.find.call_count == 2
         assert mock_todo.start.call_count == 2
         assert self.mock_repository.save.call_count == 2
-        
+
         # 両回とも同じ引数で呼ばれることを確認
         for call in self.mock_repository.find.call_args_list:
             assert call[0][0] == page_id

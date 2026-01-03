@@ -1,4 +1,5 @@
 from unittest.mock import Mock, patch
+
 import pytest
 
 from sandpiper.shared.infrastructure.slack_notice_messanger import SlackNoticeMessanger
@@ -15,10 +16,10 @@ class TestSlackNoticeMessanger:
         # Arrange
         mock_client = Mock()
         mock_web_client.return_value = mock_client
-        
+
         # Act
         messanger = SlackNoticeMessanger(self.channel_id, self.test_token)
-        
+
         # Assert
         assert messanger._channel_id == self.channel_id
         assert messanger._client == mock_client
@@ -31,10 +32,10 @@ class TestSlackNoticeMessanger:
         # Arrange
         mock_client = Mock()
         mock_web_client.return_value = mock_client
-        
+
         # Act
         messanger = SlackNoticeMessanger(self.channel_id)
-        
+
         # Assert
         assert messanger._channel_id == self.channel_id
         assert messanger._client == mock_client
@@ -47,10 +48,10 @@ class TestSlackNoticeMessanger:
         # Arrange
         mock_client = Mock()
         mock_web_client.return_value = mock_client
-        
+
         # Act
         messanger = SlackNoticeMessanger(self.channel_id)
-        
+
         # Assert
         assert messanger._channel_id == self.channel_id
         assert messanger._client == mock_client
@@ -64,10 +65,10 @@ class TestSlackNoticeMessanger:
         mock_web_client.return_value = mock_client
         messanger = SlackNoticeMessanger(self.channel_id, self.test_token)
         test_message = "テストメッセージ"
-        
+
         # Act
         messanger.send(test_message)
-        
+
         # Assert
         expected_text = "<@U04PQMBCFNE> テストメッセージ"
         mock_client.chat_postMessage.assert_called_once_with(
@@ -82,10 +83,10 @@ class TestSlackNoticeMessanger:
         mock_client = Mock()
         mock_web_client.return_value = mock_client
         messanger = SlackNoticeMessanger(self.channel_id, self.test_token)
-        
+
         # Act
         messanger.send("")
-        
+
         # Assert
         expected_text = "<@U04PQMBCFNE> "
         mock_client.chat_postMessage.assert_called_once_with(
@@ -101,10 +102,10 @@ class TestSlackNoticeMessanger:
         mock_web_client.return_value = mock_client
         messanger = SlackNoticeMessanger(self.channel_id, self.test_token)
         long_message = "これは非常に長いメッセージです。" * 100
-        
+
         # Act
         messanger.send(long_message)
-        
+
         # Assert
         expected_text = f"<@U04PQMBCFNE> {long_message}"
         mock_client.chat_postMessage.assert_called_once_with(
@@ -120,10 +121,10 @@ class TestSlackNoticeMessanger:
         mock_web_client.return_value = mock_client
         messanger = SlackNoticeMessanger(self.channel_id, self.test_token)
         special_message = "!@#$%^&*()_+{}|:<>?[]\\;'\",./"
-        
+
         # Act
         messanger.send(special_message)
-        
+
         # Assert
         expected_text = f"<@U04PQMBCFNE> {special_message}"
         mock_client.chat_postMessage.assert_called_once_with(
@@ -138,12 +139,12 @@ class TestSlackNoticeMessanger:
         mock_client = Mock()
         mock_web_client.return_value = mock_client
         messanger = SlackNoticeMessanger(self.channel_id, self.test_token)
-        
+
         # Act
         messanger.send("メッセージ1")
         messanger.send("メッセージ2")
         messanger.send("メッセージ3")
-        
+
         # Assert
         assert mock_client.chat_postMessage.call_count == 3
         mock_client.chat_postMessage.assert_any_call(
@@ -167,11 +168,11 @@ class TestSlackNoticeMessanger:
         mock_client.chat_postMessage.side_effect = Exception("Slack API error")
         mock_web_client.return_value = mock_client
         messanger = SlackNoticeMessanger(self.channel_id, self.test_token)
-        
+
         # Act & Assert
         with pytest.raises(Exception, match="Slack API error"):
             messanger.send("テストメッセージ")
-        
+
         mock_client.chat_postMessage.assert_called_once()
 
     @patch('sandpiper.shared.infrastructure.slack_notice_messanger.WebClient')
@@ -181,10 +182,10 @@ class TestSlackNoticeMessanger:
         mock_client = Mock()
         mock_web_client.return_value = mock_client
         messanger = SlackNoticeMessanger(self.channel_id, self.test_token)
-        
+
         # Act
         messanger.send("任意のメッセージ")
-        
+
         # Assert
         # U04PQMBCFNE が一貫して使われることを確認
         expected_text = "<@U04PQMBCFNE> 任意のメッセージ"
@@ -203,11 +204,11 @@ class TestSlackNoticeMessanger:
         channel2 = "channel-2"
         messanger1 = SlackNoticeMessanger(channel1, self.test_token)
         messanger2 = SlackNoticeMessanger(channel2, self.test_token)
-        
+
         # Act
         messanger1.send("チャンネル1メッセージ")
         messanger2.send("チャンネル2メッセージ")
-        
+
         # Assert
         assert mock_client.chat_postMessage.call_count == 2
         mock_client.chat_postMessage.assert_any_call(
