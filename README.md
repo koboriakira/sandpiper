@@ -110,6 +110,7 @@ uv run pre-commit run --all-files           # 従来のpre-commit
 
 # アプリケーション実行
 uv run sandpiper hello --name "開発者"
+uv run sandpiper get-github-activity --help  # GitHub活動ログ取得
 ```
 
 ## プロジェクト構造
