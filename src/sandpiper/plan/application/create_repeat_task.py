@@ -15,7 +15,7 @@ class CreateRepeatTask:
         self.routine_repository = routine_repository
         self.todo_repository = todo_repository
 
-    def execute(self, basis_date: date):
+    def execute(self, basis_date: date) -> None:
         # Create the main task
         print("Creating repeat tasks...")
         routines = self.routine_repository.fetch()

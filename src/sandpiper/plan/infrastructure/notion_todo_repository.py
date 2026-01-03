@@ -1,5 +1,5 @@
-from lotion import BasePage, Lotion, notion_database
-from lotion.block.rich_text.rich_text_builder import RichTextBuilder
+from lotion import BasePage, Lotion, notion_database  # type: ignore[import-untyped]
+from lotion.block.rich_text.rich_text_builder import RichTextBuilder  # type: ignore[import-untyped]
 
 from sandpiper.plan.domain.todo import InsertedToDo, ToDo, ToDoKind, ToDoStatus
 from sandpiper.shared.notion.database_config import DatabaseId
@@ -16,7 +16,7 @@ from sandpiper.shared.valueobject.task_chute_section import TaskChuteSection
 
 
 @notion_database(DatabaseId.TODO)
-class TodoPage(BasePage):
+class TodoPage(BasePage):  # type: ignore[misc]
     name: TodoName
     status: TodoStatus
     kind: TodoKindProp | None = None

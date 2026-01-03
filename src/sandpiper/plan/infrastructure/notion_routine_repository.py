@@ -1,4 +1,4 @@
-from lotion import Lotion
+from lotion import Lotion  # type: ignore[import-untyped]
 
 from sandpiper.plan.domain.routine import Routine
 from sandpiper.plan.domain.routine_cycle import RoutineCycle
@@ -8,7 +8,7 @@ from sandpiper.shared.valueobject.task_chute_section import TaskChuteSection
 
 
 class NotionRoutineRepository(RoutineRepository):
-    def __init__(self):
+    def __init__(self) -> None:
         self.client = Lotion.get_instance()
 
     def fetch(self) -> list[Routine]:

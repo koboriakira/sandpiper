@@ -19,11 +19,11 @@ class CreateToDo:
     _dispatcher: MessageDispatcher
     _todo_repository: TodoRepository
 
-    def __init__(self, dispatcher: MessageDispatcher, todo_repository: TodoRepository):
+    def __init__(self, dispatcher: MessageDispatcher, todo_repository: TodoRepository) -> None:
         self._dispatcher = dispatcher
         self._todo_repository = todo_repository
 
-    def execute(self, request: CreateNewToDoRequest, enableStart: bool = False):
+    def execute(self, request: CreateNewToDoRequest, enableStart: bool = False) -> None:
         todo = ToDo(
             title=request.title,
             kind=request.kind,

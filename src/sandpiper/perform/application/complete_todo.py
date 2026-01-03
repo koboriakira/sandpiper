@@ -7,11 +7,11 @@ class CompleteTodo:
     _todo_repository: TodoRepository
     _dispatcher: MessageDispatcher
 
-    def __init__(self, todo_repository: TodoRepository, dispatcher: MessageDispatcher):
+    def __init__(self, todo_repository: TodoRepository, dispatcher: MessageDispatcher) -> None:
         self._todo_repository = todo_repository
         self._dispatcher = dispatcher
 
-    def execute(self, page_id: str):
+    def execute(self, page_id: str) -> None:
         todo = self._todo_repository.find(page_id)
         todo.complete()
         self._todo_repository.save(todo)
