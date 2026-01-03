@@ -77,3 +77,7 @@ class NotionTodoRepository:
             cls=TodoPage, props=[TodoStatus.from_status_name(ToDoStatus.TODO.value)]
         )
         return [page.to_domain() for page in notion_pages]
+
+    def find(self, page_id: str) -> ToDo:
+        notion_page = self.client.retrieve_page(page_id, cls=TodoPage)
+        return notion_page.to_domain()

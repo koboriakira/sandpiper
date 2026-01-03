@@ -15,6 +15,7 @@ from sandpiper.review.query.todo_query import NotionTodoQuery
 from sandpiper.shared.event.todo_completed import TodoCompleted
 from sandpiper.shared.event.todo_created import TodoStarted
 from sandpiper.shared.infrastructure.event_bus import EventBus
+from sandpiper.shared.infrastructure.notion_commentator import NotionCommentator
 from sandpiper.shared.infrastructure.slack_notice_messanger import SlackNoticeMessanger
 
 
@@ -45,14 +46,13 @@ def bootstrap() -> SandPiperApp:
     plan_notion_todo_repository = PlanNotionTodoRepository()
     perform_notion_todo_repository = PerformNotionTodoRepository()
     routine_repository = NotionRoutineRepository()
-
-    # Notice messanger setup
     default_notice_messanger = SlackNoticeMessanger(channel_id="C04Q3AV4TA5")
+    commentator = NotionCommentator()
 
     # Subscribe event handlers
     handle_todo_started = HandleTodoStarted(perform_notion_todo_repository)
     event_bus.subscribe(TodoStarted, handle_todo_started)
-    handle_todo_completed = HandleCompletedTask(plan_notion_todo_repository, default_notice_messanger)
+    handle_todo_completed = HandleCompletedTask(plan_notion_todo_repository, default_notice_messanger, commentator)
     event_bus.subscribe(TodoCompleted, handle_todo_completed)
 
     # Create message dispatcher
