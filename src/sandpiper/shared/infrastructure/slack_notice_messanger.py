@@ -9,4 +9,5 @@ class SlackNoticeMessanger:
         self._client = WebClient(token=token or os.getenv("SLACK_BOT_TOKEN"))
 
     def send(self, message: str) -> None:
-        self._client.chat_postMessage(channel=self._channel_id, text=message)
+        text = f"<@U04PQMBCFNE> {message}"
+        self._client.chat_postMessage(channel=self._channel_id, text=text)
