@@ -10,11 +10,14 @@ from sandpiper.plan.application.handle_completed_task import HandleCompletedTask
 from sandpiper.plan.infrastructure.notion_routine_repository import NotionRoutineRepository
 from sandpiper.plan.infrastructure.notion_todo_repository import NotionTodoRepository as PlanNotionTodoRepository
 from sandpiper.plan.query.project_task_query import NotionProjectTaskQuery
+from sandpiper.review.application.get_github_activity import GetGitHubActivity
 from sandpiper.review.application.get_todo_log import GetTodoLog
+from sandpiper.review.query.github_activity_query import GitHubActivityQuery
 from sandpiper.review.query.todo_query import NotionTodoQuery
 from sandpiper.shared.event.todo_completed import TodoCompleted
 from sandpiper.shared.event.todo_created import TodoStarted
 from sandpiper.shared.infrastructure.event_bus import EventBus
+from sandpiper.shared.infrastructure.github_client import GitHubClient
 from sandpiper.shared.infrastructure.notion_commentator import NotionCommentator
 from sandpiper.shared.infrastructure.slack_notice_messanger import SlackNoticeMessanger
 
@@ -26,6 +29,7 @@ class SandPiperApp:
         create_repeat_task: CreateRepeatTask,
         create_repeat_project_task: CreateRepeatProjectTask,
         get_todo_log: GetTodoLog,
+        get_github_activity: GetGitHubActivity,
         start_todo: StartTodo,
         complete_todo: CompleteTodo,
     ) -> None:
@@ -33,6 +37,7 @@ class SandPiperApp:
         self.create_repeat_task = create_repeat_task
         self.create_repeat_project_task = create_repeat_project_task
         self.get_todo_log = get_todo_log
+        self.get_github_activity = get_github_activity
         self.start_todo = start_todo
         self.complete_todo = complete_todo
 
@@ -48,6 +53,10 @@ def bootstrap() -> SandPiperApp:
     routine_repository = NotionRoutineRepository()
     default_notice_messanger = SlackNoticeMessanger(channel_id="C04Q3AV4TA5")
     commentator = NotionCommentator()
+
+    # GitHub integration setup
+    github_client = GitHubClient()
+    github_activity_query = GitHubActivityQuery(github_client)
 
     # Subscribe event handlers
     handle_todo_started = HandleTodoStarted(perform_notion_todo_repository)
@@ -74,6 +83,9 @@ def bootstrap() -> SandPiperApp:
         ),
         get_todo_log=GetTodoLog(
             todo_query=todo_query,
+        ),
+        get_github_activity=GetGitHubActivity(
+            github_activity_query=github_activity_query,
         ),
         start_todo=StartTodo(
             todo_repository=perform_notion_todo_repository,

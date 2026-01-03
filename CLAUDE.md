@@ -11,6 +11,7 @@ Sandpiperは個人のタスク管理を支援するPythonアプリケーショ�
 - **Notion統合**: NotionデータベースとのリアルタイムWebhook連携
 - **Slack通知**: タスク完了時の自動Slack通知
 - **繰り返しタスク**: 複雑な周期ルールに基づく自動タスク生成
+- **GitHub活動ログ**: PyGithubによるGitHub活動の可視化と日報機能
 - **CLI**: typerによる使いやすいコマンドラインインターフェース
 - **Web API**: FastAPIによるNotion Webhook受信とヘルスチェック
 
@@ -37,6 +38,8 @@ uv run sandpiper hello --name "開発者"          # 挨拶コマンド
 uv run sandpiper create-todo "新しいタスク" --start # タスク作成・開始
 uv run sandpiper get-todo-log --json            # 完了タスクログ(JSON)
 uv run sandpiper get-todo-log --markdown        # 完了タスクログ(Markdown)
+uv run sandpiper get-github-activity            # GitHub活動ログ取得(今日)
+uv run sandpiper get-github-activity --date 2024-03-20 --json  # 特定日・JSON形式
 uv run sandpiper create-repeat-tasks --basis-date 2024-03-20  # 繰り返しタスク作成
 uv run sandpiper create-repeat-project-tasks --tomorrow       # 明日のプロジェクトタスク作成
 
@@ -88,11 +91,11 @@ src/sandpiper/
 │   ├── application/             # 実行ユースケース(StartTodo, CompleteTodo)
 │   └── infrastructure/          # Notion実行状態リポジトリ
 ├── review/                      # タスクレビュー・分析ドメイン
-│   ├── application/             # 分析ユースケース(GetTodoLog)
-│   └── query/                   # 実行結果クエリ
+│   ├── application/             # 分析ユースケース(GetTodoLog, GetGitHubActivity)
+│   └── query/                   # 実行結果クエリ(TodoQuery, GitHubActivityQuery)
 ├── shared/                      # 共通コンポーネント
 │   ├── event/                   # ドメインイベント(TodoStarted, TodoCompleted)
-│   ├── infrastructure/          # EventBus, Slack通知, Notionコメント
+│   ├── infrastructure/          # EventBus, Slack通知, GitHubClient
 │   ├── notion/                  # Notion API統合(lotion + notion-client)
 │   ├── utils/                   # 日付ユーティリティ
 │   └── valueobject/             # 値オブジェクト(TaskChuteSection)
@@ -118,6 +121,7 @@ src/sandpiper/
 #### 外部サービス統合
 - **Notion API**: lotion(日本製)+ notion-client(公式SDK)
 - **Slack API**: slack-sdk(タスク完了通知)
+- **GitHub API**: PyGithub(活動ログ取得)
 - **Webhook**: Notion → FastAPI リアルタイム連携
 
 #### データベース構成
@@ -138,11 +142,12 @@ src/sandpiper/
 
 ### 環境変数設定
 
-#### 必須環境変数(Notion・Slack統合)
+#### 必須環境変数(Notion・Slack・GitHub統合)
 ```bash
 # Notion API設定
 export NOTION_TOKEN="secret_****"           # Notion Integration Token
 export SLACK_BOT_TOKEN="xoxb-****"         # Slack Bot Token
+export GITHUB_TOKEN="ghp_****"             # GitHub Personal Access Token
 
 # FastAPI設定
 export ENVIRONMENT=development              # 開発環境設定
@@ -301,6 +306,7 @@ git commit -m "ci: CI設定改善"
 - `typer`: CLIアプリケーション構築
 - `fastapi`: モダンなWeb APIフレームワーク
 - `uvicorn`: ASGI サーバー
+- `PyGithub`: GitHub API v3クライアント
 
 ### 開発依存関係
 - `pytest`: テストフレームワーク + プラグイン
@@ -340,6 +346,15 @@ event_bus.publish(TodoCompletedEvent(todo_id="123"))
 result = sandpiper_app.get_todo_log.execute()
 for todo in result:
     print(f"{todo.title} - {todo.project_name} - {todo.perform_range}")
+
+# GitHub活動ログの取得
+from datetime import datetime
+github_activity = sandpiper_app.get_github_activity.execute(
+    username="koboriakira",
+    target_date=datetime.now()
+)
+print(f"Commits: {github_activity.summary.commit_count}")
+print(f"Pull Requests: {github_activity.summary.pull_request_count}")
 ```
 
 ### Notion統合開発

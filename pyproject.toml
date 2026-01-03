@@ -28,6 +28,8 @@ dependencies = [
     "fastapi>=0.128.0",
     "uvicorn[standard]>=0.40.0",
     "slack-sdk>=3.39.0",
+    "pygithub>=2.8.1",
+    "python-dotenv>=1.2.1",
 ]
 
 [dependency-groups]
@@ -153,8 +155,13 @@ omit = [
     # API・エンドポイント層(統合テストでカバー)
     "src/sandpiper/api.py",
     "src/sandpiper/routers/*",
+    # CLI エントリーポイント(統合テストでカバー)
+    "src/sandpiper/main.py",
     # インフラストラクチャ層(外部依存・統合テストでカバー)
     "src/sandpiper/**/notion_*_repository.py",
+    "src/sandpiper/shared/infrastructure/github_client.py",
+    "src/sandpiper/review/query/github_activity_query.py",
+    "src/sandpiper/plan/query/project_task_query.py",
     # 設定・初期化ファイル
     "src/sandpiper/routers/__init__.py",
 ]
