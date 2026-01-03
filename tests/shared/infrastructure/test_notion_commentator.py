@@ -152,6 +152,6 @@ class TestNotionCommentator:
 
         # Assert
         # 正確なパラメータで呼び出されることを確認
-        args, kwargs = mock_client.append_comment.call_args
+        args, _kwargs = mock_client.append_comment.call_args
         assert args[0] == "test-page"
         assert args[1] == "test-message"
