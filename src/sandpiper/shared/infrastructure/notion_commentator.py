@@ -1,4 +1,4 @@
-from lotion import Lotion
+from lotion import Lotion  # type: ignore[import-untyped]
 
 
 class NotionCommentator:
