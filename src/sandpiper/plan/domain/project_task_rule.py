@@ -1,4 +1,4 @@
-from sandpiper.plan.query.project_task_query import ProjectTaskDto
+from sandpiper.plan.query import ProjectTaskDto
 
 
 def group_next_project_tasks_by_project(project_task_dtos: list[ProjectTaskDto]) -> dict[str, ProjectTaskDto]:

@@ -1,4 +1,4 @@
-from lotion import BasePage, Lotion, notion_database
+from lotion import BasePage, Lotion, notion_database  # type: ignore[import-untyped]
 
 from sandpiper.perform.domain.todo import ToDo
 from sandpiper.shared.notion.database_config import DatabaseId
@@ -8,7 +8,7 @@ from sandpiper.shared.valueobject.todo_status_enum import ToDoStatusEnum
 
 
 @notion_database(DatabaseId.TODO)
-class TodoPage(BasePage):
+class TodoPage(BasePage):  # type: ignore[misc]
     name: TodoName
     status: TodoStatus
     section: TodoSection | None = None
@@ -29,12 +29,12 @@ class TodoPage(BasePage):
 
 
 class NotionTodoRepository:
-    def __init__(self):
+    def __init__(self) -> None:
         self.client = Lotion.get_instance()
 
     def find(self, page_id: str) -> ToDo:
         page = self.client.retrieve_page(page_id, TodoPage)
-        return page.to_domain()
+        return page.to_domain()  # type: ignore[no-any-return]
 
     def save(self, todo: ToDo) -> None:
         print(f"Saving ToDo: {todo}")
