@@ -1,5 +1,4 @@
 from datetime import date
-import pytest
 
 from sandpiper.plan.domain.routine import Routine
 from sandpiper.plan.domain.routine_cycle import RoutineCycle
@@ -14,7 +13,7 @@ class TestRoutine:
             title="テストルーティン",
             date=date(2024, 1, 15),
             section=TaskChuteSection.A_07_10,
-            cycle=self.test_cycle
+            cycle=self.test_cycle,
         )
 
     def test_routine_creation(self):
@@ -34,16 +33,16 @@ class TestRoutine:
             title="Test Title",
             date=date(2024, 2, 1),
             section=TaskChuteSection.B_10_13,
-            cycle=RoutineCycle.WEEKLY_TUE_FRI
+            cycle=RoutineCycle.WEEKLY_TUE_FRI,
         )
-        
+
         # Assert
-        assert hasattr(routine, '__dataclass_fields__')
-        assert 'id' in routine.__dataclass_fields__
-        assert 'title' in routine.__dataclass_fields__
-        assert 'date' in routine.__dataclass_fields__
-        assert 'section' in routine.__dataclass_fields__
-        assert 'cycle' in routine.__dataclass_fields__
+        assert hasattr(routine, "__dataclass_fields__")
+        assert "id" in routine.__dataclass_fields__
+        assert "title" in routine.__dataclass_fields__
+        assert "date" in routine.__dataclass_fields__
+        assert "section" in routine.__dataclass_fields__
+        assert "cycle" in routine.__dataclass_fields__
 
     def test_next_cycle_with_default_basis_date(self):
         """デフォルトのbasis_date（self.date）でのnext_cycleをテスト"""
@@ -54,12 +53,12 @@ class TestRoutine:
             title="毎日のルーティン",
             date=date(2024, 1, 15),
             section=TaskChuteSection.C_13_17,
-            cycle=daily_cycle
+            cycle=daily_cycle,
         )
-        
+
         # Act
         next_routine = routine.next_cycle()
-        
+
         # Assert
         assert next_routine.id == routine.id
         assert next_routine.title == routine.title
@@ -77,14 +76,14 @@ class TestRoutine:
             title="週次ルーティン",
             date=date(2024, 1, 15),  # 月曜日
             section=TaskChuteSection.D_17_19,
-            cycle=weekly_cycle
+            cycle=weekly_cycle,
         )
-        
+
         explicit_basis = date(2024, 1, 20)  # 土曜日
-        
+
         # Act
         next_routine = routine.next_cycle(basis_date=explicit_basis)
-        
+
         # Assert
         assert next_routine.id == routine.id
         assert next_routine.title == routine.title
@@ -103,12 +102,12 @@ class TestRoutine:
             title="保持テスト",
             date=original_date,
             section=TaskChuteSection.E_19_22,
-            cycle=RoutineCycle.DAILY
+            cycle=RoutineCycle.DAILY,
         )
-        
+
         # Act
         next_routine = routine.next_cycle()
-        
+
         # Assert - 元のroutineは変更されない
         assert routine.date == original_date
         assert next_routine.date != original_date
@@ -122,31 +121,31 @@ class TestRoutine:
             title="Noneベーステスト",
             date=date(2024, 1, 12),
             section=TaskChuteSection.F_22_24,
-            cycle=RoutineCycle.DAILY
+            cycle=RoutineCycle.DAILY,
         )
-        
+
         # Act
         next_routine = routine.next_cycle(basis_date=None)
-        
+
         # Assert - None指定時はself.dateが使用される
         assert next_routine.date == date(2024, 1, 13)  # 翌日
 
     def test_next_cycle_with_different_cycles(self):
         """異なるサイクルタイプでのnext_cycleをテスト"""
         base_date = date(2024, 1, 15)  # 月曜日
-        
+
         # 週次サイクル（火・木）
         weekly_routine = Routine(
             id="weekly-test",
             title="週次テスト",
             date=base_date,
             section=TaskChuteSection.A_07_10,
-            cycle=RoutineCycle.WEEKLY_TUE_FRI
+            cycle=RoutineCycle.WEEKLY_TUE_FRI,
         )
-        
+
         # Act
         next_weekly = weekly_routine.next_cycle()
-        
+
         # Assert
         # 月曜日から次の火曜日へ
         assert next_weekly.date == date(2024, 1, 16)
@@ -160,12 +159,12 @@ class TestRoutine:
             title="週次複雑ルーティン",
             date=date(2024, 1, 15),  # 月曜日
             section=TaskChuteSection.G_24_07,
-            cycle=weekly_cycle
+            cycle=weekly_cycle,
         )
-        
+
         # Act
         next_routine = routine.next_cycle()
-        
+
         # Assert
         assert next_routine.id == routine.id
         assert next_routine.title == routine.title
@@ -182,17 +181,17 @@ class TestRoutine:
             title="等価テスト",
             date=date(2024, 1, 20),
             section=TaskChuteSection.B_10_13,
-            cycle=RoutineCycle.DAILY
+            cycle=RoutineCycle.DAILY,
         )
-        
+
         routine2 = Routine(
             id="equal-test",
-            title="等価テスト", 
+            title="等価テスト",
             date=date(2024, 1, 20),
             section=TaskChuteSection.B_10_13,
-            cycle=RoutineCycle.DAILY
+            cycle=RoutineCycle.DAILY,
         )
-        
+
         # Assert - dataclassの自動equality
         assert routine1 == routine2
 
@@ -204,16 +203,16 @@ class TestRoutine:
             title="不変性テスト",
             date=date(2024, 1, 5),
             section=TaskChuteSection.C_13_17,
-            cycle=RoutineCycle.DAILY
+            cycle=RoutineCycle.DAILY,
         )
-        
+
         # Act
         next_routine = original_routine.next_cycle()
-        
+
         # Assert - 新しいインスタンスが作成される
         assert original_routine is not next_routine
         assert id(original_routine) != id(next_routine)
-        
+
         # 変更されるのはdateのみ
         assert original_routine.id == next_routine.id
         assert original_routine.title == next_routine.title

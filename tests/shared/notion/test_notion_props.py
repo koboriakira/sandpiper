@@ -2,14 +2,14 @@ import pytest
 from lotion.properties import Date, Relation, Select, Status, Title
 
 from sandpiper.shared.notion.notion_props import (
-    TodoName,
-    TodoStatus,
-    TodoSection,
-    TodoLogDate,
+    RoutineNextDate,
     TodoKindProp,
+    TodoLogDate,
+    TodoName,
     TodoProjectProp,
     TodoProjectTaskProp,
-    RoutineNextDate,
+    TodoSection,
+    TodoStatus,
 )
 
 
@@ -136,7 +136,7 @@ class TestNotionPropDecorator:
         # 各クラスが適切に定義されていることを確認
         classes_to_test = [
             TodoName,
-            TodoStatus, 
+            TodoStatus,
             TodoSection,
             TodoLogDate,
             TodoKindProp,
@@ -144,32 +144,37 @@ class TestNotionPropDecorator:
             TodoProjectTaskProp,
             RoutineNextDate,
         ]
-        
+
         for cls in classes_to_test:
             # クラスが定義されていることを確認
             assert cls is not None
             # クラス名が正しく設定されていることを確認
             assert cls.__name__ in [
-                'TodoName', 'TodoStatus', 'TodoSection', 'TodoLogDate',
-                'TodoKindProp', 'TodoProjectProp', 'TodoProjectTaskProp',
-                'RoutineNextDate'
+                "TodoName",
+                "TodoStatus",
+                "TodoSection",
+                "TodoLogDate",
+                "TodoKindProp",
+                "TodoProjectProp",
+                "TodoProjectTaskProp",
+                "RoutineNextDate",
             ]
 
     def test_all_classes_are_property_types(self):
         """すべてのクラスがlotion property typesを継承していることをテスト"""
         property_classes = [Title, Status, Select, Date, Relation]
-        
+
         test_classes = [
             (TodoName, Title),
             (TodoStatus, Status),
-            (TodoSection, Select), 
+            (TodoSection, Select),
             (TodoLogDate, Date),
             (TodoKindProp, Select),
             (TodoProjectProp, Relation),
             (TodoProjectTaskProp, Relation),
             (RoutineNextDate, Date),
         ]
-        
+
         for test_class, expected_parent in test_classes:
             assert issubclass(test_class, expected_parent)
             # 間接的にlotion propertyであることも確認
@@ -178,12 +183,17 @@ class TestNotionPropDecorator:
     def test_class_module_location(self):
         """クラスが正しいモジュールで定義されていることをテスト"""
         expected_module = "sandpiper.shared.notion.notion_props"
-        
+
         classes_to_check = [
-            TodoName, TodoStatus, TodoSection, TodoLogDate,
-            TodoKindProp, TodoProjectProp, TodoProjectTaskProp,
-            RoutineNextDate
+            TodoName,
+            TodoStatus,
+            TodoSection,
+            TodoLogDate,
+            TodoKindProp,
+            TodoProjectProp,
+            TodoProjectTaskProp,
+            RoutineNextDate,
         ]
-        
+
         for cls in classes_to_check:
             assert cls.__module__ == expected_module

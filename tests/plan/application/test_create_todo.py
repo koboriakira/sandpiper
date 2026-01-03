@@ -1,8 +1,7 @@
-from unittest.mock import Mock, MagicMock
-import pytest
+from unittest.mock import Mock
 
 from sandpiper.app.message_dispatcher import MessageDispatcher
-from sandpiper.plan.application.create_todo import CreateToDo, CreateNewToDoRequest
+from sandpiper.plan.application.create_todo import CreateNewToDoRequest, CreateToDo
 from sandpiper.plan.domain.todo import ToDo, ToDoKind
 from sandpiper.plan.domain.todo_repository import TodoRepository
 from sandpiper.shared.event.todo_created import TodoStarted
@@ -20,12 +19,12 @@ class TestCreateToDo:
         mock_todo = Mock(spec=ToDo)
         mock_todo.id = "test-id-123"
         self.mock_repository.save.return_value = mock_todo
-        
+
         request = CreateNewToDoRequest(title="テストタスク")
-        
+
         # Act
         self.create_todo.execute(request)
-        
+
         # Assert
         self.mock_repository.save.assert_called_once()
         saved_todo_arg = self.mock_repository.save.call_args[0][0]
@@ -38,16 +37,14 @@ class TestCreateToDo:
         mock_todo = Mock(spec=ToDo)
         mock_todo.id = "test-id-123"
         self.mock_repository.save.return_value = mock_todo
-        
+
         request = CreateNewToDoRequest(
-            title="プロジェクトタスク",
-            kind=ToDoKind.PROJECT,
-            section=TaskChuteSection.B_10_13
+            title="プロジェクトタスク", kind=ToDoKind.PROJECT, section=TaskChuteSection.B_10_13
         )
-        
+
         # Act
         self.create_todo.execute(request)
-        
+
         # Assert
         self.mock_repository.save.assert_called_once()
         saved_todo_arg = self.mock_repository.save.call_args[0][0]
@@ -60,12 +57,12 @@ class TestCreateToDo:
         mock_todo = Mock(spec=ToDo)
         mock_todo.id = "test-id-123"
         self.mock_repository.save.return_value = mock_todo
-        
+
         request = CreateNewToDoRequest(title="タスク")
-        
+
         # Act
         self.create_todo.execute(request, enableStart=False)
-        
+
         # Assert
         self.mock_repository.save.assert_called_once()
         self.mock_dispatcher.publish.assert_not_called()
@@ -75,16 +72,16 @@ class TestCreateToDo:
         mock_todo = Mock(spec=ToDo)
         mock_todo.id = "test-id-123"
         self.mock_repository.save.return_value = mock_todo
-        
+
         request = CreateNewToDoRequest(title="開始するタスク")
-        
+
         # Act
         self.create_todo.execute(request, enableStart=True)
-        
+
         # Assert
         self.mock_repository.save.assert_called_once()
         self.mock_dispatcher.publish.assert_called_once()
-        
+
         # TodoStartedイベントが正しく発行されることを確認
         published_event = self.mock_dispatcher.publish.call_args[0][0]
         assert isinstance(published_event, TodoStarted)
@@ -95,16 +92,12 @@ class TestCreateToDo:
         mock_todo = Mock(spec=ToDo)
         mock_todo.id = "test-id-456"
         self.mock_repository.save.return_value = mock_todo
-        
-        request = CreateNewToDoRequest(
-            title="詳細タスク",
-            kind=ToDoKind.REPEAT,
-            section=TaskChuteSection.E_19_22
-        )
-        
+
+        request = CreateNewToDoRequest(title="詳細タスク", kind=ToDoKind.REPEAT, section=TaskChuteSection.E_19_22)
+
         # Act
         self.create_todo.execute(request)
-        
+
         # Assert
         self.mock_repository.save.assert_called_once()
         saved_todo = self.mock_repository.save.call_args[0][0]
@@ -117,9 +110,9 @@ class TestCreateToDo:
         # Arrange & Act
         mock_dispatcher = Mock(spec=MessageDispatcher)
         mock_repository = Mock(spec=TodoRepository)
-        
+
         create_todo = CreateToDo(mock_dispatcher, mock_repository)
-        
+
         # Assert
         assert create_todo._dispatcher == mock_dispatcher
         assert create_todo._todo_repository == mock_repository
@@ -129,7 +122,7 @@ class TestCreateNewToDoRequest:
     def test_create_request_with_defaults(self):
         # Act
         request = CreateNewToDoRequest(title="基本タスク")
-        
+
         # Assert
         assert request.title == "基本タスク"
         assert request.kind is None
@@ -137,12 +130,8 @@ class TestCreateNewToDoRequest:
 
     def test_create_request_with_all_fields(self):
         # Act
-        request = CreateNewToDoRequest(
-            title="完全タスク",
-            kind=ToDoKind.PROJECT,
-            section=TaskChuteSection.C_13_17
-        )
-        
+        request = CreateNewToDoRequest(title="完全タスク", kind=ToDoKind.PROJECT, section=TaskChuteSection.C_13_17)
+
         # Assert
         assert request.title == "完全タスク"
         assert request.kind == ToDoKind.PROJECT

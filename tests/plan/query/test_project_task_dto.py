@@ -1,4 +1,3 @@
-import pytest
 from sandpiper.plan.domain.todo import ToDo, ToDoKind
 from sandpiper.plan.query.project_task_dto import ProjectTaskDto
 from sandpiper.shared.valueobject.todo_status_enum import ToDoStatusEnum
@@ -13,9 +12,9 @@ class TestProjectTaskDto:
             title="プロジェクトタスク",
             status=ToDoStatusEnum.TODO,
             project_page_id="project-page-456",
-            is_next=True
+            is_next=True,
         )
-        
+
         # Assert
         assert dto.page_id == "task-page-123"
         assert dto.title == "プロジェクトタスク"
@@ -31,12 +30,12 @@ class TestProjectTaskDto:
             title="テストタスク",
             status=ToDoStatusEnum.IN_PROGRESS,
             project_page_id="test-project",
-            is_next=False
+            is_next=False,
         )
-        
+
         # Assert
-        assert hasattr(dto, '__dataclass_fields__')
-        expected_fields = {'page_id', 'title', 'status', 'project_page_id', 'is_next'}
+        assert hasattr(dto, "__dataclass_fields__")
+        expected_fields = {"page_id", "title", "status", "project_page_id", "is_next"}
         actual_fields = set(dto.__dataclass_fields__.keys())
         assert actual_fields == expected_fields
 
@@ -48,12 +47,12 @@ class TestProjectTaskDto:
             title="変換テストタスク",
             status=ToDoStatusEnum.DONE,
             project_page_id="project-789",
-            is_next=False
+            is_next=False,
         )
-        
+
         # Act
         todo = dto.to_todo_model()
-        
+
         # Assert
         assert isinstance(todo, ToDo)
         assert todo.title == "変換テストタスク"
@@ -65,12 +64,8 @@ class TestProjectTaskDto:
     def test_to_todo_model_different_statuses(self):
         """異なるステータスでのto_todo_model()をテスト"""
         # 複数のステータスをテスト
-        test_cases = [
-            ToDoStatusEnum.TODO,
-            ToDoStatusEnum.IN_PROGRESS,
-            ToDoStatusEnum.DONE
-        ]
-        
+        test_cases = [ToDoStatusEnum.TODO, ToDoStatusEnum.IN_PROGRESS, ToDoStatusEnum.DONE]
+
         for status in test_cases:
             # Arrange
             dto = ProjectTaskDto(
@@ -78,12 +73,12 @@ class TestProjectTaskDto:
                 title=f"タスク-{status.value}",
                 status=status,
                 project_page_id="project-test",
-                is_next=True
+                is_next=True,
             )
-            
+
             # Act
             todo = dto.to_todo_model()
-            
+
             # Assert
             assert todo.title == f"タスク-{status.value}"
             assert todo.kind == ToDoKind.PROJECT
@@ -94,7 +89,7 @@ class TestProjectTaskDto:
         """is_nextフィールドの異なる値でのto_todo_model()をテスト"""
         # is_nextの値をテスト（ToDoモデルには影響しないが、DTOの動作確認）
         test_cases = [True, False]
-        
+
         for is_next in test_cases:
             # Arrange
             dto = ProjectTaskDto(
@@ -102,12 +97,12 @@ class TestProjectTaskDto:
                 title="Next フラグテスト",
                 status=ToDoStatusEnum.TODO,
                 project_page_id="project-next",
-                is_next=is_next
+                is_next=is_next,
             )
-            
+
             # Act
             todo = dto.to_todo_model()
-            
+
             # Assert
             assert todo.title == "Next フラグテスト"
             assert todo.kind == ToDoKind.PROJECT
@@ -122,12 +117,12 @@ class TestProjectTaskDto:
             title="ID保持テスト",
             status=ToDoStatusEnum.IN_PROGRESS,
             project_page_id="unique-project-id",
-            is_next=True
+            is_next=True,
         )
-        
+
         # Act
         todo = dto.to_todo_model()
-        
+
         # Assert
         assert todo.project_page_id == "unique-project-id"
         assert todo.project_task_page_id == "unique-task-id"
@@ -143,17 +138,17 @@ class TestProjectTaskDto:
             title="同じタスク",
             status=ToDoStatusEnum.TODO,
             project_page_id="same-project",
-            is_next=True
+            is_next=True,
         )
-        
+
         dto2 = ProjectTaskDto(
             page_id="same-id",
             title="同じタスク",
             status=ToDoStatusEnum.TODO,
             project_page_id="same-project",
-            is_next=True
+            is_next=True,
         )
-        
+
         # Assert
         assert dto1 == dto2
 
@@ -161,38 +156,28 @@ class TestProjectTaskDto:
         """ProjectTaskDtoの非等価性をテスト"""
         # Arrange
         dto1 = ProjectTaskDto(
-            page_id="id-1",
-            title="タスク1",
-            status=ToDoStatusEnum.TODO,
-            project_page_id="project-1",
-            is_next=True
+            page_id="id-1", title="タスク1", status=ToDoStatusEnum.TODO, project_page_id="project-1", is_next=True
         )
-        
+
         dto2 = ProjectTaskDto(
             page_id="id-2",
             title="タスク2",
             status=ToDoStatusEnum.IN_PROGRESS,
             project_page_id="project-2",
-            is_next=False
+            is_next=False,
         )
-        
+
         # Assert
         assert dto1 != dto2
 
     def test_to_todo_model_with_empty_strings(self):
         """空文字列でのto_todo_model()をテスト"""
         # Arrange
-        dto = ProjectTaskDto(
-            page_id="",
-            title="",
-            status=ToDoStatusEnum.TODO,
-            project_page_id="",
-            is_next=False
-        )
-        
+        dto = ProjectTaskDto(page_id="", title="", status=ToDoStatusEnum.TODO, project_page_id="", is_next=False)
+
         # Act
         todo = dto.to_todo_model()
-        
+
         # Assert
         assert todo.title == ""
         assert todo.project_page_id == ""

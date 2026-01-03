@@ -1,21 +1,20 @@
 from datetime import datetime
-from unittest.mock import Mock, MagicMock
+from unittest.mock import Mock
+
 import pytest
-
 from lotion import BasePage, Lotion
+
 from sandpiper.plan.domain.todo import ToDoKind
-from sandpiper.review.query.done_todo_dto import DoneTodoDto
 from sandpiper.review.query.todo_query import NotionTodoQuery
-from sandpiper.shared.valueobject.todo_status_enum import ToDoStatusEnum
 
 
-class TestNotionTodoQuery:        
+class TestNotionTodoQuery:
     @pytest.fixture
     def mock_lotion_client(self, monkeypatch):
         mock_client = Mock(spec=Lotion)
-        monkeypatch.setattr(Lotion, 'get_instance', lambda: mock_client)
+        monkeypatch.setattr(Lotion, "get_instance", lambda: mock_client)
         return mock_client
-    
+
     @pytest.fixture
     def query(self, mock_lotion_client):
         return NotionTodoQuery()
@@ -23,10 +22,10 @@ class TestNotionTodoQuery:
     def test_fetch_done_todos_empty_result(self, query, mock_lotion_client):
         # Arrange
         mock_lotion_client.retrieve_database.return_value = []
-        
+
         # Act
         result = query.fetch_done_todos()
-        
+
         # Assert
         assert result == []
         assert mock_lotion_client.retrieve_database.call_count == 2
@@ -37,15 +36,15 @@ class TestNotionTodoQuery:
         mock_status = Mock()
         mock_status.status_name = "ToDo"  # Not DONE
         mock_todo.get_status.return_value = mock_status
-        
+
         mock_lotion_client.retrieve_database.side_effect = [
             [mock_todo],  # TODO database
-            []  # PROJECT database
+            [],  # PROJECT database
         ]
-        
+
         # Act
         result = query.fetch_done_todos()
-        
+
         # Assert
         assert result == []
 
@@ -53,21 +52,18 @@ class TestNotionTodoQuery:
         # Arrange
         mock_todo = self._create_mock_todo_item()
         self._setup_done_status(mock_todo)
-        
+
         # perform_range が None の場合
         mock_date_range = Mock()
         mock_date_range.start = None
         mock_date_range.end = None
         mock_todo.get_date.return_value = mock_date_range
-        
-        mock_lotion_client.retrieve_database.side_effect = [
-            [mock_todo],
-            []
-        ]
-        
+
+        mock_lotion_client.retrieve_database.side_effect = [[mock_todo], []]
+
         # Act
         result = query.fetch_done_todos()
-        
+
         # Assert
         assert result == []
 
@@ -76,20 +72,17 @@ class TestNotionTodoQuery:
         mock_todo = self._create_mock_todo_item()
         self._setup_done_status(mock_todo)
         self._setup_valid_perform_range(mock_todo)
-        
+
         # タスク種別が空の場合
         mock_select = Mock()
         mock_select.selected_name = None
         mock_todo.get_select.return_value = mock_select
-        
-        mock_lotion_client.retrieve_database.side_effect = [
-            [mock_todo],
-            []
-        ]
-        
+
+        mock_lotion_client.retrieve_database.side_effect = [[mock_todo], []]
+
         # Act
         result = query.fetch_done_todos()
-        
+
         # Assert
         assert result == []
 
@@ -101,15 +94,12 @@ class TestNotionTodoQuery:
         self._setup_valid_task_kind(mock_todo, "単発")
         mock_todo.get_title_text.return_value = "テストタスク"
         mock_todo.id = "test-todo-id"
-        
-        mock_lotion_client.retrieve_database.side_effect = [
-            [mock_todo],
-            []
-        ]
-        
+
+        mock_lotion_client.retrieve_database.side_effect = [[mock_todo], []]
+
         # Act
         result = query.fetch_done_todos()
-        
+
         # Assert
         assert len(result) == 1
         todo_dto = result[0]
@@ -128,25 +118,22 @@ class TestNotionTodoQuery:
         self._setup_valid_task_kind(mock_todo, "プロジェクト")
         mock_todo.get_title_text.return_value = "プロジェクトタスク"
         mock_todo.id = "project-todo-id"
-        
+
         # プロジェクト関連の設定
         mock_relation = Mock()
         mock_relation.id_list = ["project-123"]
         mock_todo.get_relation.return_value = mock_relation
-        
+
         # プロジェクトページのモック
         mock_project = Mock(spec=BasePage)
         mock_project.id = "project-123"
         mock_project.get_title_text.return_value = "テストプロジェクト"
-        
-        mock_lotion_client.retrieve_database.side_effect = [
-            [mock_todo],
-            [mock_project]
-        ]
-        
+
+        mock_lotion_client.retrieve_database.side_effect = [[mock_todo], [mock_project]]
+
         # Act
         result = query.fetch_done_todos()
-        
+
         # Assert
         assert len(result) == 1
         todo_dto = result[0]
@@ -161,20 +148,17 @@ class TestNotionTodoQuery:
         self._setup_done_status(mock_todo)
         self._setup_valid_perform_range(mock_todo)
         self._setup_valid_task_kind(mock_todo, "プロジェクト")
-        
+
         # プロジェクト関連が空の場合
         mock_relation = Mock()
         mock_relation.id_list = []
         mock_todo.get_relation.return_value = mock_relation
-        
-        mock_lotion_client.retrieve_database.side_effect = [
-            [mock_todo],
-            []
-        ]
-        
+
+        mock_lotion_client.retrieve_database.side_effect = [[mock_todo], []]
+
         # Act
         result = query.fetch_done_todos()
-        
+
         # Assert
         assert result == []
 
@@ -186,22 +170,19 @@ class TestNotionTodoQuery:
         self._setup_valid_task_kind(mock_todo1, "単発")
         mock_todo1.get_title_text.return_value = "タスク1"
         mock_todo1.id = "todo-1"
-        
+
         mock_todo2 = self._create_mock_todo_item()
         self._setup_done_status(mock_todo2)
         self._setup_valid_perform_range(mock_todo2)
         self._setup_valid_task_kind(mock_todo2, "差し込み")
         mock_todo2.get_title_text.return_value = "タスク2"
         mock_todo2.id = "todo-2"
-        
-        mock_lotion_client.retrieve_database.side_effect = [
-            [mock_todo1, mock_todo2],
-            []
-        ]
-        
+
+        mock_lotion_client.retrieve_database.side_effect = [[mock_todo1, mock_todo2], []]
+
         # Act
         result = query.fetch_done_todos()
-        
+
         # Assert
         assert len(result) == 2
         assert result[0].title == "タスク1"
