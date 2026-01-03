@@ -93,6 +93,6 @@ class TestMessageDispatcher:
         self.dispatcher.publish(custom_message)
 
         # Assert - 引数がそのまま渡されることを確認
-        args, kwargs = self.mock_event_bus.publish.call_args
+        args, _kwargs = self.mock_event_bus.publish.call_args
         assert args[0] == custom_message
         assert args[0] is custom_message  # 同じオブジェクトであることを確認

@@ -52,7 +52,7 @@ def jst_tommorow() -> datetime:
     return jst_today_datetime() + timedelta(days=1)
 
 
-def convert_to_date_or_datetime(value: str | None, cls: type[D] | None = None) -> D | None:
+def convert_to_date_or_datetime[D: date](value: str | None, cls: type[D] | None = None) -> D | None:
     if value is None:
         return None
     date_type = DateType.get_datetype(value)
@@ -65,7 +65,7 @@ def convert_to_date_or_datetime(value: str | None, cls: type[D] | None = None) -
             return None
 
 
-def _convert_date(value: str, cls: type[D] | None) -> date | datetime:
+def _convert_date[D: date](value: str, cls: type[D] | None) -> date | datetime:
     _date = date.fromisoformat(value)
     if cls is None:
         return _date
@@ -74,7 +74,7 @@ def _convert_date(value: str, cls: type[D] | None) -> date | datetime:
     return datetime(_date.year, _date.month, _date.day, tzinfo=JST)
 
 
-def _convert_datetime(value: str, cls: type[D] | None) -> date | datetime:
+def _convert_datetime[D: date](value: str, cls: type[D] | None) -> date | datetime:
     _datetime = datetime.fromisoformat(value)
     if cls is None:
         if not __is_datatime(_datetime):
