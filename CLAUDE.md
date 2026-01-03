@@ -4,17 +4,21 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## プロジェクト概要
 
-2026年の最新Python開発テンプレートプロジェクト。uv、ruff、pytest、mypy、Claude Code hooks、pre-commitを使用したモダンなPython開発環境を提供。
+Sandpiperは個人のタスク管理を支援するPythonアプリケーションです。Notion統合によるタスク管理、Slack通知、繰り返しタスクの自動生成などの機能を提供します。
 
 ### 主な機能
+- **タスク管理**: ToDo作成・開始・完了のライフサイクル管理
+- **Notion統合**: NotionデータベースとのリアルタイムWebhook連携
+- **Slack通知**: タスク完了時の自動Slack通知
+- **繰り返しタスク**: 複雑な周期ルールに基づく自動タスク生成
 - **CLI**: typerによる使いやすいコマンドラインインターフェース
-- **Web API**: FastAPIによるモダンなREST API（自動ドキュメント生成、型安全、高速）
-- **両立**: CLIとWeb APIの両方の使い方をサポート
+- **Web API**: FastAPIによるNotion Webhook受信とヘルスチェック
 
-### Claude Code統合機能
-- **サブエージェント**: 専門領域別のAI支援（GitHub、コードレビュー、テスト、開発ワークフロー）
-- **スラッシュコマンド**: 開発タスクの自動化コマンド
-- **統合ワークフロー**: 大まかな依頼から完成したPRまでの一気通貫処理
+### アーキテクチャ特徴
+- **ドメイン駆動設計**: plan/perform/reviewドメインによる責務分離
+- **イベントドリブン**: EventBusによる疎結合なコンポーネント設計
+- **CQRS**: コマンド（変更）とクエリ（参照）の分離
+- **Notion中心**: Notionデータベースをメインデータストアとした統合設計
 
 ## 開発環境とツール
 
@@ -28,6 +32,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 # 環境セットアップ
 uv sync                          # 依存関係をインストール（初回・更新時）
 
+# CLI実行
+uv run sandpiper hello --name "開発者"          # 挨拶コマンド
+uv run sandpiper create-todo "新しいタスク" --start # タスク作成・開始
+uv run sandpiper get-todo-log --json            # 完了タスクログ（JSON）
+uv run sandpiper get-todo-log --markdown        # 完了タスクログ（Markdown）
+uv run sandpiper create-repeat-tasks --basis-date 2024-03-20  # 繰り返しタスク作成
+uv run sandpiper create-repeat-project-tasks --tomorrow       # 明日のプロジェクトタスク作成
+
 # テスト実行
 uv run pytest                    # 基本テスト実行
 uv run pytest --cov             # カバレッジ付きテスト
@@ -37,29 +49,20 @@ uv run pytest tests/test_*.py   # 特定のテストファイル
 # FastAPI開発サーバー起動
 # 開発モード（セキュリティ制限緩和、APIドキュメント有効）
 ENVIRONMENT=development uv run uvicorn sandpiper.api:app --reload
-ENVIRONMENT=development uv run uvicorn sandpiper.api:app --reload --port 8000
 
-# 本番モード（セキュアな設定、APIドキュメント無効）
-ENVIRONMENT=production ALLOWED_ORIGINS=https://yourdomain.com uv run uvicorn sandpiper.api:app
-
-# 全インターフェースでリッスン
-uv run uvicorn sandpiper.api:app --host 0.0.0.0
+# 本番モード（Notion Webhook受信用）
+ENVIRONMENT=production ALLOWED_ORIGINS=https://notion.so uv run uvicorn sandpiper.api:app --host 0.0.0.0
 
 # コード品質チェック
 uv run ruff check .              # リンティング
 uv run ruff format .             # フォーマット
 uv run mypy                      # 型チェック
 
-# 開発者ツール
-# Claude Code hooks（推奨）
+# 統合品質チェック（Claude Code hooks）
 .claude/scripts/pre-commit-replacement.sh  # 統合品質チェック
 .claude/scripts/code-quality.sh           # Python コード品質チェック
 .claude/scripts/run-tests.sh              # テスト実行
 .claude/scripts/file-checks.sh            # ファイル品質チェック
-
-# 従来のpre-commit（手動開発時）
-uv run pre-commit run --all-files         # 全ファイルチェック
-uv run pre-commit install                 # Git hooksインストール
 ```
 
 ### パッケージ操作
@@ -69,23 +72,59 @@ uv add --group dev package-name  # 開発依存関係追加
 uv remove package-name           # パッケージ削除
 ```
 
-## プロジェクト構造
+## アーキテクチャ・プロジェクト構造
+
+### ドメイン駆動設計（DDD）による3層アーキテクチャ
 
 ```
-src/sandpiper/         # メインアプリケーションコード
-├── __init__.py                  # パッケージ初期化・バージョン情報
-├── main.py                      # CLIエントリーポイント（typer使用）
-├── api.py                       # FastAPIアプリケーション
-├── utils.py                     # 共通ユーティリティ関数
-└── routers/                     # FastAPIルーター
-    ├── __init__.py
-    └── hello.py                 # 挨拶APIエンドポイント
-
-tests/                           # テストコード（pytest）
-├── test_main.py                 # CLIアプリケーションテスト
-├── test_api.py                  # FastAPI APIテスト
-└── test_utils.py                # ユーティリティテスト
+src/sandpiper/
+├── plan/                        # タスク計画・作成ドメイン
+│   ├── domain/                  # ドメインモデル（Todo, Routine, ProjectTaskRule）
+│   ├── application/             # ユースケース（CreateTodo, CreateRepeatTask）
+│   ├── infrastructure/          # Notionリポジトリ実装
+│   └── query/                   # 読み取り専用クエリ（CQRS）
+├── perform/                     # タスク実行ドメイン
+│   ├── domain/                  # 実行状態管理（Todo開始・完了）
+│   ├── application/             # 実行ユースケース（StartTodo, CompleteTodo）
+│   └── infrastructure/          # Notion実行状態リポジトリ
+├── review/                      # タスクレビュー・分析ドメイン
+│   ├── application/             # 分析ユースケース（GetTodoLog）
+│   └── query/                   # 実行結果クエリ
+├── shared/                      # 共通コンポーネント
+│   ├── event/                   # ドメインイベント（TodoStarted, TodoCompleted）
+│   ├── infrastructure/          # EventBus, Slack通知, Notionコメント
+│   ├── notion/                  # Notion API統合（lotion + notion-client）
+│   ├── utils/                   # 日付ユーティリティ
+│   └── valueobject/             # 値オブジェクト（TaskChuteSection）
+├── app/                         # アプリケーション統合
+│   ├── app.py                   # DI設定とbootstrap
+│   └── message_dispatcher.py    # メッセージ配信
+├── routers/                     # FastAPIエンドポイント
+│   ├── notion.py                # Notion Webhook受信
+│   ├── health.py                # ヘルスチェック
+│   └── dependency/              # 認証・依存性注入
+├── main.py                      # CLIエントリーポイント（typer）
+└── api.py                       # FastAPIエントリーポイント
 ```
+
+### 主要コンポーネント
+
+#### ドメインモデル
+- **Todo**: タスクエンティティ（status: TODO/IN_PROGRESS/DONE）
+- **Routine**: 繰り返しルール（毎日、毎週、月次、特定曜日）
+- **ProjectTaskRule**: プロジェクトタスクルール
+- **EventBus**: 軽量イベント配信システム
+
+#### 外部サービス統合
+- **Notion API**: lotion（日本製）+ notion-client（公式SDK）
+- **Slack API**: slack-sdk（タスク完了通知）
+- **Webhook**: Notion → FastAPI リアルタイム連携
+
+#### データベース構成
+- **ROUTINE**: 繰り返しルール管理
+- **TODO**: タスク管理
+- **PROJECT_TASK**: プロジェクトタスク管理
+- **PROJECT**: プロジェクト管理
 
 ## 設定ファイルの重要性
 
@@ -97,64 +136,48 @@ tests/                           # テストコード（pytest）
 
 ## 開発ワークフロー
 
-### FastAPI開発
+### 環境変数設定
 
-#### 環境変数による設定切り替え
-FastAPIアプリケーションは環境変数で動作モードを切り替えられます：
-
-**開発モード（デフォルトで開発時に推奨）:**
+#### 必須環境変数（Notion・Slack統合）
 ```bash
-# 開発モード設定
-export ENVIRONMENT=development
-# または
-ENVIRONMENT=development uv run uvicorn sandpiper.api:app --reload
+# Notion API設定
+export NOTION_TOKEN="secret_****"           # Notion Integration Token
+export SLACK_BOT_TOKEN="xoxb-****"         # Slack Bot Token
 
-# 特徴:
-# - すべてのオリジンからのCORS許可（allow_origins=["*"]）
-# - APIドキュメント有効（/docs, /redoc）
-# - 詳細なログ出力
+# FastAPI設定
+export ENVIRONMENT=development              # 開発環境設定
+export DEBUG=true                          # デバッグモード
+export ALLOWED_ORIGINS=https://notion.so   # 本番時のCORS設定
 ```
-
-**本番モード（デプロイ時）:**
-```bash
-# 本番モード設定
-export ENVIRONMENT=production
-export ALLOWED_ORIGINS=https://yourdomain.com,https://app.yourdomain.com
-# または
-ENVIRONMENT=production ALLOWED_ORIGINS=https://yourdomain.com uv run uvicorn sandpiper.api:app
-
-# 特徴:
-# - 指定されたオリジンのみCORS許可
-# - APIドキュメント無効化（セキュリティ）
-# - セキュアな設定
-```
-
-**環境変数一覧:**
-| 変数名 | デフォルト | 説明 |
-|--------|-----------|------|
-| `ENVIRONMENT` | `production` | 環境設定（`development`, `dev`, `local`, `production`） |
-| `DEBUG` | `false` | デバッグモード（`true`, `1`, `yes`で有効） |
-| `ALLOWED_ORIGINS` | なし | 許可するオリジン（カンマ区切り） |
 
 #### 開発フロー
+
+**CLIアプリケーション開発:**
 ```bash
-# 1. APIサーバー起動（開発モード）
+# 1. 新しいCLIコマンド追加
+# main.py に @app.command() 関数を追加
+# app/app.py でサービス初期化
+
+# 2. テスト実行
+uv run pytest tests/test_main.py -v
+
+# 3. 動作確認
+uv run sandpiper your-new-command --help
+```
+
+**WebAPIアプリケーション開発（Webhook受信）:**
+```bash
+# 1. API開発サーバー起動
 ENVIRONMENT=development uv run uvicorn sandpiper.api:app --reload
 
-# 2. ブラウザでAPIドキュメントを確認
-# http://localhost:8000/docs (Swagger UI)
-# http://localhost:8000/redoc (ReDoc)
+# 2. Webhookテスト（ローカル）
+# ngrok等でローカルサーバーを公開
+# NotionでWebhook URLを設定
 
-# 3. APIテスト実行
-ENVIRONMENT=development uv run pytest tests/test_api.py -v
-
-# 4. エンドポイント追加
-# - routers/に新しいルーターファイル作成
-# - api.pyでルーター登録
-# - テスト作成・実行
-
-# 5. コード品質チェック
-uv run ruff check . && uv run ruff format . && uv run mypy
+# 3. エンドポイント確認
+# http://localhost:8000/docs (開発時のみ)
+# GET /api/version (ヘルスチェック)
+# POST /api/notion/todo/start (Webhook受信)
 ```
 
 ### 新機能開発
@@ -285,62 +308,75 @@ git commit -m "ci: CI設定改善"
 - `mypy`: 静的型チェッカー
 - `pre-commit`: Git フック管理
 
-## Claude Code機能（AI統合開発支援）
+## ドメイン固有の開発ガイドライン
 
-### サブエージェント（専門AI支援）
+### タスク管理ドメインの理解
 
-利用可能なサブエージェント：
+#### 1. planドメイン（タスク計画）
+```python
+# 新しいタスク作成
+from sandpiper.plan.application.create_todo import CreateNewToDoRequest
+request = CreateNewToDoRequest(title="新機能実装")
+sandpiper_app.create_todo.execute(request, enableStart=True)
 
-```bash
-/agents github-agent      # GitHub操作専門（Issue/PR作成・管理）
-/agents code-reviewer     # コード品質専門（ruff/mypy解析、改善提案）
-/agents test-engineer     # テスト品質専門（pytest最適化、カバレッジ分析）
-/agents dev-workflow      # 開発ワークフロー統括（要件分析→PR完成）
+# 繰り返しタスクルール
+from sandpiper.plan.domain.routine_cycle import RoutineCycle
+cycle = RoutineCycle.create_weekly(["月", "水", "金"])  # 月水金の繰り返し
 ```
 
-### スラッシュコマンド（タスク自動化）
+#### 2. performドメイン（タスク実行）
+```python
+# タスク開始・完了のイベント処理
+from sandpiper.shared.event.todo_started import TodoStartedEvent
+from sandpiper.shared.event.todo_completed import TodoCompletedEvent
 
-開発効率化コマンド：
-
-```bash
-# 統合開発ワークフロー
-/develop "機能名または要件"           # 要件分析→Issue→実装→PRまで一括実行
-
-# GitHub操作
-/create-issue type "タイトル"        # Issue自動作成（bug/feature/tech-debt/security）
-/create-pr "タイトル" "説明"         # PR自動作成（品質チェック統合）
-
-# 品質管理
-/test-and-fix                       # テスト実行＋自動修正＋レポート生成
+# EventBusによる非同期処理
+event_bus.publish(TodoCompletedEvent(todo_id="123"))
 ```
 
-### 使用例：一気通貫開発
-
-```bash
-# 1. 大まかな依頼から完成まで自動化
-/develop "ユーザー認証機能（JWT、セキュリティ重視）"
-
-# このコマンドが自動実行する内容:
-# - 技術要件分析（JWT vs セッション認証選択等）
-# - 構造化されたIssue作成（受入基準付き）
-# - 適切なブランチ作成（feature/user-authentication）
-# - TDD実装プロセス（テスト→実装→リファクタ）
-# - 統合品質チェック（ruff/mypy/pytest/security）
-# - 包括的なPR作成（変更内容・テスト・チェックリスト）
+#### 3. reviewドメイン（振り返り）
+```python
+# 完了タスクの分析
+result = sandpiper_app.get_todo_log.execute()
+for todo in result:
+    print(f"{todo.title} - {todo.project_name} - {todo.perform_range}")
 ```
 
-### サブエージェント連携例
+### Notion統合開発
 
-```bash
-# 2. 個別専門支援
-/agents code-reviewer                # コード品質向上支援
-# → ruffエラー解析、型ヒント最適化、セキュリティ改善提案
+#### データベース設定
+```python
+# src/sandpiper/shared/notion/database_config.py
+# 各データベースIDは実際のNotionデータベースIDに対応
+ROUTINE_DATABASE_ID = "actual-notion-database-id"
+TODO_DATABASE_ID = "actual-notion-database-id"
+```
 
-/agents test-engineer               # テスト品質向上支援
-# → カバレッジ分析、パラメータ化テスト提案、モック最適化
+#### Webhookエンドポイント開発
+```python
+# routers/notion.py での新しいWebhook追加例
+@router.post("/todo/update")
+async def handle_todo_update(request: dict, app=Depends(get_app)):
+    # Notionからの更新イベント処理
+    pass
+```
 
-/agents github-agent                # GitHub管理支援
-# → Issue管理、PR状態確認、release-please監視
+### イベントドリブン開発
+
+#### 新しいドメインイベント追加
+```python
+# 1. イベント定義
+class NewDomainEvent:
+    def __init__(self, data: str):
+        self.data = data
+
+# 2. イベントハンドラー作成
+def handle_new_event(event: NewDomainEvent):
+    # イベント処理ロジック
+    pass
+
+# 3. bootstrap()でハンドラー登録
+event_bus.subscribe(NewDomainEvent, handle_new_event)
 ```
 
 ## 注意事項
