@@ -71,7 +71,7 @@ else
     echo "⚠️ 品質チェックスクリプトが見つかりません"
 fi
 
-# 5. リモートプッシュ（必要に応じて）
+# 5. リモートプッシュ(必要に応じて)
 echo ""
 echo "📤 リモートブランチ確認..."
 if ! git ls-remote --heads origin "$CURRENT_BRANCH" | grep -q "$CURRENT_BRANCH"; then
@@ -92,13 +92,13 @@ $(git diff --name-only origin/main...HEAD | sed 's/^/- /')
 ## テストプラン
 - [ ] 既存テストの通過確認
 - [ ] 新機能のテスト実行
-- [ ] 品質チェック（ruff, mypy）の通過
+- [ ] 品質チェック(ruff, mypy)の通過
 
 ## チェックリスト
 - [ ] コードレビュー完了
 - [ ] テスト追加・更新
 - [ ] ドキュメント更新
-- [ ] CHANGELOG.md更新（必要に応じて）
+- [ ] CHANGELOG.md更新(必要に応じて)
 
 🤖 Generated with [Claude Code](https://claude.ai/code)"
 

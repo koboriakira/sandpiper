@@ -21,30 +21,30 @@ release-pleaseとGitHub Actionsが正常に動作するために、以下の設�
   - ✅ CI workflow checks
 - ✅ **Require branches to be up to date before merging**
 
-### 3. Environment設定（PyPI公開用）
+### 3. Environment設定(PyPI公開用)
 
 **Repository Settings > Environments**で以下の環境を作成：
 
-#### `production`環境（PyPI本番）
+#### `production`環境(PyPI本番)
 - **Environment protection rules**:
-  - ✅ Required reviewers（推奨）
+  - ✅ Required reviewers(推奨)
   - ✅ Wait timer: 0 minutes
 - **Environment secrets**:
   - PyPI API tokenが必要な場合に設定
 
-#### `test`環境（TestPyPI）
+#### `test`環境(TestPyPI)
 - **Environment protection rules**:
-  - ✅ Required reviewers（推奨）
+  - ✅ Required reviewers(推奨)
   - ✅ Wait timer: 0 minutes
 - **Environment secrets**:
   - TestPyPI API tokenが必要な場合に設定
 
-### 4. Codecov設定（カバレッジレポート用）
+### 4. Codecov設定(カバレッジレポート用)
 
 **Repository Settings > Secrets and variables > Actions**で以下のシークレットを設定：
 
 #### `CODECOV_TOKEN`
-1. **Codecov.io**（https://codecov.io）でGitHubアカウントログイン
+1. **Codecov.io**(https://codecov.io)でGitHubアカウントログイン
 2. リポジトリ追加：「Add new repository」→ `sandpiper`選択
 3. **Repository Settings**→「General」タブ
 4. **Repository Upload Token**をコピー
@@ -53,7 +53,7 @@ release-pleaseとGitHub Actionsが正常に動作するために、以下の設�
    - **Name**: `CODECOV_TOKEN`
    - **Secret**: コピーしたトークンを貼り付け
 
-### 5. Trusted Publishing（推奨）
+### 5. Trusted Publishing(推奨)
 
 PyPI/TestPyPIでTrusted Publishingを設定：
 

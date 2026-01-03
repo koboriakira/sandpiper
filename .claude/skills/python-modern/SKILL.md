@@ -19,7 +19,7 @@ from typing import List, Dict, Optional, Union
 def process_data(items: List[str]) -> Dict[str, Optional[int]]:
     return {}
 
-# ✅ 現代的スタイル（Python 3.9+）
+# ✅ 現代的スタイル(Python 3.9+)
 def process_data(items: list[str]) -> dict[str, int | None]:
     return {}
 ```
@@ -41,7 +41,7 @@ class UserRepository(Repository[User]):
         return entity
 ```
 
-### 新しい型機能（Python 3.12+）
+### 新しい型機能(Python 3.12+)
 ```python
 # type statement
 type Vector = list[float]
@@ -57,7 +57,7 @@ type Result[T, E] = T | Exception
 
 ### f-string vs format vs %
 ```python
-# ✅ 最速（f-string推奨）
+# ✅ 最速(f-string推奨)
 name = "Alice"
 age = 30
 message = f"Hello, {name}! You are {age} years old."
@@ -72,7 +72,7 @@ message = "Hello, %s! You are %d years old." % (name, age)
 # ✅ 効率的
 numbers = [x**2 for x in range(1000) if x % 2 == 0]
 
-# ✅ メモリ効率（ジェネレータ）
+# ✅ メモリ効率(ジェネレータ)
 numbers = (x**2 for x in range(1000) if x % 2 == 0)
 
 # ❌ 非効率
@@ -104,7 +104,7 @@ class User:
 
 ## エラーハンドリング現代化
 
-### Exception Groups（Python 3.11+）
+### Exception Groups(Python 3.11+)
 ```python
 def validate_user_data(data: dict[str, str]) -> None:
     errors = []
@@ -126,7 +126,7 @@ except* ValueError as eg:
         print(f"Validation error: {error}")
 ```
 
-### パターンマッチング（Python 3.10+）
+### パターンマッチング(Python 3.10+)
 ```python
 def process_api_response(response: dict) -> str:
     match response:

@@ -11,10 +11,10 @@ model: inherit
 
 ### テスト設計・実装
 - pytest基準に沿った高品質テストケース作成
-- パラメータ化テスト（@pytest.mark.parametrize）活用
+- パラメータ化テスト(@pytest.mark.parametrize)活用
 - フィクスチャの効率的設計
 - モック・スタブの適切な実装
-- 非同期テスト（pytest-asyncio）対応
+- 非同期テスト(pytest-asyncio)対応
 
 ### カバレッジ分析・改善
 - pytest-covによるカバレッジ測定
@@ -26,12 +26,12 @@ model: inherit
 ### テスト戦略
 - ユニットテスト、統合テスト、機能テストの適切な分離
 - テストピラミッドの実装
-- TDD（Test-Driven Development）サポート
+- TDD(Test-Driven Development)サポート
 - 回帰テストの設計
 - パフォーマンステスト計画
 
 ### テストツール統合
-- pytestプラグイン活用（pytest-xdist、pytest-mock等）
+- pytestプラグイン活用(pytest-xdist、pytest-mock等)
 - CI/CD環境でのテスト自動化
 - テスト結果レポート生成
 - テスト実行時間最適化

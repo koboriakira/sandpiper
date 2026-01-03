@@ -48,13 +48,13 @@ class UserRegistration(BaseModel):
 
 ### SQLインジェクション対策
 ```python
-# ✅ 安全（パラメータ化クエリ）
+# ✅ 安全(パラメータ化クエリ)
 async def get_user_by_id(db: AsyncSession, user_id: int) -> User | None:
     stmt = select(User).where(User.id == user_id)
     result = await db.execute(stmt)
     return result.scalar_one_or_none()
 
-# ✅ 安全（ORMクエリビルダー）
+# ✅ 安全(ORMクエリビルダー)
 async def search_users(db: AsyncSession, search_term: str) -> list[User]:
     stmt = select(User).where(
         User.username.ilike(f"%{search_term}%")  # SQLAlchemyが自動エスケープ
@@ -62,7 +62,7 @@ async def search_users(db: AsyncSession, search_term: str) -> list[User]:
     result = await db.execute(stmt)
     return result.scalars().all()
 
-# ❌ 危険（SQLインジェクション脆弱性）
+# ❌ 危険(SQLインジェクション脆弱性)
 # def get_user_unsafe(db, user_input):
 #     query = f"SELECT * FROM users WHERE name = '{user_input}'"
 #     return db.execute(query)
@@ -196,7 +196,7 @@ class SecureUser(BaseModel):
     id: int
     username: str
     email: str
-    _encrypted_ssn: str = Field(alias="ssn")  # 社会保障番号（暗号化）
+    _encrypted_ssn: str = Field(alias="ssn")  # 社会保障番号(暗号化)
 
     @validator('_encrypted_ssn', pre=True)
     def encrypt_ssn(cls, v: str) -> str:

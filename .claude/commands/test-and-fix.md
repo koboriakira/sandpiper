@@ -15,12 +15,12 @@ model: inherit
    - パッケージ同期状態の検証
 
 2. **コード品質チェック**
-   - ruffによるリンティング（自動修正付き）
+   - ruffによるリンティング(自動修正付き)
    - mypyによる型チェック
    - セキュリティ監査
 
 3. **テスト実行**
-   - pytest実行（カバレッジ測定）
+   - pytest実行(カバレッジ測定)
    - テスト結果の詳細表示
    - カバレッジレポート生成
 
@@ -57,14 +57,14 @@ echo "2️⃣ 依存関係同期"
 echo "────────────────────"
 uv sync
 
-# 3. リンティング（自動修正付き）
+# 3. リンティング(自動修正付き)
 echo ""
 echo "3️⃣ コードフォーマット＆リンティング"
 echo "────────────────────"
 echo "🔧 ruffフォーマット実行中..."
 uv run ruff format .
 
-echo "🔍 ruffリンティング（自動修正）実行中..."
+echo "🔍 ruffリンティング(自動修正)実行中..."
 uv run ruff check . --fix || {
     echo "⚠️ 自動修正できない問題があります"
     echo "📋 詳細な問題一覧:"
@@ -85,7 +85,7 @@ uv run mypy || {
 echo ""
 echo "5️⃣ テスト実行"
 echo "────────────────────"
-echo "🧪 pytest実行中（カバレッジ測定付き）..."
+echo "🧪 pytest実行中(カバレッジ測定付き)..."
 
 # カバレッジ付きテスト実行
 if uv run pytest --cov --cov-report=term-missing --cov-report=html; then
@@ -108,7 +108,7 @@ else
     TEST_EXIT_CODE=1
 fi
 
-# 6. セキュリティチェック（banditがある場合）
+# 6. セキュリティチェック(banditがある場合)
 echo ""
 echo "6️⃣ セキュリティチェック"
 echo "────────────────────"
@@ -150,5 +150,5 @@ echo ""
 echo "🚀 次のステップ:"
 echo "   - 変更をコミット"
 echo "   - Pull Request作成: /create-pr"
-echo "   - Issue作成（問題がある場合）: /create-issue"
+echo "   - Issue作成(問題がある場合): /create-issue"
 ```

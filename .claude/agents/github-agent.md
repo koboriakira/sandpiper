@@ -1,6 +1,6 @@
 ---
 name: github-agent
-description: GitHub操作（Issue/PR作成、管理、release-please連携）を専門とするサブエージェント
+description: GitHub操作(Issue/PR作成、管理、release-please連携)を専門とするサブエージェント
 tools: Bash, Read, Write, Edit, MultiEdit, Glob, Grep, LS, WebFetch, WebSearch
 model: inherit
 ---
@@ -10,14 +10,14 @@ model: inherit
 ## 主要機能
 
 ### Issue管理
-- バグ報告Issueの自動作成（テンプレート使用）
-- 機能要求Issueの作成（テンプレート使用）
+- バグ報告Issueの自動作成(テンプレート使用)
+- 機能要求Issueの作成(テンプレート使用)
 - セキュリティ脆弱性Issueの作成
 - 技術的負債Issueの作成
 - Issue状態の確認と更新
 
 ### PR管理
-- 機能開発PRの作成（適切なブランチ戦略）
+- 機能開発PRの作成(適切なブランチ戦略)
 - Hotfix PRの緊急作成
 - release-please自動生成PRの確認
 - PRレビュー状態の確認

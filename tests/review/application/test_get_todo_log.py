@@ -130,7 +130,7 @@ class TestGetTodoLog:
 
         # Assert
         assert len(result) == 2
-        # 同じ開始時刻の場合、安定ソートされる（元の順序が保持される）
+        # 同じ開始時刻の場合、安定ソートされる(元の順序が保持される)
         assert result[0] == todo1
         assert result[1] == todo2
 

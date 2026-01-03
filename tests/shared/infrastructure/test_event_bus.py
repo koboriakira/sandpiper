@@ -139,7 +139,7 @@ class TestEventBus:
         with pytest.raises(Exception, match="Handler error"):
             self.event_bus.publish(event)
 
-        # handler1は呼ばれるが、handler3は呼ばれない（例外で停止）
+        # handler1は呼ばれるが、handler3は呼ばれない(例外で停止)
         handler1.assert_called_once_with(event)
         handler2.assert_called_once_with(event)
         handler3.assert_not_called()
@@ -162,6 +162,6 @@ class TestEventBus:
         # 何も起こらないことを確認
         self.event_bus.publish(event)
 
-        # publishを呼んでもhandlersリストには空のリストが追加される（defaultdictの特性）
+        # publishを呼んでもhandlersリストには空のリストが追加される(defaultdictの特性)
         # しかし、actual handlerは存在しないことを確認
         assert len(self.event_bus._handlers[DummyEvent]) == 0

@@ -62,7 +62,7 @@ def get_third_friday(year: int, month: int) -> date:
         第3金曜日のdate
 
     Raises:
-        ValueError: 第1金曜日が見つからない場合（get_first_fridayから）
+        ValueError: 第1金曜日が見つからない場合(get_first_fridayから)
 
     Examples:
         >>> get_third_friday(2024, 3)
@@ -107,7 +107,7 @@ def get_third_thursday(year: int, month: int) -> date:
         第3木曜日のdate
 
     Raises:
-        ValueError: 第1木曜日が見つからない場合（get_first_thursdayから）
+        ValueError: 第1木曜日が見つからない場合(get_first_thursdayから)
 
     Examples:
         >>> get_third_thursday(2024, 3)
