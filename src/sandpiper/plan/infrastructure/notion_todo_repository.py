@@ -1,3 +1,5 @@
+from typing import Any
+
 from lotion import BasePage, Lotion, notion_database  # type: ignore[import-untyped]
 from lotion.block.rich_text.rich_text_builder import RichTextBuilder  # type: ignore[import-untyped]
 
@@ -25,7 +27,7 @@ class TodoPage(BasePage):  # type: ignore[misc]
     project_task_relation: TodoProjectTaskProp | None = None
 
     @staticmethod
-    def generate(todo: ToDo, options: dict) -> "TodoPage":
+    def generate(todo: ToDo, options: dict[str, Any]) -> "TodoPage":
         properties = [
             TodoName.from_plain_text(todo.title),
             TodoStatus.from_status_name("ToDo"),
@@ -42,7 +44,7 @@ class TodoPage(BasePage):  # type: ignore[misc]
             start_day = jst_tommorow() if options.get("is_tomorrow") else jst_today()
             rich_text_builder = RichTextBuilder.create().add_text(todo.title).add_date_mention(start=start_day)
             properties.append(TodoName.from_rich_text(rich_text_builder.build()))
-        return TodoPage.create(properties=properties)
+        return TodoPage.create(properties=properties)  # type: ignore[no-any-return]
 
     def to_domain(self) -> ToDo:
         section = self.get_select("セクション")
@@ -59,10 +61,10 @@ class TodoPage(BasePage):  # type: ignore[misc]
 
 
 class NotionTodoRepository:
-    def __init__(self):
+    def __init__(self) -> None:
         self.client = Lotion.get_instance()
 
-    def save(self, todo: ToDo, options: dict | None = None) -> InsertedToDo:
+    def save(self, todo: ToDo, options: dict[str, Any] | None = None) -> InsertedToDo:
         notion_todo = TodoPage.generate(todo, options=options or {})
         page = self.client.create_page(notion_todo)
         return InsertedToDo(
@@ -80,4 +82,4 @@ class NotionTodoRepository:
 
     def find(self, page_id: str) -> ToDo:
         notion_page = self.client.retrieve_page(page_id, cls=TodoPage)
-        return notion_page.to_domain()
+        return notion_page.to_domain()  # type: ignore[no-any-return]
