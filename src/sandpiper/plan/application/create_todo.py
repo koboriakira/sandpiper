@@ -35,14 +35,14 @@ class CreateToDo:
             self._dispatcher.publish(TodoStarted(page_id=inserted_todo.id))
 
 
-if __name__ == "__main__":
-    # uv run python -m src.sandpiper.plan.application.create_todo
-    from sandpiper.app.app import bootstrap
-
-    app = bootstrap()
-    app.create_todo.execute(
-        CreateNewToDoRequest(
-            title="新しいToDoタスク",
-        ),
-        enableStart=True,
-    )
+# if __name__ == "__main__":
+#     # uv run python -m src.sandpiper.plan.application.create_todo
+#     from sandpiper.app.app import bootstrap
+#
+#     app = bootstrap()
+#     app.create_todo.execute(
+#         CreateNewToDoRequest(
+#             title="新しいToDoタスク",
+#         ),
+#         enableStart=True,
+#     )

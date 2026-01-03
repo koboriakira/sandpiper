@@ -43,8 +43,8 @@ def bootstrap() -> SandPiperApp:
     # infrastructure setup
     project_task_query = NotionProjectTaskQuery()
     todo_query = NotionTodoQuery()
-    plan_notion_todo_repository = PlanNotionTodoRepository()  # type: ignore[no-untyped-call]
-    perform_notion_todo_repository = PerformNotionTodoRepository()  # type: ignore[no-untyped-call]
+    plan_notion_todo_repository = PlanNotionTodoRepository()
+    perform_notion_todo_repository = PerformNotionTodoRepository()
     routine_repository = NotionRoutineRepository()
     default_notice_messanger = SlackNoticeMessanger(channel_id="C04Q3AV4TA5")
     commentator = NotionCommentator()
