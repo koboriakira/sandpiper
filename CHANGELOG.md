@@ -5,6 +5,13 @@
 このプロジェクトは[セマンティックバージョニング](https://semver.org/spec/v2.0.0.html)に従い、
 [Conventional Commits](https://conventionalcommits.org/)を使用して自動的にリリースを生成します。
 
+## [0.2.0](https://github.com/koboriakira/sandpiper/compare/v0.1.0...v0.2.0) (2026-01-03)
+
+
+### Features
+
+* GitHub活動ログ取得機能の追加 ([#2](https://github.com/koboriakira/sandpiper/issues/2)) ([9feef32](https://github.com/koboriakira/sandpiper/commit/9feef32a887a040b3bda3e42e02a84cb768173eb))
+
 ## 0.1.0 (2026-01-03)
 
 
