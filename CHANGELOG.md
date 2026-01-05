@@ -5,6 +5,18 @@
 このプロジェクトは[セマンティックバージョニング](https://semver.org/spec/v2.0.0.html)に従い、
 [Conventional Commits](https://conventionalcommits.org/)を使用して自動的にリリースを生成します。
 
+## [0.3.0](https://github.com/koboriakira/sandpiper/compare/v0.2.0...v0.3.0) (2026-01-05)
+
+
+### Features
+
+* カレンダー削除APIエンドポイント実装 ([#5](https://github.com/koboriakira/sandpiper/issues/5)) ([fb69391](https://github.com/koboriakira/sandpiper/commit/fb69391cd8bac2be43c08ed5aefcc53824466576))
+
+
+### Bug Fixes
+
+* improve event deletion logic and refactor category assignment ([ed81985](https://github.com/koboriakira/sandpiper/commit/ed819853d7e76aaea16ecaea41432977ae33e59f))
+
 ## [0.2.0](https://github.com/koboriakira/sandpiper/compare/v0.1.0...v0.2.0) (2026-01-05)
 
 
