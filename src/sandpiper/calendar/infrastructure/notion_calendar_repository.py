@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import date, datetime
 
 from lotion import BasePage, Lotion, notion_database  # type: ignore[import-untyped]
 
@@ -57,3 +57,46 @@ class NotionCalendarRepository(CalendarRepository):
             start_datetime=event.start_datetime,
             end_datetime=event.end_datetime,
         )
+
+    def delete_events_by_date(self, target_date: date) -> int:
+        """指定された日付のイベントを削除する
+
+        Args:
+            target_date: 削除対象の日付
+
+        Returns:
+            削除されたイベントの数
+        """
+        # 指定された日付の開始と終了時刻を設定
+        start_datetime = datetime.combine(target_date, datetime.min.time())
+        end_datetime = datetime.combine(target_date, datetime.max.time())
+
+        # データベースから該当する日付のイベントを検索
+        # Lotionのfilter機能を使って開始日時が該当日付のイベントを検索
+        pages = self.client.retrieve_database(
+            database_id=DatabaseId.CALENDAR,
+            filter_param={
+                "and": [
+                    {
+                        "property": "開始日時",
+                        "date": {
+                            "on_or_after": start_datetime.isoformat(),
+                        }
+                    },
+                    {
+                        "property": "開始日時",
+                        "date": {
+                            "before": end_datetime.isoformat(),
+                        }
+                    }
+                ]
+            }
+        )
+
+        # 各イベントを削除
+        deleted_count = 0
+        for page in pages:
+            self.client.archive_page(page.id)
+            deleted_count += 1
+
+        return deleted_count

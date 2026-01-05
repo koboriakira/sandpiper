@@ -3,13 +3,14 @@
 from datetime import datetime
 from typing import Any
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import JSONResponse
 from lotion import BasePage  # type: ignore[import-untyped]
 from pydantic import BaseModel
 
 from sandpiper.app.app import SandPiperApp
 from sandpiper.calendar.application.create_calendar_event import CreateCalendarEventRequest
+from sandpiper.calendar.application.delete_calendar_events import DeleteCalendarEventsRequest
 from sandpiper.calendar.domain.calendar_event import EventCategory
 from sandpiper.routers.dependency.deps import get_sandpiper_app
 
@@ -68,7 +69,7 @@ async def create_calendar_event(
             status_code=422,
             content={"detail": f"Invalid category: {request.category}. Valid categories: 仕事, プライベート, TJPW"}
         )
-    
+
     create_request = CreateCalendarEventRequest(
         name=request.name,
         category=event_category,
@@ -82,4 +83,37 @@ async def create_calendar_event(
         "category": inserted_event.category.value,
         "start_datetime": inserted_event.start_datetime.isoformat(),
         "end_datetime": inserted_event.end_datetime.isoformat(),
+    })
+
+
+@router.delete("/calendar/{date_str}")
+async def delete_calendar_events(
+    date_str: str,
+    sandpiper_app: SandPiperApp = Depends(get_sandpiper_app),
+) -> JSONResponse:
+    """指定された日付のカレンダーイベントを削除する
+
+    Args:
+        date_str: 日付文字列 (YYYYMMDD形式)
+    """
+    # 日付文字列をパース (YYYYMMDD形式)
+    try:
+        if len(date_str) != 8:
+            raise ValueError("Date string must be in YYYYMMDD format")
+        year = int(date_str[:4])
+        month = int(date_str[4:6])
+        day = int(date_str[6:8])
+        target_date = datetime(year, month, day).date()
+    except (ValueError, IndexError) as e:
+        raise HTTPException(
+            status_code=422,
+            detail=f"Invalid date format: {date_str}. Expected format: YYYYMMDD"
+        ) from e
+
+    delete_request = DeleteCalendarEventsRequest(target_date=target_date)
+    result = sandpiper_app.delete_calendar_events.execute(delete_request)
+
+    return JSONResponse(content={
+        "deleted_count": result.deleted_count,
+        "target_date": date_str,
     })
