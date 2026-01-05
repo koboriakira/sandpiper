@@ -43,3 +43,24 @@ class TodoProjectTaskProp(Relation):  # type: ignore[misc]
 @notion_prop("次回実行日")
 class RoutineNextDate(Date):  # type: ignore[misc]
     ...
+
+
+# カレンダー関連のプロパティ
+@notion_prop("名前")
+class CalendarEventName(Title):  # type: ignore[misc]
+    ...
+
+
+@notion_prop("カテゴリ")
+class CalendarEventCategory(Select):  # type: ignore[misc]
+    ...
+
+
+@notion_prop("開始日時")
+class CalendarEventStartDate(Date):  # type: ignore[misc]
+    ...
+
+
+@notion_prop("終了日時")
+class CalendarEventEndDate(Date):  # type: ignore[misc]
+    ...
