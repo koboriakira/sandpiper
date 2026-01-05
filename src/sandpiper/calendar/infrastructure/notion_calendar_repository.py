@@ -37,7 +37,9 @@ class CalendarEventPage(BasePage):  # type: ignore[misc]
 
         return CalendarEvent(
             name=self.get_title_text(),
-            category=EventCategory(category_prop.selected_name) if category_prop.selected_name else EventCategory.PRIVATE,
+            category=EventCategory(category_prop.selected_name)
+            if category_prop.selected_name
+            else EventCategory.PRIVATE,
             start_datetime=start_date_prop.start if start_date_prop.start else datetime.now(),
             end_datetime=end_date_prop.start if end_date_prop.start else datetime.now(),
         )
@@ -67,36 +69,15 @@ class NotionCalendarRepository(CalendarRepository):
         Returns:
             削除されたイベントの数
         """
-        # 指定された日付の開始と終了時刻を設定
-        start_datetime = datetime.combine(target_date, datetime.min.time())
-        end_datetime = datetime.combine(target_date, datetime.max.time())
-
         # データベースから該当する日付のイベントを検索
-        # Lotionのfilter機能を使って開始日時が該当日付のイベントを検索
-        pages = self.client.retrieve_database(
-            database_id=DatabaseId.CALENDAR,
-            filter_param={
-                "and": [
-                    {
-                        "property": "開始日時",
-                        "date": {
-                            "on_or_after": start_datetime.isoformat(),
-                        }
-                    },
-                    {
-                        "property": "開始日時",
-                        "date": {
-                            "before": end_datetime.isoformat(),
-                        }
-                    }
-                ]
-            }
-        )
-
-        # 各イベントを削除
+        pages = self.client.retrieve_pages(CalendarEventPage)
         deleted_count = 0
+
+        # 該当する日付のイベントを削除
         for page in pages:
-            self.client.archive_page(page.id)
-            deleted_count += 1
+            event_start_date = datetime.fromisoformat(page.start_date.start) if page.start_date.start else None
+            if event_start_date and event_start_date.date() == target_date:
+                self.client.remove_page(page.id)
+                deleted_count += 1
 
         return deleted_count
