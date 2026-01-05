@@ -32,6 +32,7 @@ def test_app(mock_sandpiper_app):
 
     # 依存性をオーバーライド
     from sandpiper.routers.dependency.deps import get_sandpiper_app
+
     app.dependency_overrides[get_sandpiper_app] = get_test_app
 
     app.include_router(router, prefix="/api")
@@ -133,9 +134,7 @@ class TestCalendarAPI:
     def test_delete_calendar_events_success(self, test_app, mock_sandpiper_app):
         """カレンダーイベント削除APIが正常に動作することをテスト"""
         # Arrange
-        mock_sandpiper_app.delete_calendar_events.execute.return_value = DeleteCalendarEventsResult(
-            deleted_count=3
-        )
+        mock_sandpiper_app.delete_calendar_events.execute.return_value = DeleteCalendarEventsResult(deleted_count=3)
 
         # Act
         with TestClient(test_app) as client:
@@ -176,19 +175,20 @@ class TestCalendarAPI:
         response_data = response.json()
         assert "Invalid date format" in response_data["detail"]
 
-    @pytest.mark.parametrize("date_str,expected_year,expected_month,expected_day", [
-        ("20240101", 2024, 1, 1),
-        ("20241231", 2024, 12, 31),
-        ("20250228", 2025, 2, 28),
-    ])
+    @pytest.mark.parametrize(
+        "date_str,expected_year,expected_month,expected_day",
+        [
+            ("20240101", 2024, 1, 1),
+            ("20241231", 2024, 12, 31),
+            ("20250228", 2025, 2, 28),
+        ],
+    )
     def test_delete_calendar_events_various_dates(
         self, test_app, mock_sandpiper_app, date_str, expected_year, expected_month, expected_day
     ):
         """様々な日付形式でのリクエストをテスト"""
         # Arrange
-        mock_sandpiper_app.delete_calendar_events.execute.return_value = DeleteCalendarEventsResult(
-            deleted_count=1
-        )
+        mock_sandpiper_app.delete_calendar_events.execute.return_value = DeleteCalendarEventsResult(deleted_count=1)
 
         # Act
         with TestClient(test_app) as client:

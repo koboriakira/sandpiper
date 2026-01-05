@@ -67,7 +67,7 @@ async def create_calendar_event(
     except ValueError:
         return JSONResponse(
             status_code=422,
-            content={"detail": f"Invalid category: {request.category}. Valid categories: 仕事, プライベート, TJPW"}
+            content={"detail": f"Invalid category: {request.category}. Valid categories: 仕事, プライベート, TJPW"},
         )
 
     create_request = CreateCalendarEventRequest(
@@ -77,13 +77,15 @@ async def create_calendar_event(
         end_datetime=request.end_datetime,
     )
     inserted_event = sandpiper_app.create_calendar_event.execute(create_request)
-    return JSONResponse(content={
-        "id": inserted_event.id,
-        "name": inserted_event.name,
-        "category": inserted_event.category.value,
-        "start_datetime": inserted_event.start_datetime.isoformat(),
-        "end_datetime": inserted_event.end_datetime.isoformat(),
-    })
+    return JSONResponse(
+        content={
+            "id": inserted_event.id,
+            "name": inserted_event.name,
+            "category": inserted_event.category.value,
+            "start_datetime": inserted_event.start_datetime.isoformat(),
+            "end_datetime": inserted_event.end_datetime.isoformat(),
+        }
+    )
 
 
 @router.delete("/calendar/{date_str}")
@@ -106,14 +108,15 @@ async def delete_calendar_events(
         target_date = datetime(year, month, day).date()
     except (ValueError, IndexError) as e:
         raise HTTPException(
-            status_code=422,
-            detail=f"Invalid date format: {date_str}. Expected format: YYYYMMDD"
+            status_code=422, detail=f"Invalid date format: {date_str}. Expected format: YYYYMMDD"
         ) from e
 
     delete_request = DeleteCalendarEventsRequest(target_date=target_date)
     result = sandpiper_app.delete_calendar_events.execute(delete_request)
 
-    return JSONResponse(content={
-        "deleted_count": result.deleted_count,
-        "target_date": date_str,
-    })
+    return JSONResponse(
+        content={
+            "deleted_count": result.deleted_count,
+            "target_date": date_str,
+        }
+    )

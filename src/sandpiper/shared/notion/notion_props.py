@@ -64,3 +64,19 @@ class CalendarEventStartDate(Date):  # type: ignore[misc]
 @notion_prop("終了日時")
 class CalendarEventEndDate(Date):  # type: ignore[misc]
     ...
+
+
+# プロジェクトタスク関連のプロパティ
+@notion_prop("名前")
+class ProjectTaskName(Title):  # type: ignore[misc]
+    ...
+
+
+@notion_prop("ステータス")
+class ProjectTaskStatus(Status):  # type: ignore[misc]
+    ...
+
+
+@notion_prop("プロジェクト")
+class ProjectTaskProjectProp(Relation):  # type: ignore[misc]
+    ...

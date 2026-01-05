@@ -6,10 +6,12 @@ from sandpiper.perform.application.complete_todo import CompleteTodo
 from sandpiper.perform.application.handle_todo_started import HandleTodoStarted
 from sandpiper.perform.application.start_todo import StartTodo
 from sandpiper.perform.infrastructure.notion_todo_repository import NotionTodoRepository as PerformNotionTodoRepository
+from sandpiper.plan.application.create_project_task import CreateProjectTask
 from sandpiper.plan.application.create_repeat_project_task import CreateRepeatProjectTask
 from sandpiper.plan.application.create_repeat_task import CreateRepeatTask
 from sandpiper.plan.application.create_todo import CreateToDo
 from sandpiper.plan.application.handle_completed_task import HandleCompletedTask
+from sandpiper.plan.infrastructure.notion_project_task_repository import NotionProjectTaskRepository
 from sandpiper.plan.infrastructure.notion_routine_repository import NotionRoutineRepository
 from sandpiper.plan.infrastructure.notion_todo_repository import NotionTodoRepository as PlanNotionTodoRepository
 from sandpiper.plan.query.project_task_query import NotionProjectTaskQuery
@@ -29,6 +31,7 @@ class SandPiperApp:
     def __init__(
         self,
         create_todo: CreateToDo,
+        create_project_task: CreateProjectTask,
         create_repeat_task: CreateRepeatTask,
         create_repeat_project_task: CreateRepeatProjectTask,
         get_todo_log: GetTodoLog,
@@ -39,6 +42,7 @@ class SandPiperApp:
         delete_calendar_events: DeleteCalendarEvents,
     ) -> None:
         self.create_todo = create_todo
+        self.create_project_task = create_project_task
         self.create_repeat_task = create_repeat_task
         self.create_repeat_project_task = create_repeat_project_task
         self.get_todo_log = get_todo_log
@@ -54,6 +58,7 @@ def bootstrap() -> SandPiperApp:
 
     # infrastructure setup
     project_task_query = NotionProjectTaskQuery()
+    project_task_repository = NotionProjectTaskRepository()
     todo_query = NotionTodoQuery()
     plan_notion_todo_repository = PlanNotionTodoRepository()
     perform_notion_todo_repository = PerformNotionTodoRepository()
@@ -80,6 +85,9 @@ def bootstrap() -> SandPiperApp:
         create_todo=CreateToDo(
             dispatcher=dispatcher,
             todo_repository=plan_notion_todo_repository,
+        ),
+        create_project_task=CreateProjectTask(
+            project_task_repository=project_task_repository,
         ),
         create_repeat_task=CreateRepeatTask(
             routine_repository=routine_repository,

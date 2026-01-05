@@ -110,6 +110,8 @@ uv run pre-commit run --all-files           # 従来のpre-commit
 
 # アプリケーション実行
 uv run sandpiper hello --name "開発者"
+uv run sandpiper create-todo "新しいタスク" --start  # ToDo作成・開始
+uv run sandpiper create-project-task "新機能開発" --project-id xxx --status TODO  # プロジェクトタスク作成
 uv run sandpiper get-github-activity --help  # GitHub活動ログ取得
 ```
 
