@@ -1,4 +1,6 @@
 from sandpiper.app.message_dispatcher import MessageDispatcher
+from sandpiper.calendar.application.create_calendar_event import CreateCalendarEvent
+from sandpiper.calendar.infrastructure.notion_calendar_repository import NotionCalendarRepository
 from sandpiper.perform.application.complete_todo import CompleteTodo
 from sandpiper.perform.application.handle_todo_started import HandleTodoStarted
 from sandpiper.perform.application.start_todo import StartTodo
@@ -32,6 +34,7 @@ class SandPiperApp:
         get_github_activity: GetGitHubActivity,
         start_todo: StartTodo,
         complete_todo: CompleteTodo,
+        create_calendar_event: CreateCalendarEvent,
     ) -> None:
         self.create_todo = create_todo
         self.create_repeat_task = create_repeat_task
@@ -40,6 +43,7 @@ class SandPiperApp:
         self.get_github_activity = get_github_activity
         self.start_todo = start_todo
         self.complete_todo = complete_todo
+        self.create_calendar_event = create_calendar_event
 
 
 def bootstrap() -> SandPiperApp:
@@ -51,6 +55,7 @@ def bootstrap() -> SandPiperApp:
     plan_notion_todo_repository = PlanNotionTodoRepository()
     perform_notion_todo_repository = PerformNotionTodoRepository()
     routine_repository = NotionRoutineRepository()
+    calendar_repository = NotionCalendarRepository()
     default_notice_messanger = SlackNoticeMessanger(channel_id="C04Q3AV4TA5")
     commentator = NotionCommentator()
 
@@ -93,5 +98,8 @@ def bootstrap() -> SandPiperApp:
         complete_todo=CompleteTodo(
             todo_repository=perform_notion_todo_repository,
             dispatcher=dispatcher,
+        ),
+        create_calendar_event=CreateCalendarEvent(
+            calendar_repository=calendar_repository,
         ),
     )
