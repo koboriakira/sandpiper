@@ -61,7 +61,14 @@ async def create_calendar_event(
     sandpiper_app: SandPiperApp = Depends(get_sandpiper_app),
 ) -> JSONResponse:
     """カレンダーイベントを作成する"""
-    event_category = EventCategory(request.category)
+    try:
+        event_category = EventCategory(request.category)
+    except ValueError:
+        return JSONResponse(
+            status_code=422,
+            content={"detail": f"Invalid category: {request.category}. Valid categories: 仕事, プライベート, TJPW"}
+        )
+    
     create_request = CreateCalendarEventRequest(
         name=request.name,
         category=event_category,
