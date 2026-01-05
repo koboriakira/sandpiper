@@ -8,7 +8,9 @@ from rich.console import Console
 from rich.panel import Panel
 
 from sandpiper.app.app import bootstrap
+from sandpiper.plan.application.create_project_task import CreateProjectTaskRequest
 from sandpiper.plan.application.create_todo import CreateNewToDoRequest
+from sandpiper.shared.valueobject.todo_status_enum import ToDoStatusEnum
 
 from . import __version__
 
@@ -85,6 +87,29 @@ def create_project(
             name=name,
             start_date=start_date_obj,
             end_date=end_date_obj,
+        )
+    )
+
+
+@app.command()
+def create_project_task(
+    title: str,
+    project_id: str = typer.Option(..., "--project-id", help="関連するプロジェクトのNotion ID"),
+    status: str = typer.Option("TODO", help="ステータス (TODO, IN_PROGRESS, DONE)"),
+) -> None:
+    """新しいプロジェクトタスクを作成します"""
+    try:
+        status_enum = ToDoStatusEnum[status]
+    except KeyError:
+        console.print(f"[red]エラー: 無効なステータスです: {status}[/red]")
+        console.print("[yellow]有効なステータス: TODO, IN_PROGRESS, DONE[/yellow]")
+        raise typer.Exit(code=1)
+
+    sandpiper_app.create_project_task.execute(
+        request=CreateProjectTaskRequest(
+            title=title,
+            project_id=project_id,
+            status=status_enum,
         )
     )
 
