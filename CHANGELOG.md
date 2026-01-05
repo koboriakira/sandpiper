@@ -5,6 +5,15 @@
 このプロジェクトは[セマンティックバージョニング](https://semver.org/spec/v2.0.0.html)に従い、
 [Conventional Commits](https://conventionalcommits.org/)を使用して自動的にリリースを生成します。
 
+## [0.4.0](https://github.com/koboriakira/sandpiper/compare/v0.3.0...v0.4.0) (2026-01-05)
+
+
+### Features
+
+* add maintenance router and integrate with FastAPI application ([0ef46c2](https://github.com/koboriakira/sandpiper/commit/0ef46c291aeefab6cd63582bf5f5d79c1d47993e))
+* プロジェクトタスクのデータベース操作 ([#11](https://github.com/koboriakira/sandpiper/issues/11)) ([ff05907](https://github.com/koboriakira/sandpiper/commit/ff059070b92fc41ac155a153d45057337fea7a22))
+* プロジェクトデータベースの更新をする ([#9](https://github.com/koboriakira/sandpiper/issues/9)) ([7410771](https://github.com/koboriakira/sandpiper/commit/7410771df888a004d0106d233e52f6460728537e))
+
 ## [0.3.0](https://github.com/koboriakira/sandpiper/compare/v0.2.0...v0.3.0) (2026-01-05)
 
 
