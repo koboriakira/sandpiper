@@ -12,6 +12,7 @@ from sandpiper.app.app import SandPiperApp
 from sandpiper.calendar.application.create_calendar_event import CreateCalendarEventRequest
 from sandpiper.calendar.application.delete_calendar_events import DeleteCalendarEventsRequest
 from sandpiper.calendar.domain.calendar_event import EventCategory
+from sandpiper.plan.infrastructure.notion_todo_repository import TodoPage
 from sandpiper.routers.dependency.deps import get_sandpiper_app
 
 router = APIRouter(
@@ -88,6 +89,37 @@ async def create_calendar_event(
     )
 
 
+@router.post("/todo/to_project")
+async def todo_to_project(
+    request: NotionWebhookRequest,
+    sandpiper_app: SandPiperApp = Depends(get_sandpiper_app),  # noqa: ARG001
+) -> JSONResponse:
+    """TodoをProjectに変換する
+
+    NotionからのWebhookリクエストを受け取り、TodoをProjectに変換する処理を実行します。
+    現在はダミーの実装です。
+
+    Args:
+        request: Notion Webhookリクエスト
+        sandpiper_app: SandPiper アプリケーション (現在は未使用)
+
+    Returns:
+        JSONResponse: 変換結果のレスポンス
+    """
+    # ダミーの実装: Webhookリクエストからpage_idを取得
+    print("Received Notion webhook request for todo_to_project:", request.data)
+    print("Full request data:", request.source)
+    page = BasePage.from_data(request.data)
+    todo = TodoPage.from_data(request.data)
+    print("Todo details:", todo.to_domain())
+    return JSONResponse(
+        content={
+            "page_id": page.id,
+            "message": "Todo converted to project successfully",
+        }
+    )
+
+
 @router.delete("/calendar/{date_str}")
 async def delete_calendar_events(
     date_str: str,
@@ -120,11 +152,3 @@ async def delete_calendar_events(
             "target_date": date_str,
         }
     )
-
-
-@router.post("/maintenance")
-async def maintenance(
-    request: NotionWebhookRequest,  # noqa: ARG001
-) -> JSONResponse:
-    """メンテナンス用エンドポイント(処理なし)"""
-    return JSONResponse(content={"status": "received"})
