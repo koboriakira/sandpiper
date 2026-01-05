@@ -5,6 +5,14 @@
 このプロジェクトは[セマンティックバージョニング](https://semver.org/spec/v2.0.0.html)に従い、
 [Conventional Commits](https://conventionalcommits.org/)を使用して自動的にリリースを生成します。
 
+## [0.2.0](https://github.com/koboriakira/sandpiper/compare/v0.1.0...v0.2.0) (2026-01-05)
+
+
+### Features
+
+* calendar domain implementation with Notion integration ([#4](https://github.com/koboriakira/sandpiper/issues/4)) ([f415173](https://github.com/koboriakira/sandpiper/commit/f4151737586604a8a99bb6759458a60e39a3122c))
+* GitHub活動ログ取得機能の追加 ([#2](https://github.com/koboriakira/sandpiper/issues/2)) ([9feef32](https://github.com/koboriakira/sandpiper/commit/9feef32a887a040b3bda3e42e02a84cb768173eb))
+
 ## 0.1.0 (2026-01-03)
 
 
