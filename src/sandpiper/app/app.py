@@ -1,5 +1,6 @@
 from sandpiper.app.message_dispatcher import MessageDispatcher
 from sandpiper.calendar.application.create_calendar_event import CreateCalendarEvent
+from sandpiper.calendar.application.delete_calendar_events import DeleteCalendarEvents
 from sandpiper.calendar.infrastructure.notion_calendar_repository import NotionCalendarRepository
 from sandpiper.perform.application.complete_todo import CompleteTodo
 from sandpiper.perform.application.handle_todo_started import HandleTodoStarted
@@ -35,6 +36,7 @@ class SandPiperApp:
         start_todo: StartTodo,
         complete_todo: CompleteTodo,
         create_calendar_event: CreateCalendarEvent,
+        delete_calendar_events: DeleteCalendarEvents,
     ) -> None:
         self.create_todo = create_todo
         self.create_repeat_task = create_repeat_task
@@ -44,6 +46,7 @@ class SandPiperApp:
         self.start_todo = start_todo
         self.complete_todo = complete_todo
         self.create_calendar_event = create_calendar_event
+        self.delete_calendar_events = delete_calendar_events
 
 
 def bootstrap() -> SandPiperApp:
@@ -100,6 +103,9 @@ def bootstrap() -> SandPiperApp:
             dispatcher=dispatcher,
         ),
         create_calendar_event=CreateCalendarEvent(
+            calendar_repository=calendar_repository,
+        ),
+        delete_calendar_events=DeleteCalendarEvents(
             calendar_repository=calendar_repository,
         ),
     )
