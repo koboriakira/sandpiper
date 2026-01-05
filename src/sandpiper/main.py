@@ -55,6 +55,41 @@ def create_todo(title: str, start: bool = typer.Option(False, help="タスクを
 
 
 @app.command()
+def create_project(
+    name: str = typer.Argument(..., help="プロジェクト名"),
+    start_date: str = typer.Option(..., help="開始日 (YYYY-MM-DD形式)"),
+    end_date: str = typer.Option(None, help="終了日 (YYYY-MM-DD形式)"),
+) -> None:
+    """新しいプロジェクトを作成します"""
+    from datetime import datetime
+
+    from sandpiper.plan.application.create_project import CreateProjectRequest
+
+    # 日付パース
+    try:
+        start_date_obj = datetime.strptime(start_date, "%Y-%m-%d").date()
+    except ValueError:
+        console.print("[red]エラー: 開始日の形式が正しくありません。YYYY-MM-DD形式で指定してください。[/red]")
+        raise typer.Exit(code=1)
+
+    end_date_obj = None
+    if end_date:
+        try:
+            end_date_obj = datetime.strptime(end_date, "%Y-%m-%d").date()
+        except ValueError:
+            console.print("[red]エラー: 終了日の形式が正しくありません。YYYY-MM-DD形式で指定してください。[/red]")
+            raise typer.Exit(code=1)
+
+    sandpiper_app.create_project.execute(
+        CreateProjectRequest(
+            name=name,
+            start_date=start_date_obj,
+            end_date=end_date_obj,
+        )
+    )
+
+
+@app.command()
 def create_repeat_project_tasks(
     tomorrow: bool = typer.Option(False, help="明日のタスクとして作成するかどうか"),
 ) -> None:
