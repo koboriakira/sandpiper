@@ -90,9 +90,7 @@ else:
 
 # レスポンスログ出力ミドルウェア
 @app.middleware("http")
-async def log_response(
-    request: Request, call_next: Callable[[Request], Awaitable[StreamingResponse]]
-) -> Response:
+async def log_response(request: Request, call_next: Callable[[Request], Awaitable[StreamingResponse]]) -> Response:
     """レスポンスをログ出力するミドルウェア"""
     response: StreamingResponse = await call_next(request)
 
