@@ -1,46 +1,34 @@
-"""特定の名前のTODOに対して特殊処理を実行するユースケース"""
+"""特殊TODOハンドラーのオーケストレーター
 
-from abc import ABC, abstractmethod
-from dataclasses import dataclass
+このモジュールはTODOタイトルに基づいて適切なハンドラーを
+ディスパッチするアプリケーションサービスを提供します。
+"""
 
+from sandpiper.app.handlers.special_todo_handler import (
+    HandleSpecialTodoResult,
+    SpecialTodoHandler,
+)
 from sandpiper.perform.domain.todo_repository import TodoRepository
 
 
-@dataclass
-class HandleSpecialTodoResult:
-    """特殊処理の結果"""
-
-    page_id: str
-    title: str
-    handler_name: str
-    success: bool
-    message: str
-
-
-class SpecialTodoHandler(ABC):
-    """特定のTODO名に対するハンドラーの基底クラス"""
-
-    @property
-    @abstractmethod
-    def target_title(self) -> str:
-        """処理対象のTODO名"""
-        ...
-
-    @abstractmethod
-    def handle(self, page_id: str, title: str) -> HandleSpecialTodoResult:
-        """特殊処理を実行する"""
-        ...
-
-
 class HandleSpecialTodo:
-    """特定の名前のTODOに対して特殊処理を実行する
+    """特定の名前のTODOに対して特殊処理を実行するアプリケーションサービス
 
     TODOのタイトルに基づいて、登録されたハンドラーを実行します。
-    新しい特殊処理を追加する場合は、SpecialTodoHandlerを継承したクラスを作成し、
-    register_handlerメソッドで登録してください。
+    このクラスはアプリケーション層に属し、ドメイン横断的な
+    オーケストレーションを担当します。
+
+    ハンドラーの登録:
+        新しい特殊処理を追加する場合は、SpecialTodoHandlerを継承した
+        クラスを作成し、register_handlerメソッドで登録してください。
     """
 
     def __init__(self, todo_repository: TodoRepository) -> None:
+        """初期化
+
+        Args:
+            todo_repository: TODOのタイトル取得に使用するリポジトリ
+        """
         self._todo_repository = todo_repository
         self._handlers: dict[str, SpecialTodoHandler] = {}
 
