@@ -4,7 +4,9 @@ import pytest
 
 from sandpiper.perform.application.start_todo import StartTodo
 from sandpiper.perform.domain.todo_repository import TodoRepository
+from sandpiper.plan.domain.project_task import InsertedProjectTask
 from sandpiper.plan.domain.project_task_repository import ProjectTaskRepository
+from sandpiper.shared.valueobject.todo_status_enum import ToDoStatusEnum
 
 
 class TestStartTodo:
@@ -38,7 +40,8 @@ class TestStartTodo:
         self.mock_repository.find.assert_called_once_with(page_id)
         mock_todo.start.assert_called_once()
         self.mock_repository.save.assert_called_once_with(mock_todo)
-        self.mock_project_task_repository.start.assert_not_called()
+        self.mock_project_task_repository.find.assert_not_called()
+        self.mock_project_task_repository.update_status.assert_not_called()
 
     def test_execute_start_todo_success_with_project_task(self):
         """プロジェクトタスクありのToDo開始の正常なexecuteをテスト"""
@@ -48,7 +51,13 @@ class TestStartTodo:
         mock_todo = Mock()
         mock_todo.project_task_page_id = project_task_page_id
         self.mock_repository.find.return_value = mock_todo
-        self.mock_project_task_repository.start.return_value = True
+        mock_project_task = InsertedProjectTask(
+            id=project_task_page_id,
+            title="Test Project Task",
+            status=ToDoStatusEnum.TODO,
+            project_id="project-id",
+        )
+        self.mock_project_task_repository.find.return_value = mock_project_task
 
         # Act
         self.start_todo.execute(page_id)
@@ -57,7 +66,10 @@ class TestStartTodo:
         self.mock_repository.find.assert_called_once_with(page_id)
         mock_todo.start.assert_called_once()
         self.mock_repository.save.assert_called_once_with(mock_todo)
-        self.mock_project_task_repository.start.assert_called_once_with(project_task_page_id)
+        self.mock_project_task_repository.find.assert_called_once_with(project_task_page_id)
+        self.mock_project_task_repository.update_status.assert_called_once_with(
+            project_task_page_id, ToDoStatusEnum.IN_PROGRESS
+        )
 
     def test_execute_start_todo_with_project_task_already_in_progress(self):
         """プロジェクトタスクがすでにInProgressの場合のテスト"""
@@ -67,7 +79,13 @@ class TestStartTodo:
         mock_todo = Mock()
         mock_todo.project_task_page_id = project_task_page_id
         self.mock_repository.find.return_value = mock_todo
-        self.mock_project_task_repository.start.return_value = False  # すでにInProgress
+        mock_project_task = InsertedProjectTask(
+            id=project_task_page_id,
+            title="Test Project Task",
+            status=ToDoStatusEnum.IN_PROGRESS,  # すでにInProgress
+            project_id="project-id",
+        )
+        self.mock_project_task_repository.find.return_value = mock_project_task
 
         # Act
         self.start_todo.execute(page_id)
@@ -76,7 +94,8 @@ class TestStartTodo:
         self.mock_repository.find.assert_called_once_with(page_id)
         mock_todo.start.assert_called_once()
         self.mock_repository.save.assert_called_once_with(mock_todo)
-        self.mock_project_task_repository.start.assert_called_once_with(project_task_page_id)
+        self.mock_project_task_repository.find.assert_called_once_with(project_task_page_id)
+        self.mock_project_task_repository.update_status.assert_not_called()
 
     def test_execute_repository_find_raises_exception(self):
         """repository.find()で例外が発生した場合のテスト"""
@@ -91,7 +110,8 @@ class TestStartTodo:
         # findのみ呼ばれ、他は呼ばれないことを確認
         self.mock_repository.find.assert_called_once_with(page_id)
         self.mock_repository.save.assert_not_called()
-        self.mock_project_task_repository.start.assert_not_called()
+        self.mock_project_task_repository.find.assert_not_called()
+        self.mock_project_task_repository.update_status.assert_not_called()
 
     def test_execute_todo_start_raises_exception(self):
         """todo.start()で例外が発生した場合のテスト"""
@@ -110,7 +130,8 @@ class TestStartTodo:
         self.mock_repository.find.assert_called_once_with(page_id)
         mock_todo.start.assert_called_once()
         self.mock_repository.save.assert_not_called()
-        self.mock_project_task_repository.start.assert_not_called()
+        self.mock_project_task_repository.find.assert_not_called()
+        self.mock_project_task_repository.update_status.assert_not_called()
 
     def test_execute_repository_save_raises_exception(self):
         """repository.save()で例外が発生した場合のテスト"""
@@ -129,7 +150,8 @@ class TestStartTodo:
         self.mock_repository.find.assert_called_once_with(page_id)
         mock_todo.start.assert_called_once()
         self.mock_repository.save.assert_called_once_with(mock_todo)
-        self.mock_project_task_repository.start.assert_not_called()
+        self.mock_project_task_repository.find.assert_not_called()
+        self.mock_project_task_repository.update_status.assert_not_called()
 
     def test_execute_with_different_page_ids(self):
         """異なるpage_idでの実行をテスト"""
@@ -159,7 +181,8 @@ class TestStartTodo:
         assert self.mock_repository.save.call_count == 2
         self.mock_repository.save.assert_any_call(mock_todo1)
         self.mock_repository.save.assert_any_call(mock_todo2)
-        self.mock_project_task_repository.start.assert_not_called()
+        self.mock_project_task_repository.find.assert_not_called()
+        self.mock_project_task_repository.update_status.assert_not_called()
 
     def test_execute_multiple_times_same_todo(self):
         """同一toDoに対して複数回実行をテスト"""
@@ -183,4 +206,5 @@ class TestStartTodo:
             assert call[0][0] == page_id
         for call in self.mock_repository.save.call_args_list:
             assert call[0][0] == mock_todo
-        self.mock_project_task_repository.start.assert_not_called()
+        self.mock_project_task_repository.find.assert_not_called()
+        self.mock_project_task_repository.update_status.assert_not_called()
