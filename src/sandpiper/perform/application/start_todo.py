@@ -27,6 +27,4 @@ class StartTodo:
         """プロジェクトタスクがInProgressでなければInProgressに更新する"""
         project_task = self._project_task_repository.find(project_task_page_id)
         if project_task.status != ToDoStatusEnum.IN_PROGRESS:
-            self._project_task_repository.update_status(
-                project_task_page_id, ToDoStatusEnum.IN_PROGRESS
-            )
+            self._project_task_repository.update_status(project_task_page_id, ToDoStatusEnum.IN_PROGRESS)
