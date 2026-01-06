@@ -3,6 +3,7 @@ from sandpiper.calendar.application.create_calendar_event import CreateCalendarE
 from sandpiper.calendar.application.delete_calendar_events import DeleteCalendarEvents
 from sandpiper.calendar.infrastructure.notion_calendar_repository import NotionCalendarRepository
 from sandpiper.perform.application.complete_todo import CompleteTodo
+from sandpiper.perform.application.handle_special_todo import HandleSpecialTodo
 from sandpiper.perform.application.handle_todo_started import HandleTodoStarted
 from sandpiper.perform.application.start_todo import StartTodo
 from sandpiper.perform.infrastructure.notion_todo_repository import NotionTodoRepository as PerformNotionTodoRepository
@@ -45,6 +46,7 @@ class SandPiperApp:
         create_calendar_event: CreateCalendarEvent,
         delete_calendar_events: DeleteCalendarEvents,
         convert_to_project: ConvertToProject,
+        handle_special_todo: HandleSpecialTodo,
     ) -> None:
         self.create_todo = create_todo
         self.create_project = create_project
@@ -58,6 +60,7 @@ class SandPiperApp:
         self.create_calendar_event = create_calendar_event
         self.delete_calendar_events = delete_calendar_events
         self.convert_to_project = convert_to_project
+        self.handle_special_todo = handle_special_todo
 
 
 def bootstrap() -> SandPiperApp:
@@ -131,5 +134,8 @@ def bootstrap() -> SandPiperApp:
             todo_repository=plan_notion_todo_repository,
             project_repository=project_repository,
             project_task_repository=project_task_repository,
+        ),
+        handle_special_todo=HandleSpecialTodo(
+            todo_repository=perform_notion_todo_repository,
         ),
     )
