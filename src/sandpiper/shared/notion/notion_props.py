@@ -96,3 +96,24 @@ class ProjectTaskStatus(Status):  # type: ignore[misc]
 @notion_prop("プロジェクト")
 class ProjectTaskProjectProp(Relation):  # type: ignore[misc]
     ...
+
+
+# レシピ関連のプロパティ
+@notion_prop("名前")
+class RecipeName(Title):  # type: ignore[misc]
+    ...
+
+
+@notion_prop("材料")
+class RecipeIngredientsProp(Relation):  # type: ignore[misc]
+    ...
+
+
+@notion_prop("Reference")
+class RecipeReferenceProp: ...
+
+
+# 買い物関連のプロパティ
+@notion_prop("名前")
+class ShoppingName(Title):  # type: ignore[misc]
+    ...
