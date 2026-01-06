@@ -2,14 +2,14 @@
 
 import json
 import os
-from collections.abc import AsyncIterator
+from collections.abc import AsyncIterator, Awaitable, Callable
 from contextlib import asynccontextmanager
 
 from dotenv import load_dotenv
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from starlette.responses import Response
+from starlette.responses import Response, StreamingResponse
 
 from sandpiper.app.app import bootstrap
 
@@ -90,14 +90,21 @@ else:
 
 # レスポンスログ出力ミドルウェア
 @app.middleware("http")
-async def log_response(request: Request, call_next):
+async def log_response(
+    request: Request, call_next: Callable[[Request], Awaitable[StreamingResponse]]
+) -> Response:
     """レスポンスをログ出力するミドルウェア"""
-    response = await call_next(request)
+    response: StreamingResponse = await call_next(request)
 
     # レスポンスボディを取得
     body_bytes = b""
     async for chunk in response.body_iterator:
-        body_bytes += chunk
+        if isinstance(chunk, bytes):
+            body_bytes += chunk
+        elif isinstance(chunk, str):
+            body_bytes += chunk.encode()
+        else:
+            body_bytes += bytes(chunk)
 
     # ログ出力
     print(f"📤 Response: {request.method} {request.url.path} -> {response.status_code}")

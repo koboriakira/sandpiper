@@ -1,10 +1,12 @@
-from datetime import datetime
+from datetime import date, datetime
 from unittest.mock import Mock
 
 import pytest
 
 from sandpiper.plan.domain.todo import ToDoKind
 from sandpiper.review.application.get_todo_log import GetTodoLog
+from sandpiper.review.query.activity_log_item import ActivityLogItem, ActivityType
+from sandpiper.review.query.calendar_query import CalendarQuery
 from sandpiper.review.query.done_todo_dto import DoneTodoDto
 from sandpiper.review.query.todo_query import TodoQuery
 
@@ -208,3 +210,132 @@ class TestGetTodoLog:
         assert result[1] == todo_tomorrow  # 16日9:00 (後)
 
         self.mock_query.fetch_done_todos.assert_called_once()
+
+
+class TestGetTodoLogWithDate:
+    def setup_method(self):
+        self.mock_todo_query = Mock(spec=TodoQuery)
+        self.mock_calendar_query = Mock(spec=CalendarQuery)
+        self.get_todo_log = GetTodoLog(self.mock_todo_query, self.mock_calendar_query)
+
+    def test_init_with_calendar_query(self):
+        """GetTodoLogのカレンダークエリ付き初期化をテスト"""
+        todo_query = Mock(spec=TodoQuery)
+        calendar_query = Mock(spec=CalendarQuery)
+
+        get_todo_log = GetTodoLog(todo_query, calendar_query)
+
+        assert get_todo_log.todo_query == todo_query
+        assert get_todo_log.calendar_query == calendar_query
+
+    def test_init_without_calendar_query(self):
+        """GetTodoLogのカレンダークエリなし初期化をテスト"""
+        todo_query = Mock(spec=TodoQuery)
+
+        get_todo_log = GetTodoLog(todo_query)
+
+        assert get_todo_log.todo_query == todo_query
+        assert get_todo_log.calendar_query is None
+
+    def test_execute_with_date_empty_result(self):
+        """日付指定で空の結果をテスト"""
+        target_date = date(2024, 1, 15)
+        self.mock_todo_query.fetch_done_todos_by_date.return_value = []
+        self.mock_calendar_query.fetch_events_by_date.return_value = []
+
+        result = self.get_todo_log.execute_with_date(target_date)
+
+        assert result == []
+        self.mock_todo_query.fetch_done_todos_by_date.assert_called_once_with(target_date)
+        self.mock_calendar_query.fetch_events_by_date.assert_called_once_with(target_date)
+
+    def test_execute_with_date_todos_only(self):
+        """日付指定でTODOのみ取得をテスト"""
+        target_date = date(2024, 1, 15)
+        todo_item = ActivityLogItem(
+            activity_type=ActivityType.TODO,
+            title="テストタスク",
+            start_datetime=datetime(2024, 1, 15, 10, 0),
+            end_datetime=datetime(2024, 1, 15, 11, 0),
+            kind="SINGLE",
+            project_name="",
+        )
+        self.mock_todo_query.fetch_done_todos_by_date.return_value = [todo_item]
+        self.mock_calendar_query.fetch_events_by_date.return_value = []
+
+        result = self.get_todo_log.execute_with_date(target_date)
+
+        assert len(result) == 1
+        assert result[0] == todo_item
+
+    def test_execute_with_date_calendar_only(self):
+        """日付指定でカレンダーのみ取得をテスト"""
+        target_date = date(2024, 1, 15)
+        calendar_item = ActivityLogItem(
+            activity_type=ActivityType.CALENDAR,
+            title="会議",
+            start_datetime=datetime(2024, 1, 15, 14, 0),
+            end_datetime=datetime(2024, 1, 15, 15, 0),
+            category="仕事",
+        )
+        self.mock_todo_query.fetch_done_todos_by_date.return_value = []
+        self.mock_calendar_query.fetch_events_by_date.return_value = [calendar_item]
+
+        result = self.get_todo_log.execute_with_date(target_date)
+
+        assert len(result) == 1
+        assert result[0] == calendar_item
+
+    def test_execute_with_date_mixed_sorted_by_start_time(self):
+        """TODOとカレンダーが開始時刻でソートされることをテスト"""
+        target_date = date(2024, 1, 15)
+        todo1 = ActivityLogItem(
+            activity_type=ActivityType.TODO,
+            title="朝のタスク",
+            start_datetime=datetime(2024, 1, 15, 9, 0),
+            end_datetime=datetime(2024, 1, 15, 10, 0),
+            kind="SINGLE",
+        )
+        calendar1 = ActivityLogItem(
+            activity_type=ActivityType.CALENDAR,
+            title="午後の会議",
+            start_datetime=datetime(2024, 1, 15, 14, 0),
+            end_datetime=datetime(2024, 1, 15, 15, 0),
+            category="仕事",
+        )
+        todo2 = ActivityLogItem(
+            activity_type=ActivityType.TODO,
+            title="昼のタスク",
+            start_datetime=datetime(2024, 1, 15, 12, 0),
+            end_datetime=datetime(2024, 1, 15, 13, 0),
+            kind="PROJECT",
+            project_name="テストプロジェクト",
+        )
+
+        self.mock_todo_query.fetch_done_todos_by_date.return_value = [todo2, todo1]  # 逆順
+        self.mock_calendar_query.fetch_events_by_date.return_value = [calendar1]
+
+        result = self.get_todo_log.execute_with_date(target_date)
+
+        assert len(result) == 3
+        assert result[0] == todo1  # 9:00
+        assert result[1] == todo2  # 12:00
+        assert result[2] == calendar1  # 14:00
+
+    def test_execute_with_date_without_calendar_query(self):
+        """カレンダークエリなしでの日付指定をテスト"""
+        get_todo_log = GetTodoLog(self.mock_todo_query)  # カレンダークエリなし
+        target_date = date(2024, 1, 15)
+        todo_item = ActivityLogItem(
+            activity_type=ActivityType.TODO,
+            title="タスク",
+            start_datetime=datetime(2024, 1, 15, 10, 0),
+            end_datetime=datetime(2024, 1, 15, 11, 0),
+            kind="SINGLE",
+        )
+        self.mock_todo_query.fetch_done_todos_by_date.return_value = [todo_item]
+
+        result = get_todo_log.execute_with_date(target_date)
+
+        assert len(result) == 1
+        assert result[0] == todo_item

@@ -22,6 +22,7 @@ from sandpiper.plan.infrastructure.notion_todo_repository import NotionTodoRepos
 from sandpiper.plan.query.project_task_query import NotionProjectTaskQuery
 from sandpiper.review.application.get_github_activity import GetGitHubActivity
 from sandpiper.review.application.get_todo_log import GetTodoLog
+from sandpiper.review.query.calendar_query import NotionCalendarQuery
 from sandpiper.review.query.github_activity_query import GitHubActivityQuery
 from sandpiper.review.query.todo_query import NotionTodoQuery
 from sandpiper.shared.event.todo_completed import TodoCompleted
@@ -71,6 +72,7 @@ def bootstrap() -> SandPiperApp:
     project_task_query = NotionProjectTaskQuery()
     project_task_repository = NotionProjectTaskRepository()
     todo_query = NotionTodoQuery()
+    calendar_query = NotionCalendarQuery()
     plan_notion_todo_repository = PlanNotionTodoRepository()
     perform_notion_todo_repository = PerformNotionTodoRepository()
     routine_repository = NotionRoutineRepository()
@@ -128,6 +130,7 @@ def bootstrap() -> SandPiperApp:
         create_repeat_project_task=create_repeat_project_task,
         get_todo_log=GetTodoLog(
             todo_query=todo_query,
+            calendar_query=calendar_query,
         ),
         get_github_activity=GetGitHubActivity(
             github_activity_query=github_activity_query,
