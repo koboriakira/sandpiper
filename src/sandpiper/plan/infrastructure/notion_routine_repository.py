@@ -3,6 +3,7 @@ from lotion import Lotion  # type: ignore[import-untyped]
 from sandpiper.plan.domain.routine import Routine
 from sandpiper.plan.domain.routine_cycle import RoutineCycle
 from sandpiper.plan.domain.routine_repository import RoutineRepository
+from sandpiper.shared.notion.database_config import DatabaseId
 from sandpiper.shared.notion.notion_props import RoutineNextDate
 from sandpiper.shared.valueobject.task_chute_section import TaskChuteSection
 
@@ -12,7 +13,7 @@ class NotionRoutineRepository(RoutineRepository):
         self.client = Lotion.get_instance()
 
     def fetch(self) -> list[Routine]:
-        items = self.client.retrieve_database("d21db86c92034ff498999d62354e8fe1")
+        items = self.client.retrieve_database(DatabaseId.ROUTINE)
         routines = []
         for item in items:
             start_date = item.get_date("次回実行日").start_date
@@ -34,3 +35,11 @@ class NotionRoutineRepository(RoutineRepository):
         page = self.client.retrieve_page(routine.id)
         page.set_prop(RoutineNextDate.from_start_date(routine.date))
         self.client.update(page)
+
+
+if __name__ == "__main__":
+    # uv run python -m src.sandpiper.plan.infrastructure.notion_routine_repository
+    repo = NotionRoutineRepository()
+    routines = repo.fetch()
+    for routine in routines:
+        print(routine)

@@ -23,7 +23,8 @@ class CreateRepeatTask:
         todo_names = [todo.title for todo in todos]
         for routine in routines:
             # 今日の日付以前のルーチンタスクのみ処理する
-            if routine.date <= basis_date:
+            if routine.date > basis_date:
+                print(f"Processing routine: {routine.title} (next date: {routine.date})")
                 continue
 
             # すでに同じタイトルのタスクが存在する場合はスキップする
