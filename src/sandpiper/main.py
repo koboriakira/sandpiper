@@ -186,6 +186,19 @@ def create_repeat_tasks(
 
 
 @app.command()
+def mark_done() -> None:
+    """InProgress中のタスクをすべてDoneにします"""
+    result = sandpiper_app.mark_done.execute()
+
+    if result.completed_count == 0:
+        console.print("[yellow]InProgress中のタスクはありません[/yellow]")
+    else:
+        console.print(f"[green]{result.completed_count}件のタスクを完了しました:[/green]")
+        for title in result.completed_titles:
+            console.print(f"  - {title}")
+
+
+@app.command()
 def get_github_activity(
     date: str = typer.Option(None, help="対象日 (YYYY-MM-DD形式)"),
     username: str = typer.Option("koboriakira", help="GitHubユーザー名"),

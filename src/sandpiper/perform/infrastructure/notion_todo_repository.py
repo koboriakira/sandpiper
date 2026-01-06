@@ -45,6 +45,16 @@ class NotionTodoRepository:
         page = self.client.retrieve_page(page_id, TodoPage)
         return page.to_domain()  # type: ignore[no-any-return]
 
+    def find_in_progress(self) -> list[ToDo]:
+        items = self.client.retrieve_database(DatabaseId.TODO)
+        result = []
+        for item in items:
+            status = ToDoStatusEnum(item.get_status("ステータス").status_name)
+            if status == ToDoStatusEnum.IN_PROGRESS:
+                page = self.client.retrieve_page(item.id, TodoPage)
+                result.append(page.to_domain())
+        return result
+
     def save(self, todo: ToDo) -> None:
         print(f"Saving ToDo: {todo}")
         page = self.client.retrieve_page(todo.id, TodoPage)

@@ -6,6 +6,7 @@ from sandpiper.calendar.application.delete_calendar_events import DeleteCalendar
 from sandpiper.calendar.infrastructure.notion_calendar_repository import NotionCalendarRepository
 from sandpiper.perform.application.complete_todo import CompleteTodo
 from sandpiper.perform.application.handle_todo_started import HandleTodoStarted
+from sandpiper.perform.application.mark_done import MarkDone
 from sandpiper.perform.application.start_todo import StartTodo
 from sandpiper.perform.infrastructure.notion_todo_repository import NotionTodoRepository as PerformNotionTodoRepository
 from sandpiper.plan.application.convert_to_project import ConvertToProject
@@ -44,6 +45,7 @@ class SandPiperApp:
         get_github_activity: GetGitHubActivity,
         start_todo: StartTodo,
         complete_todo: CompleteTodo,
+        mark_done: MarkDone,
         create_calendar_event: CreateCalendarEvent,
         delete_calendar_events: DeleteCalendarEvents,
         convert_to_project: ConvertToProject,
@@ -58,6 +60,7 @@ class SandPiperApp:
         self.get_github_activity = get_github_activity
         self.start_todo = start_todo
         self.complete_todo = complete_todo
+        self.mark_done = mark_done
         self.create_calendar_event = create_calendar_event
         self.delete_calendar_events = delete_calendar_events
         self.convert_to_project = convert_to_project
@@ -133,6 +136,10 @@ def bootstrap() -> SandPiperApp:
             project_task_repository=project_task_repository,
         ),
         complete_todo=CompleteTodo(
+            todo_repository=perform_notion_todo_repository,
+            dispatcher=dispatcher,
+        ),
+        mark_done=MarkDone(
             todo_repository=perform_notion_todo_repository,
             dispatcher=dispatcher,
         ),
