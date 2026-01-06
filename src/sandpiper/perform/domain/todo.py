@@ -14,6 +14,7 @@ class ToDo:
     section: TaskChuteSection | None = None
     log_start_datetime: datetime | None = None
     log_end_datetime: datetime | None = None
+    project_task_page_id: str | None = None
 
     def start(self) -> None:
         self.status = ToDoStatusEnum.IN_PROGRESS

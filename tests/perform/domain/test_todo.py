@@ -105,7 +105,15 @@ class TestToDo:
 
         # Assert
         assert hasattr(todo, "__dataclass_fields__")
-        expected_fields = {"id", "title", "status", "section", "log_start_datetime", "log_end_datetime"}
+        expected_fields = {
+            "id",
+            "title",
+            "status",
+            "section",
+            "log_start_datetime",
+            "log_end_datetime",
+            "project_task_page_id",
+        }
         actual_fields = set(todo.__dataclass_fields__.keys())
         assert actual_fields == expected_fields
 
