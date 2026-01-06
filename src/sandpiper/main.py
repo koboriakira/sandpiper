@@ -123,50 +123,62 @@ def create_repeat_project_tasks(
 
 
 @app.command()
-@app.command()
 def get_todo_log(
+    date_filter: str = typer.Option(..., "--date", help="指定日付以降のログを取得 (YYYY-MM-DD形式)"),
     json: bool = typer.Option(False, "--json", help="JSON形式で出力する"),
     markdown: bool = typer.Option(False, "--markdown", help="Markdown形式で出力する"),
 ) -> None:
-    """完了したToDoタスクのログを取得します"""
+    """指定日付以降の完了タスクとカレンダー予定を時系列で取得します"""
     import json as _json
+    from datetime import datetime as dt
+    from typing import Any
 
-    result = sandpiper_app.get_todo_log.execute()
+    from sandpiper.review.query.activity_log_item import ActivityType
+
+    try:
+        target_date = dt.strptime(date_filter, "%Y-%m-%d").date()
+    except ValueError:
+        console.print("[red]エラー: 日付の形式が正しくありません。YYYY-MM-DD形式で指定してください。[/red]")
+        raise typer.Exit(code=1)
+
+    result = sandpiper_app.get_todo_log.execute(target_date)
+
     if json:
-        from typing import Any
 
-        def todo_to_dict(todo: Any) -> dict[str, Any]:
+        def item_to_dict(item: Any) -> dict[str, Any]:
             return {
-                "title": todo.title,
-                "kind": getattr(todo.kind, "value", str(todo.kind)),
-                "project_name": todo.project_name,
-                "perform_range": [
-                    todo.perform_range[0].strftime("%Y-%m-%d %H:%M"),
-                    todo.perform_range[1].strftime("%Y-%m-%d %H:%M"),
-                ]
-                if getattr(todo, "perform_range", None)
-                else None,
+                "type": item.activity_type.value,
+                "title": item.title,
+                "start_datetime": item.start_datetime.strftime("%Y-%m-%d %H:%M"),
+                "end_datetime": item.end_datetime.strftime("%Y-%m-%d %H:%M"),
+                "kind": item.kind if item.kind else None,
+                "project_name": item.project_name if item.project_name else None,
+                "category": item.category if item.category else None,
             }
 
-        todos_json = [todo_to_dict(todo) for todo in result]
-        console.print(_json.dumps(todos_json, ensure_ascii=False, indent=2))
+        items_json = [item_to_dict(item) for item in result]
+        console.print(_json.dumps(items_json, ensure_ascii=False, indent=2))
     elif markdown:
-        lines = ["| タイトル | 種別 | プロジェクト | 実施期間 |", "| --- | --- | --- | --- |"]
-        for todo in result:
-            title = todo.title.replace("|", "\\|")
-            kind = getattr(todo.kind, "value", str(todo.kind))
-            project = todo.project_name.replace("|", "\\|") if todo.project_name else ""
-            if getattr(todo, "perform_range", None):
-                daterange = f"{todo.perform_range[0].strftime('%Y-%m-%d %H:%M')} - {todo.perform_range[1].strftime('%Y-%m-%d %H:%M')}"
+        lines = ["| 種類 | タイトル | 開始 | 終了 | 詳細 |", "| --- | --- | --- | --- | --- |"]
+        for item in result:
+            type_label = "TODO" if item.activity_type == ActivityType.TODO else "予定"
+            title = item.title.replace("|", "\\|")
+            start = item.start_datetime.strftime("%H:%M")
+            end = item.end_datetime.strftime("%H:%M")
+            if item.activity_type == ActivityType.TODO:
+                detail = f"{item.kind}" + (f" / {item.project_name}" if item.project_name else "")
             else:
-                daterange = ""
-            lines.append(f"| {title} | {kind} | {project} | {daterange} |")
+                detail = item.category if item.category else ""
+            lines.append(f"| {type_label} | {title} | {start} | {end} | {detail} |")
         console.print("\n".join(lines))
     else:
-        for todo in result:
-            prefix = f"【{todo.kind.value} {todo.project_name}】" if todo.project_name else f"【{todo.kind.value}】"
-            suffix_daterange = f" ({todo.perform_range[0].strftime('%Y-%m-%d %H:%M')} - {todo.perform_range[1].strftime('%Y-%m-%d %H:%M')})"
-            console.print(f"- {prefix}{todo.title}{suffix_daterange}")
+        for item in result:
+            if item.activity_type == ActivityType.TODO:
+                prefix = f"【TODO {item.kind}】" + (f"[{item.project_name}] " if item.project_name else "")
+            else:
+                prefix = f"【予定 {item.category}】" if item.category else "【予定】"
+            time_range = f" ({item.start_datetime.strftime('%H:%M')} - {item.end_datetime.strftime('%H:%M')})"
+            console.print(f"- {prefix}{item.title}{time_range}")
 
 
 @app.command()

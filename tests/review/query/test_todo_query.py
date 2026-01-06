@@ -1,10 +1,10 @@
-from datetime import datetime
+from datetime import date, datetime
 from unittest.mock import Mock
 
 import pytest
 from lotion import BasePage, Lotion
 
-from sandpiper.plan.domain.todo import ToDoKind
+from sandpiper.review.query.activity_log_item import ActivityType
 from sandpiper.review.query.todo_query import NotionTodoQuery
 
 
@@ -19,18 +19,24 @@ class TestNotionTodoQuery:
     def query(self, mock_lotion_client):  # noqa: ARG002
         return NotionTodoQuery()
 
-    def test_fetch_done_todos_empty_result(self, query, mock_lotion_client):
+    @pytest.fixture
+    def target_date(self):
+        return date(2024, 1, 15)
+
+    def test_fetch_done_todos_by_date_empty_result(self, query, mock_lotion_client, target_date):
         # Arrange
         mock_lotion_client.retrieve_database.return_value = []
 
         # Act
-        result = query.fetch_done_todos()
+        result = query.fetch_done_todos_by_date(target_date)
 
         # Assert
         assert result == []
         assert mock_lotion_client.retrieve_database.call_count == 2
 
-    def test_fetch_done_todos_filters_non_done_status(self, query, mock_lotion_client):
+    def test_fetch_done_todos_by_date_filters_non_done_status(
+        self, query, mock_lotion_client, target_date
+    ):
         # Arrange
         mock_todo = self._create_mock_todo_item()
         mock_status = Mock()
@@ -43,12 +49,14 @@ class TestNotionTodoQuery:
         ]
 
         # Act
-        result = query.fetch_done_todos()
+        result = query.fetch_done_todos_by_date(target_date)
 
         # Assert
         assert result == []
 
-    def test_fetch_done_todos_filters_missing_perform_range(self, query, mock_lotion_client):
+    def test_fetch_done_todos_by_date_filters_missing_perform_range(
+        self, query, mock_lotion_client, target_date
+    ):
         # Arrange
         mock_todo = self._create_mock_todo_item()
         self._setup_done_status(mock_todo)
@@ -62,12 +70,32 @@ class TestNotionTodoQuery:
         mock_lotion_client.retrieve_database.side_effect = [[mock_todo], []]
 
         # Act
-        result = query.fetch_done_todos()
+        result = query.fetch_done_todos_by_date(target_date)
 
         # Assert
         assert result == []
 
-    def test_fetch_done_todos_filters_missing_task_kind(self, query, mock_lotion_client):
+    def test_fetch_done_todos_by_date_filters_before_target_date(
+        self, query, mock_lotion_client, target_date
+    ):
+        # Arrange
+        mock_todo = self._create_mock_todo_item()
+        self._setup_done_status(mock_todo)
+        # 指定日付より前の日付
+        self._setup_perform_range(mock_todo, "2024-01-14T09:00:00", "2024-01-14T10:00:00")
+        self._setup_valid_task_kind(mock_todo, "単発")
+
+        mock_lotion_client.retrieve_database.side_effect = [[mock_todo], []]
+
+        # Act
+        result = query.fetch_done_todos_by_date(target_date)
+
+        # Assert
+        assert result == []
+
+    def test_fetch_done_todos_by_date_filters_missing_task_kind(
+        self, query, mock_lotion_client, target_date
+    ):
         # Arrange
         mock_todo = self._create_mock_todo_item()
         self._setup_done_status(mock_todo)
@@ -81,12 +109,14 @@ class TestNotionTodoQuery:
         mock_lotion_client.retrieve_database.side_effect = [[mock_todo], []]
 
         # Act
-        result = query.fetch_done_todos()
+        result = query.fetch_done_todos_by_date(target_date)
 
         # Assert
         assert result == []
 
-    def test_fetch_done_todos_single_todo_success(self, query, mock_lotion_client):
+    def test_fetch_done_todos_by_date_single_todo_success(
+        self, query, mock_lotion_client, target_date
+    ):
         # Arrange
         mock_todo = self._create_mock_todo_item()
         self._setup_done_status(mock_todo)
@@ -98,19 +128,21 @@ class TestNotionTodoQuery:
         mock_lotion_client.retrieve_database.side_effect = [[mock_todo], []]
 
         # Act
-        result = query.fetch_done_todos()
+        result = query.fetch_done_todos_by_date(target_date)
 
         # Assert
         assert len(result) == 1
-        todo_dto = result[0]
-        assert todo_dto.page_id == "test-todo-id"
-        assert todo_dto.title == "テストタスク"
-        assert todo_dto.kind == ToDoKind.SINGLE
-        assert todo_dto.project_name == ""
-        assert isinstance(todo_dto.perform_range[0], datetime)
-        assert isinstance(todo_dto.perform_range[1], datetime)
+        activity = result[0]
+        assert activity.activity_type == ActivityType.TODO
+        assert activity.title == "テストタスク"
+        assert activity.kind == "単発"
+        assert activity.project_name == ""
+        assert isinstance(activity.start_datetime, datetime)
+        assert isinstance(activity.end_datetime, datetime)
 
-    def test_fetch_done_todos_project_task_success(self, query, mock_lotion_client):
+    def test_fetch_done_todos_by_date_project_task_success(
+        self, query, mock_lotion_client, target_date
+    ):
         # Arrange
         mock_todo = self._create_mock_todo_item()
         self._setup_done_status(mock_todo)
@@ -132,17 +164,19 @@ class TestNotionTodoQuery:
         mock_lotion_client.retrieve_database.side_effect = [[mock_todo], [mock_project]]
 
         # Act
-        result = query.fetch_done_todos()
+        result = query.fetch_done_todos_by_date(target_date)
 
         # Assert
         assert len(result) == 1
-        todo_dto = result[0]
-        assert todo_dto.page_id == "project-todo-id"
-        assert todo_dto.title == "プロジェクトタスク"
-        assert todo_dto.kind == ToDoKind.PROJECT
-        assert todo_dto.project_name == "テストプロジェクト"
+        activity = result[0]
+        assert activity.activity_type == ActivityType.TODO
+        assert activity.title == "プロジェクトタスク"
+        assert activity.kind == "プロジェクト"
+        assert activity.project_name == "テストプロジェクト"
 
-    def test_fetch_done_todos_project_task_no_relation(self, query, mock_lotion_client):
+    def test_fetch_done_todos_by_date_project_task_no_relation(
+        self, query, mock_lotion_client, target_date
+    ):
         # Arrange
         mock_todo = self._create_mock_todo_item()
         self._setup_done_status(mock_todo)
@@ -157,12 +191,12 @@ class TestNotionTodoQuery:
         mock_lotion_client.retrieve_database.side_effect = [[mock_todo], []]
 
         # Act
-        result = query.fetch_done_todos()
+        result = query.fetch_done_todos_by_date(target_date)
 
         # Assert
         assert result == []
 
-    def test_fetch_done_todos_multiple_todos(self, query, mock_lotion_client):
+    def test_fetch_done_todos_by_date_multiple_todos(self, query, mock_lotion_client, target_date):
         # Arrange
         mock_todo1 = self._create_mock_todo_item()
         self._setup_done_status(mock_todo1)
@@ -181,14 +215,14 @@ class TestNotionTodoQuery:
         mock_lotion_client.retrieve_database.side_effect = [[mock_todo1, mock_todo2], []]
 
         # Act
-        result = query.fetch_done_todos()
+        result = query.fetch_done_todos_by_date(target_date)
 
         # Assert
         assert len(result) == 2
         assert result[0].title == "タスク1"
-        assert result[0].kind == ToDoKind.SINGLE
+        assert result[0].kind == "単発"
         assert result[1].title == "タスク2"
-        assert result[1].kind == ToDoKind.INTERRUPTION
+        assert result[1].kind == "差し込み"
 
     def _create_mock_todo_item(self):
         """モックのToDo項目を作成"""
@@ -203,10 +237,14 @@ class TestNotionTodoQuery:
         mock_todo.get_status.return_value = mock_status
 
     def _setup_valid_perform_range(self, mock_todo):
-        """有効な実施期間を設定"""
+        """有効な実施期間を設定(target_date以降)"""
+        self._setup_perform_range(mock_todo, "2024-01-15T09:00:00", "2024-01-15T10:00:00")
+
+    def _setup_perform_range(self, mock_todo, start: str, end: str):
+        """実施期間を設定"""
         mock_date_range = Mock()
-        mock_date_range.start = "2024-01-15T09:00:00"
-        mock_date_range.end = "2024-01-15T10:00:00"
+        mock_date_range.start = start
+        mock_date_range.end = end
         mock_todo.get_date.return_value = mock_date_range
 
     def _setup_valid_task_kind(self, mock_todo, kind_name: str):
