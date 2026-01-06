@@ -22,8 +22,8 @@ class CreateRepeatTask:
         todos: list[ToDo] = self.todo_repository.fetch()
         todo_names = [todo.title for todo in todos]
         for routine in routines:
-            # 今日の日付と一致するルーチンタスクのみ処理する
-            if routine.date != basis_date:
+            # 今日の日付以前のルーチンタスクのみ処理する
+            if routine.date <= basis_date:
                 continue
 
             # すでに同じタイトルのタスクが存在する場合はスキップする
@@ -41,6 +41,6 @@ class CreateRepeatTask:
             _inserted_todo = self.todo_repository.save(todo)
 
             # Routineの次回実行日を更新する
-            routine = routine.next_cycle()
+            routine = routine.next_cycle(basis_date=basis_date)
             print(f"Update routine next date: {routine.title} -> {routine.date}")
             self.routine_repository.update(routine)
