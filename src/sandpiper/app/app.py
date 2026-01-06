@@ -20,6 +20,9 @@ from sandpiper.plan.infrastructure.notion_project_task_repository import NotionP
 from sandpiper.plan.infrastructure.notion_routine_repository import NotionRoutineRepository
 from sandpiper.plan.infrastructure.notion_todo_repository import NotionTodoRepository as PlanNotionTodoRepository
 from sandpiper.plan.query.project_task_query import NotionProjectTaskQuery
+from sandpiper.recipe.application.create_recipe import CreateRecipe
+from sandpiper.recipe.infrastructure.notion_recipe_repository import NotionRecipeRepository
+from sandpiper.recipe.infrastructure.notion_shopping_repository import NotionShoppingRepository
 from sandpiper.review.application.get_github_activity import GetGitHubActivity
 from sandpiper.review.application.get_todo_log import GetTodoLog
 from sandpiper.review.query.github_activity_query import GitHubActivityQuery
@@ -48,6 +51,7 @@ class SandPiperApp:
         delete_calendar_events: DeleteCalendarEvents,
         convert_to_project: ConvertToProject,
         handle_special_todo: HandleSpecialTodo,
+        create_recipe: CreateRecipe,
     ) -> None:
         self.create_todo = create_todo
         self.create_project = create_project
@@ -62,6 +66,7 @@ class SandPiperApp:
         self.delete_calendar_events = delete_calendar_events
         self.convert_to_project = convert_to_project
         self.handle_special_todo = handle_special_todo
+        self.create_recipe = create_recipe
 
 
 def bootstrap() -> SandPiperApp:
@@ -82,6 +87,10 @@ def bootstrap() -> SandPiperApp:
     # GitHub integration setup
     github_client = GitHubClient()
     github_activity_query = GitHubActivityQuery(github_client)
+
+    # Recipe integration setup
+    recipe_repository = NotionRecipeRepository()
+    shopping_repository = NotionShoppingRepository()
 
     # Subscribe event handlers
     handle_todo_started = HandleTodoStarted(perform_notion_todo_repository)
@@ -152,4 +161,8 @@ def bootstrap() -> SandPiperApp:
             project_task_repository=project_task_repository,
         ),
         handle_special_todo=handle_special_todo,
+        create_recipe=CreateRecipe(
+            recipe_repository=recipe_repository,
+            shopping_repository=shopping_repository,
+        ),
     )
