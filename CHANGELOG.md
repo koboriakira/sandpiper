@@ -5,6 +5,24 @@
 このプロジェクトは[セマンティックバージョニング](https://semver.org/spec/v2.0.0.html)に従い、
 [Conventional Commits](https://conventionalcommits.org/)を使用して自動的にリリースを生成します。
 
+## [0.5.0](https://github.com/koboriakira/sandpiper/compare/v0.4.0...v0.5.0) (2026-01-06)
+
+
+### Features
+
+* Add convert TODO to project feature ([#13](https://github.com/koboriakira/sandpiper/issues/13)) ([2f4414b](https://github.com/koboriakira/sandpiper/commit/2f4414ba442e75baca7eac32dbdac3aef220c2b4))
+* add endpoint to convert Todo to Project and update version to 0.3.0 ([ee20da1](https://github.com/koboriakira/sandpiper/commit/ee20da1bf58be75826c7d33c868fc97b9dd65965))
+* add special todo handler endpoint for name-based processing ([#14](https://github.com/koboriakira/sandpiper/issues/14)) ([b323af6](https://github.com/koboriakira/sandpiper/commit/b323af6131207bd9b68cf38ccf96ed4727c0b435))
+* Update project task status to in progress ([#16](https://github.com/koboriakira/sandpiper/issues/16)) ([64c68aa](https://github.com/koboriakira/sandpiper/commit/64c68aa3dad62d00ec2b6549b8acfd25c3d357ed))
+
+
+### Bug Fixes
+
+* rename unused test parameter to satisfy ruff ARG002 ([#15](https://github.com/koboriakira/sandpiper/issues/15)) ([3dac3ea](https://github.com/koboriakira/sandpiper/commit/3dac3eaa28b4a591ada4058ec0e7280f776827b8))
+* TODOリスト作成の時刻ロジックを改善しルーチンタスクも追加 ([#17](https://github.com/koboriakira/sandpiper/issues/17)) ([3cff0cb](https://github.com/koboriakira/sandpiper/commit/3cff0cbab34a20c5845f24e3a5893316afd251c4))
+* update logic to process routine tasks only if the date is today or earlier ([2991321](https://github.com/koboriakira/sandpiper/commit/2991321a870e1ec2ecf66141bf709c01a1e48e6b))
+* update routine processing logic to skip tasks with future dates and improve logging ([22eb3ec](https://github.com/koboriakira/sandpiper/commit/22eb3ec170802c588117e70960fd5b6e6bf4fcab))
+
 ## [0.4.0](https://github.com/koboriakira/sandpiper/compare/v0.3.0...v0.4.0) (2026-01-05)
 
 
