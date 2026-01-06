@@ -110,8 +110,7 @@ class RecipeIngredientsProp(Relation):  # type: ignore[misc]
 
 
 @notion_prop("Reference")
-class RecipeReferenceProp:
-    ...
+class RecipeReferenceProp: ...
 
 
 # 買い物関連のプロパティ
