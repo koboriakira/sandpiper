@@ -34,9 +34,7 @@ class TestNotionTodoQuery:
         assert result == []
         assert mock_lotion_client.retrieve_database.call_count == 2
 
-    def test_fetch_done_todos_by_date_filters_non_done_status(
-        self, query, mock_lotion_client, target_date
-    ):
+    def test_fetch_done_todos_by_date_filters_non_done_status(self, query, mock_lotion_client, target_date):
         # Arrange
         mock_todo = self._create_mock_todo_item()
         mock_status = Mock()
@@ -54,9 +52,7 @@ class TestNotionTodoQuery:
         # Assert
         assert result == []
 
-    def test_fetch_done_todos_by_date_filters_missing_perform_range(
-        self, query, mock_lotion_client, target_date
-    ):
+    def test_fetch_done_todos_by_date_filters_missing_perform_range(self, query, mock_lotion_client, target_date):
         # Arrange
         mock_todo = self._create_mock_todo_item()
         self._setup_done_status(mock_todo)
@@ -75,9 +71,7 @@ class TestNotionTodoQuery:
         # Assert
         assert result == []
 
-    def test_fetch_done_todos_by_date_filters_before_target_date(
-        self, query, mock_lotion_client, target_date
-    ):
+    def test_fetch_done_todos_by_date_filters_before_target_date(self, query, mock_lotion_client, target_date):
         # Arrange
         mock_todo = self._create_mock_todo_item()
         self._setup_done_status(mock_todo)
@@ -93,9 +87,7 @@ class TestNotionTodoQuery:
         # Assert
         assert result == []
 
-    def test_fetch_done_todos_by_date_filters_missing_task_kind(
-        self, query, mock_lotion_client, target_date
-    ):
+    def test_fetch_done_todos_by_date_filters_missing_task_kind(self, query, mock_lotion_client, target_date):
         # Arrange
         mock_todo = self._create_mock_todo_item()
         self._setup_done_status(mock_todo)
@@ -114,9 +106,7 @@ class TestNotionTodoQuery:
         # Assert
         assert result == []
 
-    def test_fetch_done_todos_by_date_single_todo_success(
-        self, query, mock_lotion_client, target_date
-    ):
+    def test_fetch_done_todos_by_date_single_todo_success(self, query, mock_lotion_client, target_date):
         # Arrange
         mock_todo = self._create_mock_todo_item()
         self._setup_done_status(mock_todo)
@@ -140,9 +130,7 @@ class TestNotionTodoQuery:
         assert isinstance(activity.start_datetime, datetime)
         assert isinstance(activity.end_datetime, datetime)
 
-    def test_fetch_done_todos_by_date_project_task_success(
-        self, query, mock_lotion_client, target_date
-    ):
+    def test_fetch_done_todos_by_date_project_task_success(self, query, mock_lotion_client, target_date):
         # Arrange
         mock_todo = self._create_mock_todo_item()
         self._setup_done_status(mock_todo)
@@ -174,9 +162,7 @@ class TestNotionTodoQuery:
         assert activity.kind == "プロジェクト"
         assert activity.project_name == "テストプロジェクト"
 
-    def test_fetch_done_todos_by_date_project_task_no_relation(
-        self, query, mock_lotion_client, target_date
-    ):
+    def test_fetch_done_todos_by_date_project_task_no_relation(self, query, mock_lotion_client, target_date):
         # Arrange
         mock_todo = self._create_mock_todo_item()
         self._setup_done_status(mock_todo)
