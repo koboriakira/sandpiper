@@ -48,14 +48,14 @@ class TestCreateCalendarEvent:
         assert called_event.end_datetime == end_time
 
     @pytest.mark.parametrize(
-        "category_name,expected_category",
+        "_category_name,expected_category",
         [
             ("仕事", EventCategory.WORK),
             ("プライベート", EventCategory.PRIVATE),
             ("TJPW", EventCategory.TJPW),
         ],
     )
-    def test_execute_with_different_categories(self, category_name, expected_category):
+    def test_execute_with_different_categories(self, _category_name, expected_category):
         """異なるカテゴリでのイベント作成をテスト"""
         # Arrange
         mock_repository = Mock()
