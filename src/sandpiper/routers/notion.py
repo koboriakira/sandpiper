@@ -118,6 +118,46 @@ async def todo_to_project(
     )
 
 
+@router.post("/todo/special")
+async def handle_special_todo(
+    request: NotionWebhookRequest,
+    sandpiper_app: SandPiperApp = Depends(get_sandpiper_app),
+) -> JSONResponse:
+    """特定の名前のTODOに対して特殊処理を実行する
+
+    NotionからのWebhookリクエストを受け取り、TODOの名前に応じた特殊処理を実行します。
+    登録されていない名前のTODOの場合はエラーを返します。
+
+    Args:
+        request: Notion Webhookリクエスト
+        sandpiper_app: SandPiper アプリケーション
+
+    Returns:
+        JSONResponse: 処理結果のレスポンス
+    """
+    base_page = BasePage.from_data(request.data)
+    result = sandpiper_app.handle_special_todo.execute(page_id=base_page.id)
+    if not result.success:
+        return JSONResponse(
+            status_code=400,
+            content={
+                "page_id": result.page_id,
+                "title": result.title,
+                "success": result.success,
+                "message": result.message,
+            },
+        )
+    return JSONResponse(
+        content={
+            "page_id": result.page_id,
+            "title": result.title,
+            "handler_name": result.handler_name,
+            "success": result.success,
+            "message": result.message,
+        }
+    )
+
+
 @router.delete("/calendar/{date_str}")
 async def delete_calendar_events(
     date_str: str,
