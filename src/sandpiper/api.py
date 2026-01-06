@@ -1,13 +1,15 @@
 """FastAPIアプリケーション"""
 
+import json
 import os
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
 from dotenv import load_dotenv
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from starlette.responses import Response
 
 from sandpiper.app.app import bootstrap
 
@@ -83,6 +85,34 @@ else:
         allow_credentials=True,
         allow_methods=["GET", "POST", "PUT", "DELETE", "PATCH"],
         allow_headers=["Content-Type", "Authorization"],
+    )
+
+
+# レスポンスログ出力ミドルウェア
+@app.middleware("http")
+async def log_response(request: Request, call_next):
+    """レスポンスをログ出力するミドルウェア"""
+    response = await call_next(request)
+
+    # レスポンスボディを取得
+    body_bytes = b""
+    async for chunk in response.body_iterator:
+        body_bytes += chunk
+
+    # ログ出力
+    print(f"📤 Response: {request.method} {request.url.path} -> {response.status_code}")
+    try:
+        body_dict = json.loads(body_bytes)
+        print(json.dumps(body_dict, ensure_ascii=False, indent=2))
+    except Exception:
+        print(body_bytes.decode())
+
+    # 新しいレスポンスを作成して返却
+    return Response(
+        content=body_bytes,
+        status_code=response.status_code,
+        headers=dict(response.headers),
+        media_type=response.media_type,
     )
 
 
