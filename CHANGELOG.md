@@ -5,6 +5,17 @@
 このプロジェクトは[セマンティックバージョニング](https://semver.org/spec/v2.0.0.html)に従い、
 [Conventional Commits](https://conventionalcommits.org/)を使用して自動的にリリースを生成します。
 
+## [0.6.0](https://github.com/koboriakira/sandpiper/compare/v0.5.0...v0.6.0) (2026-01-07)
+
+
+### Features
+
+* Add date filtering for completed todos ([#19](https://github.com/koboriakira/sandpiper/issues/19)) ([dcf8f46](https://github.com/koboriakira/sandpiper/commit/dcf8f4606c59adaa6c0cbaa335d1809aa3b6d1b3))
+* add response logging middleware to log response details ([5183723](https://github.com/koboriakira/sandpiper/commit/5183723592560ce566dc42a67350d0dc664e8e36))
+* Copy block content when creating repeat tasks ([#22](https://github.com/koboriakira/sandpiper/issues/22)) ([08c23d3](https://github.com/koboriakira/sandpiper/commit/08c23d38e0f937c0350280098186088f736435ca))
+* Copy execution time when creating repeat tasks ([#21](https://github.com/koboriakira/sandpiper/issues/21)) ([558d3df](https://github.com/koboriakira/sandpiper/commit/558d3dfdbcc8e323ae9193e241e81ea55e31fb2a))
+* Create recipe context and add recipes ([#20](https://github.com/koboriakira/sandpiper/issues/20)) ([005ee2e](https://github.com/koboriakira/sandpiper/commit/005ee2e56864a6e7831f650123f74b23d5f678e6))
+
 ## [0.5.0](https://github.com/koboriakira/sandpiper/compare/v0.4.0...v0.5.0) (2026-01-06)
 
 
