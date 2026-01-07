@@ -20,7 +20,7 @@ class CreateRepeatProjectTask:
             # ToDoを保存
             options = {
                 "is_tomorrow": is_tomorrow,
-                "source_page_id": project_task.page_id,
+                "block_children": project_task.block_children,
             }
             _inserted_todo = self.todo_repository.save(todo, options)
             print(f"Create repeat project task: {todo.title}")

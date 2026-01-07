@@ -1,4 +1,5 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from typing import Any
 
 from sandpiper.plan.domain.todo import ToDo, ToDoKind
 from sandpiper.shared.valueobject.todo_status_enum import ToDoStatusEnum
@@ -11,6 +12,7 @@ class ProjectTaskDto:
     status: ToDoStatusEnum
     project_page_id: str
     is_next: bool
+    block_children: list[Any] = field(default_factory=list)
 
     def to_todo_model(self) -> ToDo:
         return ToDo(

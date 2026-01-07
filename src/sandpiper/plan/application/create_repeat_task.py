@@ -40,7 +40,7 @@ class CreateRepeatTask:
                 kind=ToDoKind.REPEAT,
                 execution_time=routine.execution_time,
             )
-            _inserted_todo = self.todo_repository.save(todo, {"source_page_id": routine.id})
+            _inserted_todo = self.todo_repository.save(todo, {"block_children": routine.block_children})
 
             # Routineの次回実行日を更新する
             routine = routine.next_cycle(basis_date=basis_date)
