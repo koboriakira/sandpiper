@@ -607,15 +607,15 @@ wheels = [
 
 [[package]]
 name = "lotion"
-version = "0.9.4"
+version = "0.9.5"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "notion-client" },
     { name = "requests" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/12/a9/01a990faa545b83944601ffdbd5ad1f14a05a59d9f997d029e3019c1dd7e/lotion-0.9.4.tar.gz", hash = "sha256:7927677af1e55fac7e96e1f8341a02d61222015a38e0be3f05e202810d81227a", size = 36589, upload-time = "2025-01-15T04:57:10.25Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/cb/2f/d1626d4b870378a9dc840335ed60ac2cacbf83cf8b8a682c1b83fd19814d/lotion-0.9.5.tar.gz", hash = "sha256:b83721b6487b0880ddb61d96cc54c16c2c992f0bd0239812dfefe0dfb3e06e99", size = 36735, upload-time = "2026-01-07T06:02:40.324Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/89/2f/074de44d99d517fed1c9493583e126757e3f99e14c8c03243788b5c1453b/lotion-0.9.4-py3-none-any.whl", hash = "sha256:10801c123d1d6f27952c411674d69e51f78512c4fae2c3e71b1e931bae1997ed", size = 61417, upload-time = "2025-01-15T04:57:07.843Z" },
+    { url = "https://files.pythonhosted.org/packages/22/77/0b431bbd6427f5dc65481b8651fb714de42f030874c9bbe246d8bae96f1e/lotion-0.9.5-py3-none-any.whl", hash = "sha256:24521ee8a750f3bb45f86d5227f9772acf98ce03791b7581ed0b52030516f94c", size = 61581, upload-time = "2026-01-07T06:02:39.163Z" },
 ]
 
 [[package]]
@@ -1457,7 +1457,7 @@ test = [
 requires-dist = [
     { name = "fastapi", specifier = ">=0.128.0" },
     { name = "httpx", specifier = ">=0.25.0" },
-    { name = "lotion", specifier = ">=0.9.4" },
+    { name = "lotion", specifier = ">=0.9.5" },
     { name = "notion-client", specifier = "==2.2.1" },
     { name = "pydantic", specifier = ">=2.5.0" },
     { name = "pygithub", specifier = ">=2.8.1" },
