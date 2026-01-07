@@ -19,4 +19,5 @@ class ProjectTaskDto:
             kind=ToDoKind.PROJECT,
             project_page_id=self.project_page_id,
             project_task_page_id=self.page_id,
+            execution_time=30,
         )

@@ -38,6 +38,7 @@ class CreateRepeatTask:
                 title=routine.title,
                 section=routine.section,
                 kind=ToDoKind.REPEAT,
+                execution_time=routine.execution_time,
             )
             _inserted_todo = self.todo_repository.save(todo)
 

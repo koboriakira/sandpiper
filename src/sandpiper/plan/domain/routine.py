@@ -12,6 +12,7 @@ class Routine:
     date: Date
     section: TaskChuteSection
     cycle: RoutineCycle
+    execution_time: int | None = None
 
     def next_cycle(self, basis_date: Date | None = None) -> "Routine":
         next_date = self.cycle.next_date(basis_date=basis_date or self.date)
@@ -21,4 +22,5 @@ class Routine:
             date=next_date,
             section=self.section,
             cycle=self.cycle,
+            execution_time=self.execution_time,
         )

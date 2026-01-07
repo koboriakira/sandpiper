@@ -1,5 +1,5 @@
 from lotion import notion_prop  # type: ignore[import-untyped]
-from lotion.properties import Date, Relation, Select, Status, Title  # type: ignore[import-untyped]
+from lotion.properties import Date, Number, Relation, Select, Status, Title  # type: ignore[import-untyped]
 
 # ToDo関連のプロパティ
 
@@ -39,9 +39,19 @@ class TodoProjectTaskProp(Relation):  # type: ignore[misc]
     ...
 
 
+@notion_prop("実行時間")
+class TodoExecutionTime(Number):  # type: ignore[misc]
+    ...
+
+
 # ルーティン関連のプロパティ
 @notion_prop("次回実行日")
 class RoutineNextDate(Date):  # type: ignore[misc]
+    ...
+
+
+@notion_prop("実行時間")
+class RoutineExecutionTime(Number):  # type: ignore[misc]
     ...
 
 
