@@ -21,12 +21,14 @@ class NotionRoutineRepository(RoutineRepository):
                 continue
             section_name = item.get_select("セクション").selected_name
             cycle = item.get_select("周期").selected_name
+            execution_time = item.get_number("実行時間").number
             routine = Routine(
                 id=item.id,
                 title=item.get_title_text(),
                 date=start_date,
                 section=TaskChuteSection(section_name),
                 cycle=RoutineCycle(cycle),
+                execution_time=int(execution_time) if execution_time else None,
             )
             routines.append(routine)
         return routines

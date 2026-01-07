@@ -6,6 +6,7 @@ from lotion.block.rich_text.rich_text_builder import RichTextBuilder  # type: ig
 from sandpiper.plan.domain.todo import InsertedToDo, ToDo, ToDoKind, ToDoStatus
 from sandpiper.shared.notion.database_config import DatabaseId
 from sandpiper.shared.notion.notion_props import (
+    TodoExecutionTime,
     TodoKindProp,
     TodoName,
     TodoProjectProp,
@@ -38,6 +39,8 @@ class TodoPage(BasePage):  # type: ignore[misc]
         t_section = TodoSection.from_name(todo.section.value) if todo.section else None
         if t_section:
             properties.append(t_section)
+        if todo.execution_time is not None:
+            properties.append(TodoExecutionTime.from_num(todo.execution_time))
         if todo.project_page_id and todo.project_task_page_id:
             properties.append(TodoProjectProp.from_id(todo.project_page_id))
             properties.append(TodoProjectTaskProp.from_id(todo.project_task_page_id))
@@ -51,12 +54,14 @@ class TodoPage(BasePage):  # type: ignore[misc]
         kind = self.get_select("タスク種別")
         project = self.get_relation("プロジェクト").id_list
         project_task = self.get_relation("プロジェクトタスク").id_list
+        execution_time = self.get_number("実行時間").number
         return ToDo(
             title=self.get_title_text(),
             kind=ToDoKind(kind.selected_name) if kind.selected_name else None,
             section=TaskChuteSection(section.selected_name) if section.selected_name else None,
             project_page_id=project[0] if project else None,
             project_task_page_id=project_task[0] if project_task else None,
+            execution_time=int(execution_time) if execution_time else None,
         )
 
 
@@ -72,6 +77,7 @@ class NotionTodoRepository:
             title=todo.title,
             section=todo.section,
             kind=todo.kind,
+            execution_time=todo.execution_time,
         )
 
     def fetch(self) -> list[ToDo]:
