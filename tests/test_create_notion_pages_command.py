@@ -12,7 +12,7 @@ from sandpiper.recipe.domain.recipe import InsertedRecipe
 
 
 # テスト前にbootstrapをモックする必要がある
-@patch.dict("os.environ", {"GITHUB_TOKEN": "test_token", "NOTION_TOKEN": "test_notion_token"})
+@patch.dict("os.environ", {"GITHUB_TOKEN": "test_token", "NOTION_SECRET": "test_NOTION_SECRET"})
 def get_runner_and_app():
     """テスト用のrunnerとappを取得する"""
     # 既存のモジュールをクリア

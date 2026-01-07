@@ -145,7 +145,7 @@ src/sandpiper/
 #### 必須環境変数(Notion・Slack・GitHub統合)
 ```bash
 # Notion API設定
-export NOTION_TOKEN="secret_****"           # Notion Integration Token
+export NOTION_SECRET="secret_****"           # Notion Integration Token
 export SLACK_BOT_TOKEN="xoxb-****"         # Slack Bot Token
 export GITHUB_TOKEN="ghp_****"             # GitHub Personal Access Token
 
