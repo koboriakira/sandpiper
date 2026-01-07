@@ -4,22 +4,27 @@ from datetime import date
 from sandpiper.plan.domain.routine_repository import RoutineRepository
 from sandpiper.plan.domain.todo import ToDo, ToDoKind
 from sandpiper.plan.domain.todo_repository import TodoRepository
+from sandpiper.plan.query.todo_query import TodoQuery
 
 
 @dataclass
 class CreateRepeatTask:
     routine_repository: RoutineRepository
     todo_repository: TodoRepository
+    todo_query: TodoQuery
 
-    def __init__(self, routine_repository: RoutineRepository, todo_repository: TodoRepository) -> None:
+    def __init__(
+        self, routine_repository: RoutineRepository, todo_repository: TodoRepository, todo_query: TodoQuery
+    ) -> None:
         self.routine_repository = routine_repository
         self.todo_repository = todo_repository
+        self.todo_query = todo_query
 
     def execute(self, basis_date: date) -> None:
         # Create the main task
         print("Creating repeat tasks...")
         routines = self.routine_repository.fetch()
-        todos: list[ToDo] = self.todo_repository.fetch()
+        todos: list[ToDo] = self.todo_query.fetch_todos_not_is_today()
         todo_names = [todo.title for todo in todos]
         for routine in routines:
             # 今日の日付以前のルーチンタスクのみ処理する

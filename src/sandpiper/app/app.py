@@ -20,6 +20,7 @@ from sandpiper.plan.infrastructure.notion_project_task_repository import NotionP
 from sandpiper.plan.infrastructure.notion_routine_repository import NotionRoutineRepository
 from sandpiper.plan.infrastructure.notion_todo_repository import NotionTodoRepository as PlanNotionTodoRepository
 from sandpiper.plan.query.project_task_query import NotionProjectTaskQuery
+from sandpiper.plan.query.todo_query import NotionTodoQuery as PlanNotionTodoQuery
 from sandpiper.recipe.application.create_recipe import CreateRecipe
 from sandpiper.recipe.infrastructure.notion_recipe_repository import NotionRecipeRepository
 from sandpiper.recipe.infrastructure.notion_shopping_repository import NotionShoppingRepository
@@ -108,9 +109,11 @@ def bootstrap() -> SandPiperApp:
         project_task_query=project_task_query,
         todo_repository=plan_notion_todo_repository,
     )
+    plan_todo_query = PlanNotionTodoQuery()
     create_repeat_task = CreateRepeatTask(
         routine_repository=routine_repository,
         todo_repository=plan_notion_todo_repository,
+        todo_query=plan_todo_query,
     )
 
     # Create special todo handler and register handlers

@@ -1,5 +1,14 @@
 from lotion import notion_prop  # type: ignore[import-untyped]
-from lotion.properties import Date, Number, Relation, Select, Status, Title, Url  # type: ignore[import-untyped]
+from lotion.properties import (  # type: ignore[import-untyped]
+    Checkbox,
+    Date,
+    Number,
+    Relation,
+    Select,
+    Status,
+    Title,
+    Url,
+)
 
 # ToDo関連のプロパティ
 
@@ -16,6 +25,11 @@ class TodoStatus(Status):  # type: ignore[misc]
 
 @notion_prop("セクション")
 class TodoSection(Select):  # type: ignore[misc]
+    ...
+
+
+@notion_prop("今日中にやる")
+class TodoIsTodayProp(Checkbox):  # type: ignore[misc]
     ...
 
 
