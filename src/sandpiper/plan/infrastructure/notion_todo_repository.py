@@ -4,6 +4,7 @@ from lotion import BasePage, Lotion, notion_database  # type: ignore[import-unty
 from lotion.block.rich_text.rich_text_builder import RichTextBuilder  # type: ignore[import-untyped]
 
 from sandpiper.plan.domain.todo import InsertedToDo, ToDo, ToDoKind, ToDoStatus
+from sandpiper.shared.notion.block_service import get_block_service
 from sandpiper.shared.notion.database_config import DatabaseId
 from sandpiper.shared.notion.notion_props import (
     TodoExecutionTime,
@@ -70,8 +71,18 @@ class NotionTodoRepository:
         self.client = Lotion.get_instance()
 
     def save(self, todo: ToDo, options: dict[str, Any] | None = None) -> InsertedToDo:
-        notion_todo = TodoPage.generate(todo, options=options or {})
+        options = options or {}
+        notion_todo = TodoPage.generate(todo, options=options)
         page = self.client.create_page(notion_todo)
+
+        # ソースページIDが指定されている場合、ブロックをコピー
+        source_page_id = options.get("source_page_id")
+        if source_page_id:
+            block_service = get_block_service()
+            copied_count = block_service.copy_blocks(source_page_id, page.id)
+            if copied_count > 0:
+                print(f"Copied {copied_count} blocks from source page")
+
         return InsertedToDo(
             id=page.id,
             title=todo.title,
