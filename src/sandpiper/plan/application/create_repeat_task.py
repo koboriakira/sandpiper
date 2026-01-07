@@ -32,7 +32,7 @@ class CreateRepeatTask:
                 print(f"Skip creating repeat task (already exists): {routine.title}")
                 continue
 
-            # Todoを作成する
+            # Todoを作成する(Routineのブロックもコピーする)
             print(f"Create repeat task: {routine.title}")
             todo = ToDo(
                 title=routine.title,
@@ -40,7 +40,7 @@ class CreateRepeatTask:
                 kind=ToDoKind.REPEAT,
                 execution_time=routine.execution_time,
             )
-            _inserted_todo = self.todo_repository.save(todo)
+            _inserted_todo = self.todo_repository.save(todo, {"block_children": routine.block_children})
 
             # Routineの次回実行日を更新する
             routine = routine.next_cycle(basis_date=basis_date)

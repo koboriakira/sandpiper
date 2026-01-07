@@ -47,7 +47,10 @@ class TodoPage(BasePage):  # type: ignore[misc]
             start_day = jst_tommorow() if options.get("is_tomorrow") else jst_today()
             rich_text_builder = RichTextBuilder.create().add_text(todo.title).add_date_mention(start=start_day)
             properties.append(TodoName.from_rich_text(rich_text_builder.build()))
-        return TodoPage.create(properties=properties)  # type: ignore[no-any-return]
+
+        # ブロックコンテンツがある場合は一緒に作成
+        blocks = options.get("block_children", [])
+        return TodoPage.create(properties=properties, blocks=blocks)  # type: ignore[no-any-return]
 
     def to_domain(self) -> ToDo:
         section = self.get_select("セクション")
@@ -70,7 +73,8 @@ class NotionTodoRepository:
         self.client = Lotion.get_instance()
 
     def save(self, todo: ToDo, options: dict[str, Any] | None = None) -> InsertedToDo:
-        notion_todo = TodoPage.generate(todo, options=options or {})
+        options = options or {}
+        notion_todo = TodoPage.generate(todo, options=options)
         page = self.client.create_page(notion_todo)
         return InsertedToDo(
             id=page.id,

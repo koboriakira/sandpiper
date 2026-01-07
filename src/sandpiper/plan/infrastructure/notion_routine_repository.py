@@ -29,6 +29,7 @@ class NotionRoutineRepository(RoutineRepository):
                 section=TaskChuteSection(section_name),
                 cycle=RoutineCycle(cycle),
                 execution_time=int(execution_time) if execution_time else None,
+                block_children=item.block_children,
             )
             routines.append(routine)
         return routines

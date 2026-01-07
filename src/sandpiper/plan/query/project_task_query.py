@@ -34,6 +34,7 @@ class NotionProjectTaskQuery(ProjectTaskQuery):
                 status=status,
                 project_page_id=project_relations[0],
                 is_next=is_next,
+                block_children=item.block_children,
             )
             project_dtos.append(project_task)
         return project_dtos
