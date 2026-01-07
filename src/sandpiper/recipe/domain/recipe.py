@@ -3,7 +3,7 @@ from dataclasses import dataclass
 
 @dataclass
 class Ingredient:
-    """材料を表すドメインモデル"""
+    """食材を表すドメインモデル"""
 
     name: str
     quantity: str

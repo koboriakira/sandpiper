@@ -10,6 +10,7 @@ from rich.panel import Panel
 from sandpiper.app.app import bootstrap
 from sandpiper.plan.application.create_project_task import CreateProjectTaskRequest
 from sandpiper.plan.application.create_todo import CreateNewToDoRequest
+from sandpiper.recipe.application.create_recipe import CreateRecipeRequest, IngredientRequest
 from sandpiper.shared.valueobject.todo_status_enum import ToDoStatusEnum
 
 from . import __version__
@@ -347,6 +348,75 @@ def get_github_activity(
             for review in result.reviews:
                 console.print(f"  - [{review.repo}] PR #{review.pr_number}: {review.state}")
             console.print()
+
+
+@app.command()
+def create_notion_pages(
+    file_path: str = typer.Argument(..., help="JSONファイルのパス"),
+) -> None:
+    """JSONファイルからNotionページを作成します(現在はRecipeのみ対応)"""
+    import json
+    from pathlib import Path
+
+    json_path = Path(file_path)
+
+    # ファイル存在チェック
+    if not json_path.exists():
+        console.print(f"[red]エラー: ファイルが見つかりません: {file_path}[/red]")
+        raise typer.Exit(code=1)
+
+    # JSONファイル読み込み
+    try:
+        with json_path.open(encoding="utf-8") as f:
+            data = json.load(f)
+    except json.JSONDecodeError as e:
+        console.print(f"[red]エラー: JSONファイルの解析に失敗しました: {e}[/red]")
+        raise typer.Exit(code=1)
+
+    # データが配列であることを確認
+    if not isinstance(data, list):
+        console.print("[red]エラー: JSONファイルは配列形式である必要があります[/red]")
+        raise typer.Exit(code=1)
+
+    # 各アイテムを処理
+    created_count = 0
+    skipped_count = 0
+
+    for item in data:
+        item_type = item.get("type", "").lower()
+
+        if item_type == "recipe":
+            try:
+                # IngredientRequestリストを作成
+                ingredients = [
+                    IngredientRequest(
+                        name=ing.get("name", ""),
+                        quantity=ing.get("quantity", ""),
+                    )
+                    for ing in item.get("ingredients", [])
+                ]
+
+                # CreateRecipeRequestを作成
+                request = CreateRecipeRequest(
+                    title=item.get("title", ""),
+                    reference_url=item.get("reference_url"),
+                    ingredients=ingredients,
+                    steps=item.get("steps", []),
+                )
+
+                # レシピを作成
+                result = sandpiper_app.create_recipe.execute(request)
+                console.print(f"[green]作成完了: {result.title} (ID: {result.id})[/green]")
+                created_count += 1
+
+            except Exception as e:
+                console.print(f"[red]エラー: レシピ '{item.get('title', '不明')}' の作成に失敗しました: {e}[/red]")
+        else:
+            console.print(f"[yellow]スキップ: 未対応のタイプ '{item.get('type', '不明')}'[/yellow]")
+            skipped_count += 1
+
+    # 結果サマリー
+    console.print(f"\n[bold]処理完了: {created_count}件作成, {skipped_count}件スキップ[/bold]")
 
 
 if __name__ == "__main__":
