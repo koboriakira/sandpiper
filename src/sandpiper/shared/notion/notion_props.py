@@ -1,5 +1,5 @@
 from lotion import notion_prop  # type: ignore[import-untyped]
-from lotion.properties import Date, Number, Relation, Select, Status, Title  # type: ignore[import-untyped]
+from lotion.properties import Date, Number, Relation, Select, Status, Title, Url  # type: ignore[import-untyped]
 
 # ToDo関連のプロパティ
 
@@ -120,7 +120,8 @@ class RecipeIngredientsProp(Relation):  # type: ignore[misc]
 
 
 @notion_prop("Reference")
-class RecipeReferenceProp: ...
+class RecipeReferenceProp(Url):  # type: ignore[misc]
+    ...
 
 
 # 買い物関連のプロパティ
