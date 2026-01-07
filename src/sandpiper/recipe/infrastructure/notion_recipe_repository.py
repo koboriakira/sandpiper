@@ -20,9 +20,9 @@ class RecipePage(BasePage):  # type: ignore[misc]
             RecipeName.from_plain_text(recipe.title),
         ]
         if recipe.reference_url:
-            properties.append(RecipeReferenceProp.from_url(recipe.reference_url))  # type: ignore[arg-type]
+            properties.append(RecipeReferenceProp.from_url(recipe.reference_url))
         if ingredient_page_ids:
-            properties.append(RecipeIngredientsProp.from_id_list(ingredient_page_ids))  # type: ignore[arg-type]
+            properties.append(RecipeIngredientsProp.from_id_list(ingredient_page_ids))
         blocks = []
         blocks.append(Heading.from_plain_text(heading_size=2, text="食材"))
         for ingredient in recipe.ingredients:
