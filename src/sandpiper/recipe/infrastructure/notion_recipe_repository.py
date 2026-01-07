@@ -61,14 +61,14 @@ class NotionRecipeRepository:
         ingredients: list[Ingredient],
         steps: list[str],
     ) -> None:
-        """レシピのページ本文に材料と工程を追加する"""
+        """レシピのページ本文に食材と工程を追加する"""
         blocks: list[dict[str, object]] = []
 
         blocks.append(
             {
                 "object": "block",
                 "type": "heading_2",
-                "heading_2": {"rich_text": [{"type": "text", "text": {"content": "材料"}}]},
+                "heading_2": {"rich_text": [{"type": "text", "text": {"content": "食材"}}]},
             }
         )
 

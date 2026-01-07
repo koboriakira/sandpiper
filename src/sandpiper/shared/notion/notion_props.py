@@ -114,7 +114,7 @@ class RecipeName(Title):  # type: ignore[misc]
     ...
 
 
-@notion_prop("材料")
+@notion_prop("食材")
 class RecipeIngredientsProp(Relation):  # type: ignore[misc]
     ...
 

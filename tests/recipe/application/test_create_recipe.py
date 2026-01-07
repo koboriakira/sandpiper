@@ -91,11 +91,11 @@ class TestCreateRecipe:
         # Arrange
         self.mock_recipe_repository.save.return_value = InsertedRecipe(
             id="recipe-page-id",
-            title="材料なしレシピ",
+            title="食材なしレシピ",
         )
 
         request = CreateRecipeRequest(
-            title="材料なしレシピ",
+            title="食材なしレシピ",
             reference_url=None,
             ingredients=[],
             steps=["何かする"],
@@ -105,7 +105,7 @@ class TestCreateRecipe:
         result = self.create_recipe.execute(request)
 
         # Assert
-        assert result.title == "材料なしレシピ"
+        assert result.title == "食材なしレシピ"
         self.mock_shopping_repository.find_or_create.assert_not_called()
         saved_ingredient_ids = self.mock_recipe_repository.save.call_args[0][1]
         assert saved_ingredient_ids == []
@@ -131,7 +131,7 @@ class TestCreateRecipe:
         request = CreateRecipeRequest(
             title="複雑なレシピ",
             reference_url="https://youtube.com/watch?v=xxx",
-            ingredients=[IngredientRequest(name="材料A", quantity="適量")],
+            ingredients=[IngredientRequest(name="食材A", quantity="適量")],
             steps=steps,
         )
 
@@ -151,7 +151,7 @@ class TestCreateRecipeRequest:
             title="テストレシピ",
             reference_url="https://example.com",
             ingredients=[
-                IngredientRequest(name="材料1", quantity="100g"),
+                IngredientRequest(name="食材1", quantity="100g"),
             ],
             steps=["手順1"],
         )
