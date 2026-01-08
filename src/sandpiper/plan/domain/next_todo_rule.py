@@ -19,5 +19,17 @@ def next_todo_rule(title: str) -> ToDo | None:
                 kind=ToDoKind.REPEAT,
                 section=TaskChuteSection.new(jst_now() + timedelta(hours=6)),
             )
+        case "料理" | "朝食" | "昼食" | "夕食":
+            return ToDo(
+                title="食器洗い",
+                kind=ToDoKind.REPEAT,
+                section=TaskChuteSection.new(jst_now()),
+            )
+        case "食器洗い":
+            return ToDo(
+                title="食器の片付け",
+                kind=ToDoKind.REPEAT,
+                section=TaskChuteSection.new(jst_now() + timedelta(minutes=60)),
+            )
         case _:
             return None
