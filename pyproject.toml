@@ -29,6 +29,7 @@ dependencies = [
     "slack-sdk>=3.39.0",
     "pygithub>=2.8.1",
     "python-dotenv>=1.2.1",
+    "urllib3>=2.6.3",
 ]
 
 [dependency-groups]
