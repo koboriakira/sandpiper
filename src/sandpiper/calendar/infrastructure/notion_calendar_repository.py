@@ -25,8 +25,7 @@ class CalendarEventPage(BasePage):  # type: ignore[misc]
         properties = [
             CalendarEventName.from_plain_text(event.name),
             CalendarEventCategory.from_name(event.category.value),
-            CalendarEventStartDate.from_start_date(event.start_datetime),
-            CalendarEventEndDate.from_start_date(event.end_datetime),
+            CalendarEventStartDate.from_range(start=event.start_datetime, end=event.end_datetime),
         ]
         return CalendarEventPage.create(properties=properties)  # type: ignore[no-any-return]
 
