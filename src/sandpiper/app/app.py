@@ -13,11 +13,13 @@ from sandpiper.plan.application.create_project import CreateProject
 from sandpiper.plan.application.create_project_task import CreateProjectTask
 from sandpiper.plan.application.create_repeat_project_task import CreateRepeatProjectTask
 from sandpiper.plan.application.create_repeat_task import CreateRepeatTask
+from sandpiper.plan.application.create_tasks_by_someday_list import CreateTasksBySomedayList
 from sandpiper.plan.application.create_todo import CreateToDo
 from sandpiper.plan.application.handle_completed_task import HandleCompletedTask
 from sandpiper.plan.infrastructure.notion_project_repository import NotionProjectRepository
 from sandpiper.plan.infrastructure.notion_project_task_repository import NotionProjectTaskRepository
 from sandpiper.plan.infrastructure.notion_routine_repository import NotionRoutineRepository
+from sandpiper.plan.infrastructure.notion_someday_repository import NotionSomedayRepository
 from sandpiper.plan.infrastructure.notion_todo_repository import NotionTodoRepository as PlanNotionTodoRepository
 from sandpiper.plan.query.project_task_query import NotionProjectTaskQuery
 from sandpiper.plan.query.todo_query import NotionTodoQuery as PlanNotionTodoQuery
@@ -116,6 +118,13 @@ def bootstrap() -> SandPiperApp:
         todo_query=plan_todo_query,
     )
 
+    # Someday list integration
+    someday_repository = NotionSomedayRepository()
+    create_tasks_by_someday_list = CreateTasksBySomedayList(
+        someday_repository=someday_repository,
+        todo_repository=plan_notion_todo_repository,
+    )
+
     # Create special todo handler and register handlers
     handle_special_todo = HandleSpecialTodo(
         todo_repository=perform_notion_todo_repository,
@@ -124,6 +133,7 @@ def bootstrap() -> SandPiperApp:
         CreateTomorrowTodoListHandler(
             create_repeat_project_task=create_repeat_project_task,
             create_repeat_task=create_repeat_task,
+            create_tasks_by_someday_list=create_tasks_by_someday_list,
         )
     )
 

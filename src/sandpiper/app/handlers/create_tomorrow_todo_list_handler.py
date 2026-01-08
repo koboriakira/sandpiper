@@ -16,6 +16,7 @@ from sandpiper.app.handlers.special_todo_handler import (
 )
 from sandpiper.plan.application.create_repeat_project_task import CreateRepeatProjectTask
 from sandpiper.plan.application.create_repeat_task import CreateRepeatTask
+from sandpiper.plan.application.create_tasks_by_someday_list import CreateTasksBySomedayList
 
 JST = ZoneInfo("Asia/Tokyo")
 
@@ -65,15 +66,18 @@ class CreateTomorrowTodoListHandler(SpecialTodoHandler):
         self,
         create_repeat_project_task: CreateRepeatProjectTask,
         create_repeat_task: CreateRepeatTask,
+        create_tasks_by_someday_list: CreateTasksBySomedayList,
     ) -> None:
         """初期化
 
         Args:
             create_repeat_project_task: プロジェクトタスクからTODOを作成するユースケース
             create_repeat_task: ルーチンタスクからTODOを作成するユースケース
+            create_tasks_by_someday_list: サムデイリストからTODOを作成するユースケース
         """
         self._create_repeat_project_task = create_repeat_project_task
         self._create_repeat_task = create_repeat_task
+        self._create_tasks_by_someday_list = create_tasks_by_someday_list
 
     @property
     def handler_name(self) -> str:
@@ -107,10 +111,17 @@ class CreateTomorrowTodoListHandler(SpecialTodoHandler):
             # ルーチンタスクからTODOを作成
             self._create_repeat_task.execute(basis_date=basis_date)
 
+            # サムデイリストからTODOを作成
+            someday_result = self._create_tasks_by_someday_list.execute()
+
+            message = f"{target_day}のTODOリストを作成しました"
+            if someday_result.created_count > 0:
+                message += f"(サムデイリストから{someday_result.created_count}件)"
+
             return self._success_result(
                 page_id=page_id,
                 title=title,
-                message=f"{target_day}のTODOリストを作成しました",
+                message=message,
             )
         except Exception as e:
             return self._failure_result(

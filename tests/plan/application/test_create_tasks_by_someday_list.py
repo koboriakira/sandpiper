@@ -103,9 +103,7 @@ class TestCreateTasksBySomedayList:
 
         # サムデイアイテムが3回削除されたことを確認
         assert self.mock_someday_repository.delete.call_count == 3
-        self.mock_someday_repository.delete.assert_has_calls(
-            [call("someday-1"), call("someday-2"), call("someday-3")]
-        )
+        self.mock_someday_repository.delete.assert_has_calls([call("someday-1"), call("someday-2"), call("someday-3")])
 
     def test_todo_created_with_correct_kind(self):
         """TODOが正しいタスク種別で作成されることを確認"""
