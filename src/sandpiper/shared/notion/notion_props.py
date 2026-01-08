@@ -142,3 +142,24 @@ class RecipeReferenceProp(Url):  # type: ignore[misc]
 @notion_prop("名前")
 class ShoppingName(Title):  # type: ignore[misc]
     ...
+
+
+# サムデイリスト関連のプロパティ
+@notion_prop("名前")
+class SomedayName(Title):  # type: ignore[misc]
+    ...
+
+
+@notion_prop("タイミング")
+class SomedayTiming(Select):  # type: ignore[misc]
+    ...
+
+
+@notion_prop("明日やる")
+class SomedayDoTomorrow(Checkbox):  # type: ignore[misc]
+    ...
+
+
+@notion_prop("論理削除")
+class SomedayIsDeleted(Checkbox):  # type: ignore[misc]
+    ...
