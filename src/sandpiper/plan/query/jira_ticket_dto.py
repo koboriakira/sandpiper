@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from datetime import datetime
+from typing import Any
 
 
 @dataclass(frozen=True)
@@ -25,7 +26,7 @@ class JiraTicketDto:
     github_issue: str | None = None
     url: str | None = None
 
-    def to_dict(self) -> dict:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "issue_key": self.issue_key,
             "summary": self.summary,

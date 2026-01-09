@@ -1,6 +1,6 @@
 import os
 from datetime import datetime
-from typing import Protocol
+from typing import Any, Protocol
 
 import requests
 from requests import Session
@@ -24,9 +24,7 @@ class JiraTicketQuery(Protocol):
 
 class RestApiJiraTicketQuery(JiraTicketQuery):
     def __init__(self, base_url: str | None = None, username: str | None = None, api_token: str | None = None) -> None:
-        self.base_url = base_url or os.getenv("BUSINESS_JIRA_BASE_URL")
-        if not self.base_url:
-            raise ValueError("BUSINESS_JIRA_BASE_URL must be set")
+        self.base_url = base_url or os.getenv("BUSINESS_JIRA_BASE_URL", "https://jira.atlassian.com")
 
         username = username or os.getenv("BUSINESS_JIRA_USERNAME")
         api_token = api_token or os.getenv("BUSINESS_JIRA_API_TOKEN")
@@ -53,34 +51,18 @@ class RestApiJiraTicketQuery(JiraTicketQuery):
         if not jql:
             jql = self._build_jql(project, issue_type, status, assignee)
 
-        # Define fields to fetch (basic fields only)
-        fields = [
-            "summary",
-            "issuetype",
-            "status",
-            "priority",
-            "assignee",
-            "reporter",
-            "created",
-            "updated",
-        ]
-
-        url = f"{self.base_url}/rest/api/3/search/jql"
-        params = {
+        url = f"{self.base_url}/rest/api/3/search"
+        params: dict[str, str | int] = {
             "jql": jql,
             "maxResults": min(max_results, 100),  # JIRA限制
-            "fields": "key,summary,issuetype,status,priority,assignee,reporter,created,updated",
+            "fields": "key,summary,issuetype,status,priority,assignee,reporter,created,updated,duedate,description,labels,fixVersions,components,parent,customfield_10020,customfield_10016,customfield_10014,customfield_10328",
+            "startAt": 0,
         }
-        next_page_token = None
 
         tickets = []
         total_fetched = 0
 
         while total_fetched < max_results:
-            # Add pagination token if exists
-            if next_page_token:
-                params["startAt"] = next_page_token
-
             try:
                 response = self.session.get(url, params=params)
                 response.raise_for_status()
@@ -91,7 +73,7 @@ class RestApiJiraTicketQuery(JiraTicketQuery):
                     try:
                         error_data = e.response.json()
                         error_msg += f" - {error_data}"
-                    except:
+                    except Exception:
                         error_msg += f" - {e.response.text[:500]}"
                 raise requests.HTTPError(error_msg, response=e.response)
 
@@ -109,12 +91,13 @@ class RestApiJiraTicketQuery(JiraTicketQuery):
                 if total_fetched >= max_results:
                     break
 
-            # Check if there are more results using new pagination system
-            is_last = data.get("isLast", True)
-            next_page_token = data.get("nextPageToken")
-
-            if is_last or not next_page_token:
+            # Check if there are more results
+            total = data.get("total", 0)
+            if total_fetched >= total or not issues:
                 break
+
+            # Update startAt for next page
+            params["startAt"] = total_fetched
 
         return tickets
 
@@ -142,10 +125,6 @@ class RestApiJiraTicketQuery(JiraTicketQuery):
 
         if project:
             conditions.append(f'project = "{project}"')
-        elif self.default_project:
-            conditions.append(f'project = "{self.default_project}"')
-        else:
-            raise ValueError("Project must be specified either in argument or BUSINESS_JIRA_PROJECT env variable")
 
         if issue_type:
             if "," in issue_type:
@@ -166,14 +145,11 @@ class RestApiJiraTicketQuery(JiraTicketQuery):
                 conditions.append("assignee = currentUser()")
             else:
                 conditions.append(f'assignee = "{assignee}"')
-        else:
-            assignee = os.getenv("BUSINESS_JIRA_USERNAME")
-            if assignee:
-                conditions.append(f'assignee = "{assignee}"')
 
-        return " AND ".join(conditions) if conditions else "ORDER BY created DESC"
+        jql = " AND ".join(conditions) if conditions else ""
+        return jql + " ORDER BY created DESC" if jql else "ORDER BY created DESC"
 
-    def _parse_issue(self, issue: dict) -> JiraTicketDto:
+    def _parse_issue(self, issue: dict[str, Any]) -> JiraTicketDto:
         fields = issue.get("fields", {})
 
         # Parse basic fields
@@ -193,21 +169,23 @@ class RestApiJiraTicketQuery(JiraTicketQuery):
         # Parse dates
         created = self._parse_datetime(fields.get("created"))
         updated = self._parse_datetime(fields.get("updated"))
-        due_date = None  # Not fetched in basic field set
+        due_date = self._parse_datetime(fields.get("duedate"))
 
-        # Parse other fields (not fetched in basic field set)
-        description = None
-        labels = []
-        fix_versions = []
-        components = []
+        # Parse other fields
+        description = fields.get("description")
+        labels = fields.get("labels", [])
+        fix_versions = [v.get("name") for v in fields.get("fixVersions", [])]
+        components = [c.get("name") for c in fields.get("components", [])]
 
-        # Parse custom fields (set to None for now since they may not exist)
-        sprint = None
-        story_points = None
-        epic_key = None
+        # Parse custom fields
+        sprint_field = fields.get("customfield_10020", [])
+        sprint = sprint_field[0].get("name") if sprint_field and isinstance(sprint_field, list) else None
+
+        story_points = fields.get("customfield_10016")
+        epic_key = fields.get("customfield_10014")
         parent = fields.get("parent", {})
         parent_key = parent.get("key") if parent else None
-        github_issue = None
+        github_issue = fields.get("customfield_10328")
 
         # Build URL
         url = f"{self.base_url}/browse/{issue_key}"

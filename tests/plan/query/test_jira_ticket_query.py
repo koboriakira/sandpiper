@@ -16,10 +16,11 @@ class TestRestApiJiraTicketQuery:
             yield mock_session_instance
 
     @pytest.fixture
-    def jira_query(self, mock_session):
+    def jira_query(self, mock_session):  # noqa: ARG002
         with patch.dict(
             "os.environ",
             {
+                "BUSINESS_JIRA_BASE_URL": "https://jira.atlassian.com",
                 "BUSINESS_JIRA_USERNAME": "test@example.com",
                 "BUSINESS_JIRA_API_TOKEN": "test-token",
             },
@@ -124,7 +125,7 @@ class TestRestApiJiraTicketQuery:
         # Check JQL construction
         call_args = jira_query.session.get.call_args
         params = call_args[1]["params"]
-        expected_jql = 'project = "TEST" AND issuetype IN ("Bug","Task") AND status IN ("Open","In Progress") AND assignee = currentUser()'
+        expected_jql = 'project = "TEST" AND issuetype IN ("Bug","Task") AND status IN ("Open","In Progress") AND assignee = currentUser() ORDER BY created DESC'
         assert params["jql"] == expected_jql
 
     def test_get_ticket_found(self, jira_query):
@@ -194,7 +195,9 @@ class TestRestApiJiraTicketQuery:
             status="Open",
             assignee="john.doe",
         )
-        expected = 'project = "PROJ" AND issuetype = "Bug" AND status = "Open" AND assignee = "john.doe"'
+        expected = (
+            'project = "PROJ" AND issuetype = "Bug" AND status = "Open" AND assignee = "john.doe" ORDER BY created DESC'
+        )
         assert jql == expected
 
     def test_build_jql_with_multiple_values(self, jira_query):
@@ -202,12 +205,12 @@ class TestRestApiJiraTicketQuery:
             issue_type="Bug, Task, Story",
             status="Open, In Progress",
         )
-        expected = 'issuetype IN ("Bug","Task","Story") AND status IN ("Open","In Progress")'
+        expected = 'issuetype IN ("Bug","Task","Story") AND status IN ("Open","In Progress") ORDER BY created DESC'
         assert jql == expected
 
     def test_build_jql_with_current_user(self, jira_query):
         jql = jira_query._build_jql(assignee="currentUser()")
-        assert jql == "assignee = currentUser()"
+        assert jql == "assignee = currentUser() ORDER BY created DESC"
 
     def test_pagination(self, jira_query):
         # Setup paginated responses

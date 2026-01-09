@@ -442,11 +442,13 @@ def get_jira_ticket(
             console.print_json(json.dumps(ticket.to_dict(), ensure_ascii=False, indent=2))
         else:
             # 詳細出力
-            console.print(Panel(
-                f"[bold]{ticket.summary}[/bold]",
-                title=f"[cyan]{ticket.issue_key}[/cyan]",
-                border_style="blue",
-            ))
+            console.print(
+                Panel(
+                    f"[bold]{ticket.summary}[/bold]",
+                    title=f"[cyan]{ticket.issue_key}[/cyan]",
+                    border_style="blue",
+                )
+            )
 
             # 基本情報テーブル
             info_table = Table(show_header=False, box=None, padding=(0, 1))
@@ -476,11 +478,13 @@ def get_jira_ticket(
 
             # 説明
             if ticket.description:
-                console.print(Panel(
-                    ticket.description[:500] + "..." if len(ticket.description) > 500 else ticket.description,
-                    title="説明",
-                    border_style="green",
-                ))
+                console.print(
+                    Panel(
+                        ticket.description[:500] + "..." if len(ticket.description) > 500 else ticket.description,
+                        title="説明",
+                        border_style="green",
+                    )
+                )
 
             # ラベル・フィックスバージョン
             if ticket.labels:
