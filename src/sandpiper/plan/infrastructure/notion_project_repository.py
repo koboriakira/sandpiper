@@ -1,8 +1,14 @@
 from lotion import BasePage, Lotion, notion_database  # type: ignore[import-untyped]
+from lotion.filter import Builder, Cond  # type: ignore[import-untyped]
 
 from sandpiper.plan.domain.project import InsertedProject, Project
 from sandpiper.shared.notion.database_config import DatabaseId
-from sandpiper.shared.notion.notion_props import ProjectEndDate, ProjectName, ProjectStartDate
+from sandpiper.shared.notion.notion_props import (
+    ProjectEndDate,
+    ProjectJiraUrl,
+    ProjectName,
+    ProjectStartDate,
+)
 
 
 @notion_database(DatabaseId.PROJECT)
@@ -10,20 +16,24 @@ class ProjectPage(BasePage):  # type: ignore[misc]
     name: ProjectName
     start_date: ProjectStartDate
     end_date: ProjectEndDate | None = None
+    jira_url: ProjectJiraUrl | None = None
 
     @staticmethod
     def generate(project: Project) -> "ProjectPage":
-        properties = [
+        properties: list[ProjectName | ProjectStartDate | ProjectEndDate | ProjectJiraUrl] = [
             ProjectName.from_plain_text(project.name),
             ProjectStartDate.from_start_date(project.start_date),
         ]
         if project.end_date:
             properties.append(ProjectEndDate.from_start_date(project.end_date))
+        if project.jira_url:
+            properties.append(ProjectJiraUrl.from_url(project.jira_url))
         return ProjectPage.create(properties=properties)  # type: ignore[no-any-return]
 
     def to_domain(self) -> Project:
         start_date_prop = self.get_date("開始日")
         end_date_prop = self.get_date("終了日")
+        jira_url_prop = self.get_url("Jira")
 
         # start_dateは必須なのでNoneチェック
         if start_date_prop.start_date is None:
@@ -34,6 +44,24 @@ class ProjectPage(BasePage):  # type: ignore[misc]
             name=self.get_title_text(),
             start_date=start_date_prop.start_date,
             end_date=end_date_prop.start_date if end_date_prop.start_date else None,
+            jira_url=jira_url_prop.url if jira_url_prop else None,
+        )
+
+    def to_inserted(self) -> InsertedProject:
+        start_date_prop = self.get_date("開始日")
+        end_date_prop = self.get_date("終了日")
+        jira_url_prop = self.get_url("Jira")
+
+        if start_date_prop.start_date is None:
+            msg = "start_date is required"
+            raise ValueError(msg)
+
+        return InsertedProject(
+            id=self.id,
+            name=self.get_title_text(),
+            start_date=start_date_prop.start_date,
+            end_date=end_date_prop.start_date if end_date_prop.start_date else None,
+            jira_url=jira_url_prop.url if jira_url_prop else None,
         )
 
 
@@ -49,8 +77,17 @@ class NotionProjectRepository:
             name=project.name,
             start_date=project.start_date,
             end_date=project.end_date,
+            jira_url=project.jira_url,
         )
 
     def find(self, page_id: str) -> Project:
         notion_page = self.client.retrieve_page(page_id, cls=ProjectPage)
         return notion_page.to_domain()  # type: ignore[no-any-return]
+
+    def find_by_jira_url(self, jira_url: str) -> InsertedProject | None:
+        """Jira URLでプロジェクトを検索する"""
+        filter_param = Builder.create().add(Cond.Url("Jira").equals(jira_url)).build()
+        pages: list[ProjectPage] = self.client.fetch_pages(ProjectPage, filter_param=filter_param)
+        if not pages:
+            return None
+        return pages[0].to_inserted()

@@ -106,6 +106,11 @@ class ProjectEndDate(Date):  # type: ignore[misc]
     ...
 
 
+@notion_prop("Jira")
+class ProjectJiraUrl(Url):  # type: ignore[misc]
+    ...
+
+
 # プロジェクトタスク関連のプロパティ
 @notion_prop("名前")
 class ProjectTaskName(Title):  # type: ignore[misc]

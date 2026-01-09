@@ -9,6 +9,7 @@ class Project:
     name: str
     start_date: date
     end_date: date | None = None
+    jira_url: str | None = None
 
 
 @dataclass
@@ -19,3 +20,4 @@ class InsertedProject:
     name: str
     start_date: date
     end_date: date | None = None
+    jira_url: str | None = None

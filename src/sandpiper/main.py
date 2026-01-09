@@ -574,5 +574,51 @@ def create_notion_pages(
     console.print(f"\n[bold]処理完了: {created_count}件作成, {skipped_count}件スキップ[/bold]")
 
 
+@app.command()
+def sync_jira_to_project(
+    jira_project: str = typer.Option("SU", "--project", "-p", help="JIRAプロジェクトキー"),
+) -> None:
+    """JIRAチケットをNotionプロジェクトに同期します
+
+    SUプロジェクトの自分にアサインされたTask/Story/Bugチケットを取得し、
+    Notionプロジェクトデータベースに追加します。
+
+    - ステータスが"To Do"または"In Progress"のチケットを対象
+    - 既にJira URLが登録されているプロジェクトは作成しない(重複チェック)
+    - プロジェクト作成時に同名のプロジェクトタスクも作成
+    """
+    console.print(f"[bold]JIRAチケットをNotionプロジェクトに同期中...[/bold] (プロジェクト: {jira_project})")
+
+    try:
+        result = sandpiper_app.sync_jira_to_project.execute(jira_project=jira_project)
+
+        # 作成されたプロジェクト
+        if result.created_projects:
+            console.print(f"\n[green][bold]作成されたプロジェクト ({len(result.created_projects)}件):[/bold][/green]")
+            for project in result.created_projects:
+                console.print(f"  - {project.name}")
+                if project.jira_url:
+                    console.print(f"    [blue]{project.jira_url}[/blue]")
+
+        # スキップされたチケット
+        if result.skipped_tickets:
+            console.print(f"\n[yellow][bold]スキップされたチケット ({len(result.skipped_tickets)}件):[/bold][/yellow]")
+            for ticket in result.skipped_tickets:
+                console.print(f"  - {ticket.issue_key}: {ticket.summary}")
+
+        # サマリー
+        console.print(
+            f"\n[bold]同期完了: {len(result.created_projects)}件作成, {len(result.skipped_tickets)}件スキップ[/bold]"
+        )
+
+    except ValueError as e:
+        console.print(f"[red]設定エラー: {e}[/red]")
+        console.print("[yellow]BUSINESS_JIRA_USERNAME と BUSINESS_JIRA_API_TOKEN の環境変数を設定してください[/yellow]")
+        raise typer.Exit(code=1)
+    except Exception as e:
+        console.print(f"[red]エラー: {e}[/red]")
+        raise typer.Exit(code=1)
+
+
 if __name__ == "__main__":
     app()

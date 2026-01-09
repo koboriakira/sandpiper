@@ -16,11 +16,13 @@ from sandpiper.plan.application.create_repeat_task import CreateRepeatTask
 from sandpiper.plan.application.create_tasks_by_someday_list import CreateTasksBySomedayList
 from sandpiper.plan.application.create_todo import CreateToDo
 from sandpiper.plan.application.handle_completed_task import HandleCompletedTask
+from sandpiper.plan.application.sync_jira_to_project import SyncJiraToProject
 from sandpiper.plan.infrastructure.notion_project_repository import NotionProjectRepository
 from sandpiper.plan.infrastructure.notion_project_task_repository import NotionProjectTaskRepository
 from sandpiper.plan.infrastructure.notion_routine_repository import NotionRoutineRepository
 from sandpiper.plan.infrastructure.notion_someday_repository import NotionSomedayRepository
 from sandpiper.plan.infrastructure.notion_todo_repository import NotionTodoRepository as PlanNotionTodoRepository
+from sandpiper.plan.query.jira_ticket_query import RestApiJiraTicketQuery
 from sandpiper.plan.query.project_task_query import NotionProjectTaskQuery
 from sandpiper.plan.query.todo_query import NotionTodoQuery as PlanNotionTodoQuery
 from sandpiper.recipe.application.create_recipe import CreateRecipe
@@ -56,6 +58,7 @@ class SandPiperApp:
         convert_to_project: ConvertToProject,
         handle_special_todo: HandleSpecialTodo,
         create_recipe: CreateRecipe,
+        sync_jira_to_project: SyncJiraToProject,
     ) -> None:
         self.create_todo = create_todo
         self.create_project = create_project
@@ -71,6 +74,7 @@ class SandPiperApp:
         self.convert_to_project = convert_to_project
         self.handle_special_todo = handle_special_todo
         self.create_recipe = create_recipe
+        self.sync_jira_to_project = sync_jira_to_project
 
 
 def bootstrap() -> SandPiperApp:
@@ -180,5 +184,10 @@ def bootstrap() -> SandPiperApp:
         create_recipe=CreateRecipe(
             recipe_repository=recipe_repository,
             shopping_repository=shopping_repository,
+        ),
+        sync_jira_to_project=SyncJiraToProject(
+            jira_ticket_query=RestApiJiraTicketQuery(),
+            project_repository=project_repository,
+            project_task_repository=project_task_repository,
         ),
     )
