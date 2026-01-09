@@ -351,6 +351,161 @@ def get_github_activity(
 
 
 @app.command()
+def search_jira_tickets(
+    jql: str = typer.Option(None, help="JQLクエリ文字列"),
+    project: str = typer.Option(None, help="プロジェクトキー"),
+    issue_type: str = typer.Option(None, help="課題タイプ (複数の場合はカンマ区切り)"),
+    status: str = typer.Option(None, help="ステータス (複数の場合はカンマ区切り)"),
+    assignee: str = typer.Option(None, help="担当者 (currentUser() で自分)"),
+    max_results: int = typer.Option(50, help="最大取得件数"),
+    output_format: str = typer.Option("table", help="出力形式 (table, json)"),
+) -> None:
+    """JIRAのチケット情報を検索します"""
+    import json
+
+    from rich.table import Table
+
+    from sandpiper.plan.query.jira_ticket_query import RestApiJiraTicketQuery
+
+    try:
+        query = RestApiJiraTicketQuery()
+        tickets = query.search_tickets(
+            jql=jql,
+            project=project,
+            issue_type=issue_type,
+            status=status,
+            assignee=assignee,
+            max_results=max_results,
+        )
+
+        if not tickets:
+            console.print("[yellow]チケットが見つかりませんでした[/yellow]")
+            return
+
+        if output_format.lower() == "json":
+            # JSON出力
+            tickets_data = [ticket.to_dict() for ticket in tickets]
+            console.print_json(json.dumps(tickets_data, ensure_ascii=False, indent=2))
+        else:
+            # テーブル出力
+            table = Table(title=f"JIRA Tickets ({len(tickets)} 件)")
+            table.add_column("Key", style="cyan", no_wrap=True)
+            table.add_column("Summary", style="white")
+            table.add_column("Type", style="green")
+            table.add_column("Status", style="yellow")
+            table.add_column("Assignee", style="blue")
+
+            for ticket in tickets:
+                table.add_row(
+                    ticket.issue_key,
+                    ticket.summary[:50] + "..." if len(ticket.summary) > 50 else ticket.summary,
+                    ticket.issue_type,
+                    ticket.status,
+                    ticket.assignee or "未割当",
+                )
+
+            console.print(table)
+            console.print(f"\n[bold]合計: {len(tickets)} 件[/bold]")
+
+    except ValueError as e:
+        console.print(f"[red]設定エラー: {e}[/red]")
+        console.print("[yellow]BUSINESS_JIRA_USERNAME と BUSINESS_JIRA_API_TOKEN の環境変数を設定してください[/yellow]")
+        raise typer.Exit(code=1)
+    except Exception as e:
+        console.print(f"[red]エラー: {e}[/red]")
+        raise typer.Exit(code=1)
+
+
+@app.command()
+def get_jira_ticket(
+    issue_key: str = typer.Argument(..., help="チケットキー (例: PROJ-123)"),
+    output_format: str = typer.Option("detail", help="出力形式 (detail, json)"),
+) -> None:
+    """JIRAの個別チケット情報を取得します"""
+    import json
+
+    from rich.panel import Panel
+    from rich.table import Table
+
+    from sandpiper.plan.query.jira_ticket_query import RestApiJiraTicketQuery
+
+    try:
+        query = RestApiJiraTicketQuery()
+        ticket = query.get_ticket(issue_key)
+
+        if not ticket:
+            console.print(f"[red]チケット {issue_key} が見つかりませんでした[/red]")
+            raise typer.Exit(code=1)
+
+        if output_format.lower() == "json":
+            # JSON出力
+            console.print_json(json.dumps(ticket.to_dict(), ensure_ascii=False, indent=2))
+        else:
+            # 詳細出力
+            console.print(
+                Panel(
+                    f"[bold]{ticket.summary}[/bold]",
+                    title=f"[cyan]{ticket.issue_key}[/cyan]",
+                    border_style="blue",
+                )
+            )
+
+            # 基本情報テーブル
+            info_table = Table(show_header=False, box=None, padding=(0, 1))
+            info_table.add_column("Field", style="bold")
+            info_table.add_column("Value")
+
+            info_table.add_row("タイプ:", ticket.issue_type)
+            info_table.add_row("ステータス:", ticket.status)
+            if ticket.priority:
+                info_table.add_row("優先度:", ticket.priority)
+            if ticket.assignee:
+                info_table.add_row("担当者:", ticket.assignee)
+            if ticket.reporter:
+                info_table.add_row("起票者:", ticket.reporter)
+            if ticket.created:
+                info_table.add_row("作成日:", ticket.created.strftime("%Y-%m-%d %H:%M"))
+            if ticket.updated:
+                info_table.add_row("更新日:", ticket.updated.strftime("%Y-%m-%d %H:%M"))
+            if ticket.due_date:
+                info_table.add_row("期限:", ticket.due_date.strftime("%Y-%m-%d"))
+            if ticket.story_points:
+                info_table.add_row("ストーリーポイント:", str(ticket.story_points))
+            if ticket.sprint:
+                info_table.add_row("スプリント:", ticket.sprint)
+
+            console.print(info_table)
+
+            # 説明
+            if ticket.description:
+                console.print(
+                    Panel(
+                        ticket.description[:500] + "..." if len(ticket.description) > 500 else ticket.description,
+                        title="説明",
+                        border_style="green",
+                    )
+                )
+
+            # ラベル・フィックスバージョン
+            if ticket.labels:
+                console.print(f"[bold]ラベル:[/bold] {', '.join(ticket.labels)}")
+            if ticket.fix_versions:
+                console.print(f"[bold]フィックスバージョン:[/bold] {', '.join(ticket.fix_versions)}")
+
+            # URL
+            if ticket.url:
+                console.print(f"[bold blue]URL:[/bold blue] {ticket.url}")
+
+    except ValueError as e:
+        console.print(f"[red]設定エラー: {e}[/red]")
+        console.print("[yellow]BUSINESS_JIRA_USERNAME と BUSINESS_JIRA_API_TOKEN の環境変数を設定してください[/yellow]")
+        raise typer.Exit(code=1)
+    except Exception as e:
+        console.print(f"[red]エラー: {e}[/red]")
+        raise typer.Exit(code=1)
+
+
+@app.command()
 def create_notion_pages(
     file_path: str = typer.Argument(..., help="JSONファイルのパス"),
 ) -> None:

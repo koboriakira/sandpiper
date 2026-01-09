@@ -43,6 +43,12 @@ uv run sandpiper get-github-activity --date 2024-03-20 --json  # 特定日・JSO
 uv run sandpiper create-repeat-tasks --basis-date 2024-03-20  # 繰り返しタスク作成
 uv run sandpiper create-repeat-project-tasks --tomorrow       # 明日のプロジェクトタスク作成
 
+# JIRA統合
+uv run sandpiper search-jira-tickets --project "PROJ" --status "Open" # JIRAチケット検索
+uv run sandpiper search-jira-tickets --assignee "currentUser()" --max-results 10 # 自分に割り当てられたチケット
+uv run sandpiper search-jira-tickets --jql "project = PROJ AND status != Done" # JQLでの検索
+uv run sandpiper get-jira-ticket "PROJ-123"     # 個別チケットの詳細取得
+
 # テスト実行
 uv run pytest                    # 基本テスト実行
 uv run pytest --cov             # カバレッジ付きテスト
@@ -122,6 +128,7 @@ src/sandpiper/
 - **Notion API**: lotion(日本製)+ notion-client(公式SDK)
 - **Slack API**: slack-sdk(タスク完了通知)
 - **GitHub API**: PyGithub(活動ログ取得)
+- **JIRA API**: requests + JIRA REST API v3(チケット管理・検索)
 - **Webhook**: Notion → FastAPI リアルタイム連携
 
 #### データベース構成
@@ -142,12 +149,17 @@ src/sandpiper/
 
 ### 環境変数設定
 
-#### 必須環境変数(Notion・Slack・GitHub統合)
+#### 必須環境変数(Notion・Slack・GitHub・JIRA統合)
 ```bash
 # Notion API設定
 export NOTION_SECRET="secret_****"           # Notion Integration Token
 export SLACK_BOT_TOKEN="xoxb-****"         # Slack Bot Token
 export GITHUB_TOKEN="ghp_****"             # GitHub Personal Access Token
+
+# JIRA API設定
+export BUSINESS_JIRA_USERNAME="user@company.com"    # JIRA ユーザー名(メールアドレス)
+export BUSINESS_JIRA_API_TOKEN="ATATT****"          # JIRA API トークン
+export BUSINESS_JIRA_BASE_URL="https://company.atlassian.net"  # JIRA Base URL (オプション)
 
 # FastAPI設定
 export ENVIRONMENT=development              # 開発環境設定

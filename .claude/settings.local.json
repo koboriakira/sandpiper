@@ -2,7 +2,16 @@
   "permissions": {
     "allow": [
       "Bash(uv run ruff:*)",
-      "Bash(uv run:*)"
+      "Bash(uv run:*)",
+      "Bash(grep:*)",
+      "Bash(uv add:*)",
+      "Bash(gh workflow list:*)",
+      "Bash(gh run list:*)",
+      "Bash(gh run view:*)",
+      "Bash(gh pr list:*)",
+      "Bash(gh pr checks:*)",
+      "Bash(rm:*)",
+      "Bash(.claude/scripts/pre-commit-replacement.sh:*)"
     ],
     "deny": []
   }
