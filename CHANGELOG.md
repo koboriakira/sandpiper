@@ -5,6 +5,24 @@
 このプロジェクトは[セマンティックバージョニング](https://semver.org/spec/v2.0.0.html)に従い、
 [Conventional Commits](https://conventionalcommits.org/)を使用して自動的にリリースを生成します。
 
+## [0.7.0](https://github.com/koboriakira/sandpiper/compare/v0.6.0...v0.7.0) (2026-01-09)
+
+
+### Features
+
+* Add dish-related tasks to HandleCompletedTask ([#29](https://github.com/koboriakira/sandpiper/issues/29)) ([3a6de11](https://github.com/koboriakira/sandpiper/commit/3a6de1157a319df1a990192a35720ebbf9f572a3))
+* Add JIRA ticket search and retrieval functionality ([#31](https://github.com/koboriakira/sandpiper/issues/31)) ([7085fc4](https://github.com/koboriakira/sandpiper/commit/7085fc4de6ab5b180dc4aaee41585876e5966305))
+* Add Jira tickets to Notion projects ([#32](https://github.com/koboriakira/sandpiper/issues/32)) ([2ca4398](https://github.com/koboriakira/sandpiper/commit/2ca43981be60a8b806ad0f425314fe97d07f7fbc))
+* Create CLI command for Notion recipe pages ([#23](https://github.com/koboriakira/sandpiper/issues/23)) ([8fa1fcf](https://github.com/koboriakira/sandpiper/commit/8fa1fcf9da49b121be76cb7db4c93a157380c96f))
+* Filter repeat task duplicates by "今日中にやる" property ([#26](https://github.com/koboriakira/sandpiper/issues/26)) ([c84cdba](https://github.com/koboriakira/sandpiper/commit/c84cdbaedf43f19f0f97844566a7da934a0af36f))
+* Set up Notion database management for SomeDay list ([#27](https://github.com/koboriakira/sandpiper/issues/27)) ([31fb82e](https://github.com/koboriakira/sandpiper/commit/31fb82ebc74e079497cf28d80c19db210a817e70))
+* Update CalendarEventPage to use date range for event start and end dates ([#30](https://github.com/koboriakira/sandpiper/issues/30)) ([093640c](https://github.com/koboriakira/sandpiper/commit/093640c8bce30f2de71cb7e851f333ee5f051f6f))
+
+
+### Bug Fixes
+
+* Upgrade urllib3 to 2.6.3 to fix CVE-2026-21441 ([#28](https://github.com/koboriakira/sandpiper/issues/28)) ([ab63f21](https://github.com/koboriakira/sandpiper/commit/ab63f2120b07d59a9e2b5f03116e7a03d749fbd2))
+
 ## [0.6.0](https://github.com/koboriakira/sandpiper/compare/v0.5.0...v0.6.0) (2026-01-07)
 
 
