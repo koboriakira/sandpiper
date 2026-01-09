@@ -13,3 +13,11 @@ class ProjectRepository(Protocol):
     def find(self, page_id: str) -> Project:
         """プロジェクトを取得する"""
         ...
+
+    def find_by_jira_url(self, jira_url: str) -> InsertedProject | None:
+        """Jira URLでプロジェクトを検索する"""
+        ...
+
+    def fetch_all_jira_urls(self) -> set[str]:
+        """すべてのプロジェクトからJira URLの一覧を取得する"""
+        ...
