@@ -86,16 +86,20 @@ class NotionProjectRepository:
 
     def find_by_jira_url(self, jira_url: str) -> InsertedProject | None:
         """Jira URLでプロジェクトを検索する"""
-        filter_param = Builder.create().add(Cond.Url("Jira").equals(jira_url)).build()
-        pages: list[ProjectPage] = self.client.fetch_pages(ProjectPage, filter_param=filter_param)
+        filter_param = Builder.create().add(ProjectJiraUrl.from_url(jira_url), Cond.EQUALS).build()
+        pages: list[ProjectPage] = self.client.retrieve_database(
+            database_id=DatabaseId.PROJECT, filter_param=filter_param, cls=ProjectPage
+        )
         if not pages:
             return None
         return pages[0].to_inserted()
 
     def fetch_all_jira_urls(self) -> set[str]:
         """すべてのプロジェクトからJira URLの一覧を取得する"""
-        filter_param = Builder.create().add(Cond.Url("Jira").is_not_empty()).build()
-        pages: list[ProjectPage] = self.client.fetch_pages(ProjectPage, filter_param=filter_param)
+        filter_param = Builder.create().add(ProjectJiraUrl, Cond.IS_NOT_EMPTY).build()
+        pages: list[ProjectPage] = self.client.retrieve_database(
+            database_id=DatabaseId.PROJECT, filter_param=filter_param, cls=ProjectPage
+        )
         jira_urls: set[str] = set()
         for page in pages:
             jira_url_prop = page.get_url("Jira")

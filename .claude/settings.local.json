@@ -11,7 +11,12 @@
       "Bash(gh pr list:*)",
       "Bash(gh pr checks:*)",
       "Bash(rm:*)",
-      "Bash(.claude/scripts/pre-commit-replacement.sh:*)"
+      "Bash(.claude/scripts/pre-commit-replacement.sh:*)",
+      "WebFetch(domain:github.com)",
+      "Bash(uv show:*)",
+      "Bash(uv pip show:*)",
+      "Bash(uv pip:*)",
+      "Bash(find:*)"
     ],
     "deny": []
   }
