@@ -23,7 +23,7 @@ class SyncJiraToProject:
 
     SUプロジェクトの自分にアサインされたTask/Story/Bugチケットを取得し、
     Notionプロジェクトデータベースに追加する。
-    - ステータスが"To Do"または"In Progress"のチケットを対象
+    - ステータスが"In Progress"のチケットを対象
     - 既にJira URLが登録されているプロジェクトは作成しない(重複チェック)
     - プロジェクト作成時に同名のプロジェクトタスクも作成
     """
@@ -51,7 +51,7 @@ class SyncJiraToProject:
         tickets = self._jira_ticket_query.search_tickets(
             project=jira_project,
             issue_type="Task,Story,Bug",
-            status="To Do,In Progress",
+            status="In Progress",
             assignee="currentUser()",
             max_results=100,
         )
