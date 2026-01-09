@@ -43,7 +43,7 @@ class TestSyncJiraToProject:
             url="https://jira.example.com/browse/SU-123",
         )
         mock_jira_ticket_query.search_tickets.return_value = [ticket]
-        mock_project_repository.find_by_jira_url.return_value = None  # No existing project
+        mock_project_repository.fetch_all_jira_urls.return_value = set()  # No existing URLs
 
         inserted_project = InsertedProject(
             id="project-id-123",
@@ -80,6 +80,9 @@ class TestSyncJiraToProject:
             max_results=100,
         )
 
+        # Verify fetch_all_jira_urls was called once (API optimization)
+        mock_project_repository.fetch_all_jira_urls.assert_called_once()
+
         # Verify project was saved
         saved_project: Project = mock_project_repository.save.call_args[0][0]
         assert saved_project.name == "Implement new feature"
@@ -104,14 +107,8 @@ class TestSyncJiraToProject:
         )
         mock_jira_ticket_query.search_tickets.return_value = [ticket]
 
-        # Project with same URL already exists
-        existing_project = InsertedProject(
-            id="existing-project-id",
-            name="Existing feature",
-            start_date=date.today(),
-            jira_url="https://jira.example.com/browse/SU-456",
-        )
-        mock_project_repository.find_by_jira_url.return_value = existing_project
+        # URL already exists in the project database
+        mock_project_repository.fetch_all_jira_urls.return_value = {"https://jira.example.com/browse/SU-456"}
 
         # Act
         result = sync_jira_to_project.execute(jira_project="SU")
@@ -120,6 +117,9 @@ class TestSyncJiraToProject:
         assert len(result.created_projects) == 0
         assert len(result.skipped_tickets) == 1
         assert result.skipped_tickets[0].issue_key == "SU-456"
+
+        # Verify fetch_all_jira_urls was called once
+        mock_project_repository.fetch_all_jira_urls.assert_called_once()
 
         # Verify project was NOT saved
         mock_project_repository.save.assert_not_called()
@@ -145,18 +145,8 @@ class TestSyncJiraToProject:
         )
         mock_jira_ticket_query.search_tickets.return_value = [new_ticket, existing_ticket]
 
-        # Mocking find_by_jira_url
-        def find_by_jira_url(url):
-            if url == "https://jira.example.com/browse/SU-200":
-                return InsertedProject(
-                    id="existing-id",
-                    name="Existing feature",
-                    start_date=date.today(),
-                    jira_url=url,
-                )
-            return None
-
-        mock_project_repository.find_by_jira_url.side_effect = find_by_jira_url
+        # Only SU-200 exists
+        mock_project_repository.fetch_all_jira_urls.return_value = {"https://jira.example.com/browse/SU-200"}
 
         inserted_project = InsertedProject(
             id="new-project-id",
@@ -183,11 +173,15 @@ class TestSyncJiraToProject:
         assert result.created_projects[0].name == "New feature"
         assert result.skipped_tickets[0].issue_key == "SU-200"
 
+        # Verify fetch_all_jira_urls was called once (not per ticket)
+        mock_project_repository.fetch_all_jira_urls.assert_called_once()
+
     def test_execute_with_no_tickets(
         self, sync_jira_to_project, mock_jira_ticket_query, mock_project_repository, mock_project_task_repository
     ):
         # Arrange
         mock_jira_ticket_query.search_tickets.return_value = []
+        mock_project_repository.fetch_all_jira_urls.return_value = set()
 
         # Act
         result = sync_jira_to_project.execute(jira_project="SU")
@@ -202,11 +196,12 @@ class TestSyncJiraToProject:
         self,
         sync_jira_to_project,
         mock_jira_ticket_query,
-        mock_project_repository,  # noqa: ARG002
+        mock_project_repository,
         mock_project_task_repository,  # noqa: ARG002
     ):
         # Arrange
         mock_jira_ticket_query.search_tickets.return_value = []
+        mock_project_repository.fetch_all_jira_urls.return_value = set()
 
         # Act
         sync_jira_to_project.execute(jira_project="OTHER")
@@ -219,3 +214,54 @@ class TestSyncJiraToProject:
             assignee="currentUser()",
             max_results=100,
         )
+
+    def test_execute_prevents_duplicate_within_same_batch(
+        self, sync_jira_to_project, mock_jira_ticket_query, mock_project_repository, mock_project_task_repository
+    ):
+        """同一バッチ内で同じURLのチケットが複数ある場合、最初の1つだけを作成する"""
+        # Arrange
+        ticket1 = JiraTicketDto(
+            issue_key="SU-300",
+            summary="Feature A",
+            issue_type="Task",
+            status="To Do",
+            url="https://jira.example.com/browse/SU-300",
+        )
+        ticket2 = JiraTicketDto(
+            issue_key="SU-301",
+            summary="Feature A duplicate",
+            issue_type="Task",
+            status="To Do",
+            url="https://jira.example.com/browse/SU-300",  # Same URL as ticket1
+        )
+        mock_jira_ticket_query.search_tickets.return_value = [ticket1, ticket2]
+        mock_project_repository.fetch_all_jira_urls.return_value = set()
+
+        inserted_project = InsertedProject(
+            id="project-id-300",
+            name="Feature A",
+            start_date=date.today(),
+            jira_url="https://jira.example.com/browse/SU-300",
+        )
+        mock_project_repository.save.return_value = inserted_project
+
+        inserted_task = InsertedProjectTask(
+            id="task-id-300",
+            title="Feature A",
+            status=ToDoStatusEnum.TODO,
+            project_id="project-id-300",
+        )
+        mock_project_task_repository.save.return_value = inserted_task
+
+        # Act
+        result = sync_jira_to_project.execute(jira_project="SU")
+
+        # Assert
+        assert len(result.created_projects) == 1
+        assert len(result.skipped_tickets) == 1
+        assert result.created_projects[0].name == "Feature A"
+        assert result.skipped_tickets[0].issue_key == "SU-301"  # Second ticket was skipped
+
+        # Verify save was called only once
+        assert mock_project_repository.save.call_count == 1
+        assert mock_project_task_repository.save.call_count == 1

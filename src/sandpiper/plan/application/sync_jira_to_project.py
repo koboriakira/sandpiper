@@ -56,6 +56,9 @@ class SyncJiraToProject:
             max_results=100,
         )
 
+        # 既存のJira URLを一括取得(API呼び出し最適化)
+        existing_jira_urls = self._project_repository.fetch_all_jira_urls()
+
         created_projects: list[InsertedProject] = []
         skipped_tickets: list[JiraTicketDto] = []
 
@@ -65,9 +68,8 @@ class SyncJiraToProject:
                 skipped_tickets.append(ticket)
                 continue
 
-            # URLで重複チェック
-            existing = self._project_repository.find_by_jira_url(ticket.url)
-            if existing is not None:
+            # URLで重複チェック(メモリ内で実行)
+            if ticket.url in existing_jira_urls:
                 skipped_tickets.append(ticket)
                 continue
 
@@ -79,6 +81,9 @@ class SyncJiraToProject:
             )
             inserted_project = self._project_repository.save(project)
             created_projects.append(inserted_project)
+
+            # 新規作成したURLを追加(同一実行内での重複防止)
+            existing_jira_urls.add(ticket.url)
 
             # 同名のプロジェクトタスクを作成
             project_task = ProjectTask(

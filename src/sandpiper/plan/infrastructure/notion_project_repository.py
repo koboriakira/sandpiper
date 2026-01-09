@@ -91,3 +91,14 @@ class NotionProjectRepository:
         if not pages:
             return None
         return pages[0].to_inserted()
+
+    def fetch_all_jira_urls(self) -> set[str]:
+        """すべてのプロジェクトからJira URLの一覧を取得する"""
+        filter_param = Builder.create().add(Cond.Url("Jira").is_not_empty()).build()
+        pages: list[ProjectPage] = self.client.fetch_pages(ProjectPage, filter_param=filter_param)
+        jira_urls: set[str] = set()
+        for page in pages:
+            jira_url_prop = page.get_url("Jira")
+            if jira_url_prop and jira_url_prop.url:
+                jira_urls.add(jira_url_prop.url)
+        return jira_urls
