@@ -51,18 +51,25 @@ class RestApiJiraTicketQuery(JiraTicketQuery):
         if not jql:
             jql = self._build_jql(project, issue_type, status, assignee)
 
-        url = f"{self.base_url}/rest/api/3/search"
+        # Use new /search/jql endpoint (old /search was deprecated and removed)
+        url = f"{self.base_url}/rest/api/3/search/jql"
         params: dict[str, str | int] = {
             "jql": jql,
-            "maxResults": min(max_results, 100),  # JIRA限制
+            "maxResults": min(max_results, 100),  # JIRA limit
             "fields": "key,summary,issuetype,status,priority,assignee,reporter,created,updated,duedate,description,labels,fixVersions,components,parent,customfield_10020,customfield_10016,customfield_10014,customfield_10328",
-            "startAt": 0,
         }
 
-        tickets = []
+        tickets: list[JiraTicketDto] = []
         total_fetched = 0
+        next_page_token: str | None = None
 
         while total_fetched < max_results:
+            # Use nextPageToken for pagination (startAt is deprecated)
+            if next_page_token:
+                params["nextPageToken"] = next_page_token
+            elif "nextPageToken" in params:
+                del params["nextPageToken"]
+
             try:
                 response = self.session.get(url, params=params)
                 response.raise_for_status()
@@ -91,13 +98,10 @@ class RestApiJiraTicketQuery(JiraTicketQuery):
                 if total_fetched >= max_results:
                     break
 
-            # Check if there are more results
-            total = data.get("total", 0)
-            if total_fetched >= total or not issues:
+            # Check if there are more results using nextPageToken
+            next_page_token = data.get("nextPageToken")
+            if not next_page_token or data.get("isLast", True):
                 break
-
-            # Update startAt for next page
-            params["startAt"] = total_fetched
 
         return tickets
 

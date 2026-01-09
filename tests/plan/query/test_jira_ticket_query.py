@@ -212,8 +212,8 @@ class TestRestApiJiraTicketQuery:
         jql = jira_query._build_jql(assignee="currentUser()")
         assert jql == "assignee = currentUser() ORDER BY created DESC"
 
-    def test_pagination(self, jira_query):
-        # Setup paginated responses
+    def test_pagination_with_next_page_token(self, jira_query):
+        """Test pagination using nextPageToken (new API)"""
         call_count = 0
 
         def mock_get(url, params=None):  # noqa: ARG001
@@ -221,7 +221,7 @@ class TestRestApiJiraTicketQuery:
             mock_response = Mock()
 
             if call_count == 0:
-                # First call - return 100 issues
+                # First call - return 100 issues with nextPageToken
                 mock_response.json.return_value = {
                     "issues": [
                         {
@@ -234,12 +234,13 @@ class TestRestApiJiraTicketQuery:
                         }
                         for i in range(1, 101)
                     ],
-                    "total": 150,
+                    "nextPageToken": "token-page-2",
+                    "isLast": False,
                 }
-                # Verify first call has startAt=0
-                assert params["startAt"] == 0
+                # Verify first call has no nextPageToken
+                assert "nextPageToken" not in params
             else:
-                # Second call - return 20 issues
+                # Second call - return 20 issues (last page)
                 mock_response.json.return_value = {
                     "issues": [
                         {
@@ -252,10 +253,10 @@ class TestRestApiJiraTicketQuery:
                         }
                         for i in range(101, 121)
                     ],
-                    "total": 150,
+                    "isLast": True,
                 }
-                # Verify second call has startAt=100
-                assert params["startAt"] == 100
+                # Verify second call has nextPageToken from previous response
+                assert params["nextPageToken"] == "token-page-2"
 
             mock_response.raise_for_status.return_value = None
             call_count += 1
