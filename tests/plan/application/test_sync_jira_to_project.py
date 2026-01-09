@@ -39,7 +39,7 @@ class TestSyncJiraToProject:
             issue_key="SU-123",
             summary="Implement new feature",
             issue_type="Task",
-            status="To Do",
+            status="In Progress",
             url="https://jira.example.com/browse/SU-123",
         )
         mock_jira_ticket_query.search_tickets.return_value = [ticket]
@@ -75,7 +75,7 @@ class TestSyncJiraToProject:
         mock_jira_ticket_query.search_tickets.assert_called_once_with(
             project="SU",
             issue_type="Task,Story,Bug",
-            status="To Do,In Progress",
+            status="In Progress",
             assignee="currentUser()",
             max_results=100,
         )
@@ -133,7 +133,7 @@ class TestSyncJiraToProject:
             issue_key="SU-100",
             summary="New feature",
             issue_type="Task",
-            status="To Do",
+            status="In Progress",
             url="https://jira.example.com/browse/SU-100",
         )
         existing_ticket = JiraTicketDto(
@@ -210,7 +210,7 @@ class TestSyncJiraToProject:
         mock_jira_ticket_query.search_tickets.assert_called_once_with(
             project="OTHER",
             issue_type="Task,Story,Bug",
-            status="To Do,In Progress",
+            status="In Progress",
             assignee="currentUser()",
             max_results=100,
         )
@@ -224,14 +224,14 @@ class TestSyncJiraToProject:
             issue_key="SU-300",
             summary="Feature A",
             issue_type="Task",
-            status="To Do",
+            status="In Progress",
             url="https://jira.example.com/browse/SU-300",
         )
         ticket2 = JiraTicketDto(
             issue_key="SU-301",
             summary="Feature A duplicate",
             issue_type="Task",
-            status="To Do",
+            status="In Progress",
             url="https://jira.example.com/browse/SU-300",  # Same URL as ticket1
         )
         mock_jira_ticket_query.search_tickets.return_value = [ticket1, ticket2]
