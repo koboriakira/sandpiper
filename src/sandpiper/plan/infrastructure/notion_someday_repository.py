@@ -2,13 +2,13 @@ from lotion import Lotion  # type: ignore[import-untyped]
 
 from sandpiper.plan.domain.someday_item import SomedayItem, SomedayTiming
 from sandpiper.plan.domain.someday_repository import SomedayRepository
-from sandpiper.shared.notion.database_config import DatabaseId
-from sandpiper.shared.notion.notion_props import (
+from sandpiper.shared.notion.databases import someday as someday_db
+from sandpiper.shared.notion.databases.someday import (
     SomedayDoTomorrow,
     SomedayIsDeleted,
     SomedayName,
 )
-from sandpiper.shared.notion.notion_props import (
+from sandpiper.shared.notion.databases.someday import (
     SomedayTiming as SomedayTimingProp,
 )
 
@@ -21,7 +21,7 @@ class NotionSomedayRepository(SomedayRepository):
 
     def fetch_all(self, include_deleted: bool = False) -> list[SomedayItem]:
         """全てのサムデイアイテムを取得"""
-        items = self.client.retrieve_database(DatabaseId.SOMEDAY_LIST)
+        items = self.client.retrieve_database(someday_db.DATABASE_ID)
         result = []
         for item in items:
             is_deleted = item.get_checkbox("論理削除").checked
@@ -49,7 +49,7 @@ class NotionSomedayRepository(SomedayRepository):
 
     def save(self, item: SomedayItem) -> SomedayItem:
         """サムデイアイテムを保存"""
-        page = self.client.create_page_in_database(DatabaseId.SOMEDAY_LIST)
+        page = self.client.create_page_in_database(someday_db.DATABASE_ID)
         page.set_prop(SomedayName.from_plain_text(item.title))
         page.set_prop(SomedayTimingProp.from_name(item.timing.value))
         page.set_prop(SomedayDoTomorrow.true() if item.do_tomorrow else SomedayDoTomorrow.false())

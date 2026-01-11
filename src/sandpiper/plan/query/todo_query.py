@@ -3,7 +3,7 @@ from typing import Protocol
 from lotion import Lotion  # type: ignore[import-untyped]
 
 from sandpiper.plan.domain.todo import ToDo, ToDoKind
-from sandpiper.shared.notion.database_config import DatabaseId
+from sandpiper.shared.notion.databases import todo as todo_db
 from sandpiper.shared.valueobject.task_chute_section import TaskChuteSection
 from sandpiper.shared.valueobject.todo_status_enum import ToDoStatusEnum
 
@@ -20,7 +20,7 @@ class NotionTodoQuery(TodoQuery):
 
     def fetch_todos_not_is_today(self) -> list[ToDo]:
         """'今日中にやる'が無効かつTODOステータスのTODO一覧を取得する"""
-        items = self.client.retrieve_database(DatabaseId.TODO)
+        items = self.client.retrieve_database(todo_db.DATABASE_ID)
         result: list[ToDo] = []
         for item in items:
             status = ToDoStatusEnum(item.get_status("ステータス").status_name)

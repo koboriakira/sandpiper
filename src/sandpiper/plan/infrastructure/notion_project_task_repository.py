@@ -1,12 +1,16 @@
 from lotion import BasePage, Lotion, notion_database  # type: ignore[import-untyped]
 
 from sandpiper.plan.domain.project_task import InsertedProjectTask, ProjectTask
-from sandpiper.shared.notion.database_config import DatabaseId
-from sandpiper.shared.notion.notion_props import ProjectTaskName, ProjectTaskProjectProp, ProjectTaskStatus
+from sandpiper.shared.notion.databases import project_task as project_task_db
+from sandpiper.shared.notion.databases.project_task import (
+    ProjectTaskName,
+    ProjectTaskProjectProp,
+    ProjectTaskStatus,
+)
 from sandpiper.shared.valueobject.todo_status_enum import ToDoStatusEnum
 
 
-@notion_database(DatabaseId.PROJECT_TASK)
+@notion_database(project_task_db.DATABASE_ID)
 class ProjectTaskPage(BasePage):  # type: ignore[misc]
     name: ProjectTaskName
     status: ProjectTaskStatus

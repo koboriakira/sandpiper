@@ -4,8 +4,8 @@ from lotion import BasePage, Lotion, notion_database  # type: ignore[import-unty
 
 from sandpiper.calendar.domain.calendar_event import CalendarEvent, EventCategory, InsertedCalendarEvent
 from sandpiper.calendar.domain.calendar_repository import CalendarRepository
-from sandpiper.shared.notion.database_config import DatabaseId
-from sandpiper.shared.notion.notion_props import (
+from sandpiper.shared.notion.databases import calendar as calendar_db
+from sandpiper.shared.notion.databases.calendar import (
     CalendarEventCategory,
     CalendarEventEndDate,
     CalendarEventName,
@@ -13,7 +13,7 @@ from sandpiper.shared.notion.notion_props import (
 )
 
 
-@notion_database(DatabaseId.CALENDAR)
+@notion_database(calendar_db.DATABASE_ID)
 class CalendarEventPage(BasePage):  # type: ignore[misc]
     name: CalendarEventName
     category: CalendarEventCategory

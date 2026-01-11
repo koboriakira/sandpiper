@@ -3,7 +3,7 @@ from typing import Protocol
 from lotion import Lotion  # type: ignore[import-untyped]
 
 from sandpiper.plan.query.project_task_dto import ProjectTaskDto
-from sandpiper.shared.notion.database_config import DatabaseId
+from sandpiper.shared.notion.databases import project_task as project_task_db
 from sandpiper.shared.valueobject.todo_status_enum import ToDoStatusEnum
 
 
@@ -16,7 +16,7 @@ class NotionProjectTaskQuery(ProjectTaskQuery):
         self.client = Lotion.get_instance()
 
     def fetch_undone_project_tasks(self) -> list[ProjectTaskDto]:
-        items = self.client.retrieve_database(DatabaseId.PROJECT_TASK)
+        items = self.client.retrieve_database(project_task_db.DATABASE_ID)
         project_dtos = []
         for item in items:
             status = ToDoStatusEnum(item.get_status("ステータス").status_name)
