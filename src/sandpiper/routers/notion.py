@@ -158,6 +158,27 @@ async def handle_special_todo(
     )
 
 
+@router.post("/archive")
+async def archive_deleted_pages(
+    sandpiper_app: SandPiperApp = Depends(get_sandpiper_app),
+) -> JSONResponse:
+    """論理削除されたページを物理削除する
+
+    論理削除プロパティを持つデータベースから、
+    論理削除プロパティが有効なページを物理削除します。
+
+    Returns:
+        JSONResponse: データベースごとの削除件数と合計
+    """
+    result = sandpiper_app.archive_deleted_pages.execute()
+    return JSONResponse(
+        content={
+            "deleted_counts": result.deleted_counts,
+            "total_deleted_count": result.total_deleted_count,
+        }
+    )
+
+
 @router.delete("/calendar/{date_str}")
 async def delete_calendar_events(
     date_str: str,

@@ -55,3 +55,8 @@ class TodoProjectTaskProp(Relation):  # type: ignore[misc]
 @notion_prop("実行時間")
 class TodoExecutionTime(Number):  # type: ignore[misc]
     ...
+
+
+@notion_prop("論理削除")
+class TodoIsDeleted(Checkbox):  # type: ignore[misc]
+    ...

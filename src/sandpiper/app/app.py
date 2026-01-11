@@ -35,6 +35,7 @@ from sandpiper.review.query.github_activity_query import GitHubActivityQuery
 from sandpiper.review.query.todo_query import NotionTodoQuery
 from sandpiper.shared.event.todo_completed import TodoCompleted
 from sandpiper.shared.event.todo_created import TodoStarted
+from sandpiper.shared.infrastructure.archive_deleted_pages import ArchiveDeletedPages
 from sandpiper.shared.infrastructure.event_bus import EventBus
 from sandpiper.shared.infrastructure.github_client import GitHubClient
 from sandpiper.shared.infrastructure.notion_commentator import NotionCommentator
@@ -59,6 +60,7 @@ class SandPiperApp:
         handle_special_todo: HandleSpecialTodo,
         create_recipe: CreateRecipe,
         sync_jira_to_project: SyncJiraToProject,
+        archive_deleted_pages: ArchiveDeletedPages,
     ) -> None:
         self.create_todo = create_todo
         self.create_project = create_project
@@ -75,6 +77,7 @@ class SandPiperApp:
         self.handle_special_todo = handle_special_todo
         self.create_recipe = create_recipe
         self.sync_jira_to_project = sync_jira_to_project
+        self.archive_deleted_pages = archive_deleted_pages
 
 
 def bootstrap() -> SandPiperApp:
@@ -190,4 +193,5 @@ def bootstrap() -> SandPiperApp:
             project_repository=project_repository,
             project_task_repository=project_task_repository,
         ),
+        archive_deleted_pages=ArchiveDeletedPages(),
     )
