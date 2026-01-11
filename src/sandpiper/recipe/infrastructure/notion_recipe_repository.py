@@ -2,11 +2,11 @@ from lotion import BasePage, Lotion, notion_database  # type: ignore[import-unty
 from lotion.block import BulletedListItem, Heading  # type: ignore[import-untyped]
 
 from sandpiper.recipe.domain.recipe import InsertedRecipe, Recipe
-from sandpiper.shared.notion.database_config import DatabaseId
-from sandpiper.shared.notion.notion_props import RecipeIngredientsProp, RecipeName, RecipeReferenceProp
+from sandpiper.shared.notion.databases import recipe as recipe_db
+from sandpiper.shared.notion.databases.recipe import RecipeIngredientsProp, RecipeName, RecipeReferenceProp
 
 
-@notion_database(DatabaseId.RECIPE)
+@notion_database(recipe_db.DATABASE_ID)
 class RecipePage(BasePage):  # type: ignore[misc]
     name: RecipeName
     ingredients: RecipeIngredientsProp | None = None

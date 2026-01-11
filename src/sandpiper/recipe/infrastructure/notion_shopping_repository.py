@@ -1,10 +1,10 @@
 from lotion import BasePage, Lotion, notion_database  # type: ignore[import-untyped]
 
-from sandpiper.shared.notion.database_config import DatabaseId
-from sandpiper.shared.notion.notion_props import ShoppingName
+from sandpiper.shared.notion.databases import shopping as shopping_db
+from sandpiper.shared.notion.databases.shopping import ShoppingName
 
 
-@notion_database(DatabaseId.SHOPPING)
+@notion_database(shopping_db.DATABASE_ID)
 class ShoppingPage(BasePage):  # type: ignore[misc]
     name: ShoppingName
 

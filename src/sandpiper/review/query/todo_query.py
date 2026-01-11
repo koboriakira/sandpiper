@@ -5,7 +5,8 @@ from lotion import BasePage, Lotion  # type: ignore[import-untyped]
 
 from sandpiper.plan.domain.todo import ToDoKind
 from sandpiper.review.query.activity_log_item import ActivityLogItem, ActivityType
-from sandpiper.shared.notion.database_config import DatabaseId
+from sandpiper.shared.notion.databases import project as project_db
+from sandpiper.shared.notion.databases import todo as todo_db
 from sandpiper.shared.valueobject.todo_status_enum import ToDoStatusEnum
 
 
@@ -19,8 +20,8 @@ class NotionTodoQuery:
 
     def fetch_done_todos_by_date(self, target_date: date) -> list[ActivityLogItem]:
         """指定された日付以降のDONEステータスのTODOを取得する"""
-        items = self.client.retrieve_database(DatabaseId.TODO)
-        project_list = self.client.retrieve_database(DatabaseId.PROJECT)
+        items = self.client.retrieve_database(todo_db.DATABASE_ID)
+        project_list = self.client.retrieve_database(project_db.DATABASE_ID)
 
         projects: dict[str, BasePage] = {}
         for project in project_list:

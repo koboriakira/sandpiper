@@ -1,8 +1,8 @@
 from lotion import BasePage, Lotion, notion_database  # type: ignore[import-untyped]
 
 from sandpiper.perform.domain.todo import ToDo
-from sandpiper.shared.notion.database_config import DatabaseId
-from sandpiper.shared.notion.notion_props import (
+from sandpiper.shared.notion.databases import todo as todo_db
+from sandpiper.shared.notion.databases.todo import (
     TodoLogDate,
     TodoName,
     TodoProjectTaskProp,
@@ -13,7 +13,7 @@ from sandpiper.shared.valueobject.task_chute_section import TaskChuteSection
 from sandpiper.shared.valueobject.todo_status_enum import ToDoStatusEnum
 
 
-@notion_database(DatabaseId.TODO)
+@notion_database(todo_db.DATABASE_ID)
 class TodoPage(BasePage):  # type: ignore[misc]
     name: TodoName
     status: TodoStatus

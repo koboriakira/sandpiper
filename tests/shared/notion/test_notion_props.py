@@ -1,8 +1,8 @@
 import pytest
 from lotion.properties import Date, Relation, Select, Status, Title
 
-from sandpiper.shared.notion.notion_props import (
-    RoutineNextDate,
+from sandpiper.shared.notion.databases.routine import RoutineNextDate
+from sandpiper.shared.notion.databases.todo import (
     TodoKindProp,
     TodoLogDate,
     TodoName,
@@ -182,9 +182,10 @@ class TestNotionPropDecorator:
 
     def test_class_module_location(self):
         """クラスが正しいモジュールで定義されていることをテスト"""
-        expected_module = "sandpiper.shared.notion.notion_props"
+        todo_expected_module = "sandpiper.shared.notion.databases.todo"
+        routine_expected_module = "sandpiper.shared.notion.databases.routine"
 
-        classes_to_check = [
+        todo_classes = [
             TodoName,
             TodoStatus,
             TodoSection,
@@ -192,8 +193,9 @@ class TestNotionPropDecorator:
             TodoKindProp,
             TodoProjectProp,
             TodoProjectTaskProp,
-            RoutineNextDate,
         ]
 
-        for cls in classes_to_check:
-            assert cls.__module__ == expected_module
+        for cls in todo_classes:
+            assert cls.__module__ == todo_expected_module
+
+        assert RoutineNextDate.__module__ == routine_expected_module

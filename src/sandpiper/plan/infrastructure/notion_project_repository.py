@@ -2,8 +2,8 @@ from lotion import BasePage, Lotion, notion_database  # type: ignore[import-unty
 from lotion.filter import Builder, Cond  # type: ignore[import-untyped]
 
 from sandpiper.plan.domain.project import InsertedProject, Project
-from sandpiper.shared.notion.database_config import DatabaseId
-from sandpiper.shared.notion.notion_props import (
+from sandpiper.shared.notion.databases import project as project_db
+from sandpiper.shared.notion.databases.project import (
     ProjectEndDate,
     ProjectJiraUrl,
     ProjectName,
@@ -11,7 +11,7 @@ from sandpiper.shared.notion.notion_props import (
 )
 
 
-@notion_database(DatabaseId.PROJECT)
+@notion_database(project_db.DATABASE_ID)
 class ProjectPage(BasePage):  # type: ignore[misc]
     name: ProjectName
     start_date: ProjectStartDate
@@ -88,7 +88,7 @@ class NotionProjectRepository:
         """Jira URLでプロジェクトを検索する"""
         filter_param = Builder.create().add(ProjectJiraUrl.from_url(jira_url), Cond.EQUALS).build()
         pages: list[ProjectPage] = self.client.retrieve_database(
-            database_id=DatabaseId.PROJECT, filter_param=filter_param, cls=ProjectPage
+            database_id=project_db.DATABASE_ID, filter_param=filter_param, cls=ProjectPage
         )
         if not pages:
             return None
@@ -98,7 +98,7 @@ class NotionProjectRepository:
         """すべてのプロジェクトからJira URLの一覧を取得する"""
         filter_param = Builder.create().add(ProjectJiraUrl, Cond.IS_NOT_EMPTY).build()
         pages: list[ProjectPage] = self.client.retrieve_database(
-            database_id=DatabaseId.PROJECT, filter_param=filter_param, cls=ProjectPage
+            database_id=project_db.DATABASE_ID, filter_param=filter_param, cls=ProjectPage
         )
         jira_urls: set[str] = set()
         for page in pages:

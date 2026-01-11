@@ -4,8 +4,8 @@ from lotion import BasePage, Lotion, notion_database  # type: ignore[import-unty
 from lotion.block.rich_text.rich_text_builder import RichTextBuilder  # type: ignore[import-untyped]
 
 from sandpiper.plan.domain.todo import InsertedToDo, ToDo, ToDoKind, ToDoStatus
-from sandpiper.shared.notion.database_config import DatabaseId
-from sandpiper.shared.notion.notion_props import (
+from sandpiper.shared.notion.databases import todo as todo_db
+from sandpiper.shared.notion.databases.todo import (
     TodoExecutionTime,
     TodoKindProp,
     TodoName,
@@ -18,7 +18,7 @@ from sandpiper.shared.utils.date_utils import jst_today, jst_tommorow
 from sandpiper.shared.valueobject.task_chute_section import TaskChuteSection
 
 
-@notion_database(DatabaseId.TODO)
+@notion_database(todo_db.DATABASE_ID)
 class TodoPage(BasePage):  # type: ignore[misc]
     name: TodoName
     status: TodoStatus
