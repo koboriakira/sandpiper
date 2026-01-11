@@ -8,7 +8,6 @@ from sandpiper.perform.application.complete_todo import CompleteTodo
 from sandpiper.perform.application.handle_todo_started import HandleTodoStarted
 from sandpiper.perform.application.start_todo import StartTodo
 from sandpiper.perform.infrastructure.notion_todo_repository import NotionTodoRepository as PerformNotionTodoRepository
-from sandpiper.plan.application.archive_deleted_pages import ArchiveDeletedPages
 from sandpiper.plan.application.convert_to_project import ConvertToProject
 from sandpiper.plan.application.create_project import CreateProject
 from sandpiper.plan.application.create_project_task import CreateProjectTask
@@ -36,6 +35,7 @@ from sandpiper.review.query.github_activity_query import GitHubActivityQuery
 from sandpiper.review.query.todo_query import NotionTodoQuery
 from sandpiper.shared.event.todo_completed import TodoCompleted
 from sandpiper.shared.event.todo_created import TodoStarted
+from sandpiper.shared.infrastructure.archive_deleted_pages import ArchiveDeletedPages
 from sandpiper.shared.infrastructure.event_bus import EventBus
 from sandpiper.shared.infrastructure.github_client import GitHubClient
 from sandpiper.shared.infrastructure.notion_commentator import NotionCommentator

@@ -164,17 +164,16 @@ async def archive_deleted_pages(
 ) -> JSONResponse:
     """論理削除されたページを物理削除する
 
-    TODOデータベースとサムデイリストデータベースから、
+    論理削除プロパティを持つデータベースから、
     論理削除プロパティが有効なページを物理削除します。
 
     Returns:
-        JSONResponse: 削除されたページ数
+        JSONResponse: データベースごとの削除件数と合計
     """
     result = sandpiper_app.archive_deleted_pages.execute()
     return JSONResponse(
         content={
-            "todo_deleted_count": result.todo_deleted_count,
-            "someday_deleted_count": result.someday_deleted_count,
+            "deleted_counts": result.deleted_counts,
             "total_deleted_count": result.total_deleted_count,
         }
     )

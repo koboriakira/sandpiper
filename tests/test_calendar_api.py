@@ -7,8 +7,8 @@ from fastapi.testclient import TestClient
 
 from sandpiper.calendar.application.delete_calendar_events import DeleteCalendarEventsResult
 from sandpiper.calendar.domain.calendar_event import EventCategory, InsertedCalendarEvent
-from sandpiper.plan.application.archive_deleted_pages import ArchiveDeletedPagesResult
 from sandpiper.routers.notion import router
+from sandpiper.shared.infrastructure.archive_deleted_pages import ArchiveDeletedPagesResult
 
 
 @pytest.fixture
@@ -210,8 +210,7 @@ class TestArchiveAPI:
         """論理削除されたページのアーカイブAPIが正常に動作することをテスト"""
         # Arrange
         mock_sandpiper_app.archive_deleted_pages.execute.return_value = ArchiveDeletedPagesResult(
-            todo_deleted_count=3,
-            someday_deleted_count=2,
+            deleted_counts={"db1": 3, "db2": 2},
         )
 
         # Act
@@ -221,8 +220,8 @@ class TestArchiveAPI:
         # Assert
         assert response.status_code == 200
         response_data = response.json()
-        assert response_data["todo_deleted_count"] == 3
-        assert response_data["someday_deleted_count"] == 2
+        assert response_data["deleted_counts"]["db1"] == 3
+        assert response_data["deleted_counts"]["db2"] == 2
         assert response_data["total_deleted_count"] == 5
 
         # サービスが正しく呼び出されたことを確認
@@ -232,8 +231,7 @@ class TestArchiveAPI:
         """削除対象がない場合のAPIレスポンスをテスト"""
         # Arrange
         mock_sandpiper_app.archive_deleted_pages.execute.return_value = ArchiveDeletedPagesResult(
-            todo_deleted_count=0,
-            someday_deleted_count=0,
+            deleted_counts={"db1": 0, "db2": 0},
         )
 
         # Act
@@ -243,6 +241,6 @@ class TestArchiveAPI:
         # Assert
         assert response.status_code == 200
         response_data = response.json()
-        assert response_data["todo_deleted_count"] == 0
-        assert response_data["someday_deleted_count"] == 0
+        assert response_data["deleted_counts"]["db1"] == 0
+        assert response_data["deleted_counts"]["db2"] == 0
         assert response_data["total_deleted_count"] == 0
