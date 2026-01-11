@@ -7,6 +7,7 @@ from fastapi.testclient import TestClient
 
 from sandpiper.calendar.application.delete_calendar_events import DeleteCalendarEventsResult
 from sandpiper.calendar.domain.calendar_event import EventCategory, InsertedCalendarEvent
+from sandpiper.plan.application.archive_deleted_pages import ArchiveDeletedPagesResult
 from sandpiper.routers.notion import router
 
 
@@ -16,8 +17,10 @@ def mock_sandpiper_app():
     mock_app = Mock()
     mock_create_calendar_event = Mock()
     mock_delete_calendar_events = Mock()
+    mock_archive_deleted_pages = Mock()
     mock_app.create_calendar_event = mock_create_calendar_event
     mock_app.delete_calendar_events = mock_delete_calendar_events
+    mock_app.archive_deleted_pages = mock_archive_deleted_pages
     return mock_app
 
 
@@ -200,3 +203,46 @@ class TestCalendarAPI:
         assert call_args.target_date.year == expected_year
         assert call_args.target_date.month == expected_month
         assert call_args.target_date.day == expected_day
+
+
+class TestArchiveAPI:
+    def test_archive_deleted_pages_success(self, test_app, mock_sandpiper_app):
+        """論理削除されたページのアーカイブAPIが正常に動作することをテスト"""
+        # Arrange
+        mock_sandpiper_app.archive_deleted_pages.execute.return_value = ArchiveDeletedPagesResult(
+            todo_deleted_count=3,
+            someday_deleted_count=2,
+        )
+
+        # Act
+        with TestClient(test_app) as client:
+            response = client.post("/api/notion/archive")
+
+        # Assert
+        assert response.status_code == 200
+        response_data = response.json()
+        assert response_data["todo_deleted_count"] == 3
+        assert response_data["someday_deleted_count"] == 2
+        assert response_data["total_deleted_count"] == 5
+
+        # サービスが正しく呼び出されたことを確認
+        mock_sandpiper_app.archive_deleted_pages.execute.assert_called_once()
+
+    def test_archive_deleted_pages_with_no_deleted_pages(self, test_app, mock_sandpiper_app):
+        """削除対象がない場合のAPIレスポンスをテスト"""
+        # Arrange
+        mock_sandpiper_app.archive_deleted_pages.execute.return_value = ArchiveDeletedPagesResult(
+            todo_deleted_count=0,
+            someday_deleted_count=0,
+        )
+
+        # Act
+        with TestClient(test_app) as client:
+            response = client.post("/api/notion/archive")
+
+        # Assert
+        assert response.status_code == 200
+        response_data = response.json()
+        assert response_data["todo_deleted_count"] == 0
+        assert response_data["someday_deleted_count"] == 0
+        assert response_data["total_deleted_count"] == 0

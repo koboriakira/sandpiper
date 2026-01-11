@@ -8,6 +8,7 @@ from sandpiper.perform.application.complete_todo import CompleteTodo
 from sandpiper.perform.application.handle_todo_started import HandleTodoStarted
 from sandpiper.perform.application.start_todo import StartTodo
 from sandpiper.perform.infrastructure.notion_todo_repository import NotionTodoRepository as PerformNotionTodoRepository
+from sandpiper.plan.application.archive_deleted_pages import ArchiveDeletedPages
 from sandpiper.plan.application.convert_to_project import ConvertToProject
 from sandpiper.plan.application.create_project import CreateProject
 from sandpiper.plan.application.create_project_task import CreateProjectTask
@@ -59,6 +60,7 @@ class SandPiperApp:
         handle_special_todo: HandleSpecialTodo,
         create_recipe: CreateRecipe,
         sync_jira_to_project: SyncJiraToProject,
+        archive_deleted_pages: ArchiveDeletedPages,
     ) -> None:
         self.create_todo = create_todo
         self.create_project = create_project
@@ -75,6 +77,7 @@ class SandPiperApp:
         self.handle_special_todo = handle_special_todo
         self.create_recipe = create_recipe
         self.sync_jira_to_project = sync_jira_to_project
+        self.archive_deleted_pages = archive_deleted_pages
 
 
 def bootstrap() -> SandPiperApp:
@@ -190,4 +193,5 @@ def bootstrap() -> SandPiperApp:
             project_repository=project_repository,
             project_task_repository=project_task_repository,
         ),
+        archive_deleted_pages=ArchiveDeletedPages(),
     )
