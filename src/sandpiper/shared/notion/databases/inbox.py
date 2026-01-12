@@ -1,7 +1,7 @@
 from lotion import notion_prop  # type: ignore[import-untyped]
 from lotion.properties import Select, Title, Url  # type: ignore[import-untyped]
 
-DATABASE_ID = ""  # データベースIDは後ほど指定
+DATABASE_ID = "2e66567a3bbf80aa8c83f113aa101d44"
 
 
 @notion_prop("名前")
