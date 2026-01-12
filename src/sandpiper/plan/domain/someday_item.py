@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from enum import Enum
 
 
@@ -18,6 +18,7 @@ class SomedayItem:
     timing: SomedayTiming
     do_tomorrow: bool = False
     is_deleted: bool = False
+    context: list[str] = field(default_factory=list)
 
     @classmethod
     def create(
@@ -25,6 +26,7 @@ class SomedayItem:
         title: str,
         timing: SomedayTiming = SomedayTiming.SOMEDAY,
         do_tomorrow: bool = False,
+        context: list[str] | None = None,
     ) -> "SomedayItem":
         """新しいサムデイアイテムを作成"""
         return cls(
@@ -33,4 +35,5 @@ class SomedayItem:
             timing=timing,
             do_tomorrow=do_tomorrow,
             is_deleted=False,
+            context=context or [],
         )
