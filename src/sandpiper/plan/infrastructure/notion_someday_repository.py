@@ -49,6 +49,26 @@ class NotionSomedayRepository(SomedayRepository):
         updated_page.id = page.id
         self._client.update(updated_page)
 
+    def fetch_by_timing_and_context(
+        self, timing: SomedayTiming, context: str
+    ) -> list[SomedayItem]:
+        """タイミングとコンテクストでフィルタリングしたアイテムを取得"""
+        all_items = self.fetch_all(include_deleted=False)
+        return [
+            item
+            for item in all_items
+            if item.timing == timing and context in item.context
+        ]
+
+    def _parse_timing(self, timing_name: str) -> SomedayTiming:
+        """タイミング名からEnumに変換"""
+        timing_map = {
+            "明日": SomedayTiming.TOMORROW,
+            "いつか": SomedayTiming.SOMEDAY,
+            "ついでに": SomedayTiming.INCIDENTALLY,
+        }
+        return timing_map.get(timing_name, SomedayTiming.SOMEDAY)
+
 
 if __name__ == "__main__":
     # uv run python -m sandpiper.plan.infrastructure.notion_someday_repository
