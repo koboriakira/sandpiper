@@ -1,49 +1,25 @@
 from lotion import Lotion  # type: ignore[import-untyped]
 
-from sandpiper.plan.domain.someday_item import SomedayItem, SomedayTiming
+from sandpiper.plan.domain.someday_item import SomedayItem
 from sandpiper.plan.domain.someday_repository import SomedayRepository
-from sandpiper.shared.notion.databases import someday as someday_db
-from sandpiper.shared.notion.databases.someday import (
-    SomedayContext,
-    SomedayDoTomorrow,
-    SomedayIsDeleted,
-    SomedayName,
-)
-from sandpiper.shared.notion.databases.someday import (
-    SomedayTiming as SomedayTimingProp,
-)
+from sandpiper.shared.notion.databases.someday import SomedayPage
 
 
 class NotionSomedayRepository(SomedayRepository):
     """Notionを使用したサムデイリストリポジトリ"""
 
     def __init__(self) -> None:
-        self.client = Lotion.get_instance()
+        self._client = Lotion.get_instance()
 
     def fetch_all(self, include_deleted: bool = False) -> list[SomedayItem]:
         """全てのサムデイアイテムを取得"""
-        items = self.client.retrieve_database(someday_db.DATABASE_ID)
+        pages = SomedayPage.fetch_all(self._client)
         result = []
-        for item in items:
-            is_deleted = item.get_checkbox("論理削除").checked
-            if not include_deleted and is_deleted:
+        for page in pages:
+            item = page.to_domain()
+            if not include_deleted and item.is_deleted:
                 continue
-
-            timing_name = item.get_select("タイミング").selected_name
-            timing = SomedayTiming.TOMORROW if timing_name == "明日" else SomedayTiming.SOMEDAY
-            do_tomorrow = item.get_checkbox("明日やる").checked
-            context_prop = item.get_multi_select("コンテクスト")
-            context = [v.name for v in context_prop.values] if context_prop else []
-
-            someday_item = SomedayItem(
-                id=item.id,
-                title=item.get_title_text(),
-                timing=timing,
-                do_tomorrow=do_tomorrow,
-                is_deleted=is_deleted,
-                context=context,
-            )
-            result.append(someday_item)
+            result.append(item)
         return result
 
     def fetch_tomorrow_items(self) -> list[SomedayItem]:
@@ -53,39 +29,25 @@ class NotionSomedayRepository(SomedayRepository):
 
     def save(self, item: SomedayItem) -> SomedayItem:
         """サムデイアイテムを保存"""
-        page = self.client.create_page_in_database(someday_db.DATABASE_ID)
-        page.set_prop(SomedayName.from_plain_text(item.title))
-        page.set_prop(SomedayTimingProp.from_name(item.timing.value))
-        page.set_prop(SomedayDoTomorrow.true() if item.do_tomorrow else SomedayDoTomorrow.false())
-        page.set_prop(SomedayIsDeleted.false())
-        if item.context:
-            page.set_prop(SomedayContext.from_name(item.context))
-        created_page = self.client.update(page)
-        return SomedayItem(
-            id=created_page.id,
-            title=item.title,
-            timing=item.timing,
-            do_tomorrow=item.do_tomorrow,
-            is_deleted=False,
-            context=item.context,
-        )
+        someday_page = SomedayPage.generate(item)
+        created_page: SomedayPage = self._client.create_page(someday_page)
+        return created_page.to_domain()
 
     def update(self, item: SomedayItem) -> None:
         """サムデイアイテムを更新"""
-        page = self.client.retrieve_page(item.id)
-        page.set_prop(SomedayName.from_plain_text(item.title))
-        page.set_prop(SomedayTimingProp.from_name(item.timing.value))
-        page.set_prop(SomedayDoTomorrow.true() if item.do_tomorrow else SomedayDoTomorrow.false())
-        page.set_prop(SomedayIsDeleted.true() if item.is_deleted else SomedayIsDeleted.false())
-        if item.context:
-            page.set_prop(SomedayContext.from_name(item.context))
-        self.client.update(page)
+        page = self._client.retrieve_page(item.id, cls=SomedayPage)
+        updated_page = SomedayPage.generate(item)
+        updated_page.id = page.id
+        self._client.update(updated_page)
 
     def delete(self, item_id: str) -> None:
         """サムデイアイテムを論理削除"""
-        page = self.client.retrieve_page(item_id)
-        page.set_prop(SomedayIsDeleted.true())
-        self.client.update(page)
+        page: SomedayPage = self._client.retrieve_page(item_id, cls=SomedayPage)
+        item = page.to_domain()
+        item.is_deleted = True
+        updated_page = SomedayPage.generate(item)
+        updated_page.id = page.id
+        self._client.update(updated_page)
 
 
 if __name__ == "__main__":

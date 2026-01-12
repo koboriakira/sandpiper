@@ -106,4 +106,5 @@ class NotionTodoRepository:
         if not page_id:
             return []
         page = self.client.retrieve_page(page_id)
-        return page.block_children
+        blocks: list[Block] = page.block_children
+        return blocks
