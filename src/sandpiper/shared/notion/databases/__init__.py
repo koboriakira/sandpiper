@@ -28,6 +28,7 @@ from sandpiper.shared.notion.databases.clips import (
 from sandpiper.shared.notion.databases.inbox import (
     InboxName,
     InboxType,
+    InboxTypeProp,
     InboxUrl,
 )
 from sandpiper.shared.notion.databases.project import (
@@ -98,6 +99,7 @@ __all__ = [
     "DatabaseId",
     "InboxName",
     "InboxType",
+    "InboxTypeProp",
     "InboxUrl",
     "ProjectEndDate",
     "ProjectJiraUrl",
