@@ -28,6 +28,8 @@ class NotionProjectTaskQuery(ProjectTaskQuery):
                 continue
 
             is_next = item.get_checkbox("次やる").checked
+            context_prop = item.get_multi_select("コンテクスト")
+            context = [v.name for v in context_prop.values] if context_prop else []
             project_task = ProjectTaskDto(
                 page_id=item.id,
                 title=item.get_title_text(),
@@ -35,6 +37,7 @@ class NotionProjectTaskQuery(ProjectTaskQuery):
                 project_page_id=project_relations[0],
                 is_next=is_next,
                 block_children=item.block_children,
+                context=context,
             )
             project_dtos.append(project_task)
         return project_dtos

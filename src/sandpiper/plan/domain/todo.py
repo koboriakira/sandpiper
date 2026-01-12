@@ -27,6 +27,7 @@ class ToDo:
     project_page_id: str | None = None
     project_task_page_id: str | None = None
     execution_time: int | None = None
+    context: list[str] | None = None
 
 
 @dataclass
@@ -36,3 +37,4 @@ class InsertedToDo:
     section: TaskChuteSection | None = None
     kind: ToDoKind | None = None
     execution_time: int | None = None
+    context: list[str] | None = None
