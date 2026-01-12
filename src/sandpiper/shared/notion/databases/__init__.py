@@ -22,6 +22,7 @@ from sandpiper.shared.notion.databases.calendar import (
     CalendarEventStartDate,
 )
 from sandpiper.shared.notion.databases.clips import (
+    ClipsAutoFetchTitle,
     ClipsName,
     ClipsTypeProp,
     ClipsUrl,
@@ -95,6 +96,7 @@ __all__ = [
     "CalendarEventEndDate",
     "CalendarEventName",
     "CalendarEventStartDate",
+    "ClipsAutoFetchTitle",
     "ClipsName",
     "ClipsTypeProp",
     "ClipsUrl",
