@@ -1,6 +1,7 @@
 from typing import Any
 
 from lotion import BasePage, Lotion, notion_database  # type: ignore[import-untyped]
+from lotion.block import Block  # type: ignore[import-untyped]
 from lotion.block.rich_text.rich_text_builder import RichTextBuilder  # type: ignore[import-untyped]
 
 from sandpiper.plan.domain.todo import InsertedToDo, ToDo, ToDoKind, ToDoStatus
@@ -29,7 +30,7 @@ class TodoPage(BasePage):  # type: ignore[misc]
     project_task_relation: TodoProjectTaskProp | None = None
 
     @staticmethod
-    def generate(todo: ToDo, options: dict[str, Any]) -> "TodoPage":
+    def generate(todo: ToDo, options: dict[str, Any], blocks: list[Block] | None = None) -> "TodoPage":
         properties = [
             TodoName.from_plain_text(todo.title),
             TodoStatus.from_status_name("ToDo"),
@@ -51,8 +52,6 @@ class TodoPage(BasePage):  # type: ignore[misc]
             rich_text_builder = RichTextBuilder.create().add_text(todo.title).add_date_mention(start=start_day)
             properties.append(TodoName.from_rich_text(rich_text_builder.build()))
 
-        # ブロックコンテンツがある場合は一緒に作成
-        blocks = options.get("block_children", [])
         return TodoPage.create(properties=properties, blocks=blocks)  # type: ignore[no-any-return]
 
     def to_domain(self) -> ToDo:
@@ -80,7 +79,8 @@ class NotionTodoRepository:
 
     def save(self, todo: ToDo, options: dict[str, Any] | None = None) -> InsertedToDo:
         options = options or {}
-        notion_todo = TodoPage.generate(todo, options=options)
+        blocks = self._get_blocks_from_other_pages(todo)
+        notion_todo = TodoPage.generate(todo, options=options, blocks=blocks)
         page = self.client.create_page(notion_todo)
         return InsertedToDo(
             id=page.id,
@@ -100,3 +100,10 @@ class NotionTodoRepository:
     def find(self, page_id: str) -> ToDo:
         notion_page = self.client.retrieve_page(page_id, cls=TodoPage)
         return notion_page.to_domain()  # type: ignore[no-any-return]
+
+    def _get_blocks_from_other_pages(self, todo: ToDo) -> list[Block]:
+        page_id = todo.routine_page_id or todo.project_task_page_id
+        if not page_id:
+            return []
+        page = self.client.retrieve_page(page_id)
+        return page.block_children
