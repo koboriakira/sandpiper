@@ -4,6 +4,7 @@ from sandpiper.plan.domain.someday_item import SomedayItem, SomedayTiming
 from sandpiper.plan.domain.someday_repository import SomedayRepository
 from sandpiper.shared.notion.databases import someday as someday_db
 from sandpiper.shared.notion.databases.someday import (
+    SomedayContext,
     SomedayDoTomorrow,
     SomedayIsDeleted,
     SomedayName,
@@ -31,6 +32,8 @@ class NotionSomedayRepository(SomedayRepository):
             timing_name = item.get_select("タイミング").selected_name
             timing = SomedayTiming.TOMORROW if timing_name == "明日" else SomedayTiming.SOMEDAY
             do_tomorrow = item.get_checkbox("明日やる").checked
+            context_prop = item.get_multi_select("コンテクスト")
+            context = [v.name for v in context_prop.values] if context_prop else []
 
             someday_item = SomedayItem(
                 id=item.id,
@@ -38,6 +41,7 @@ class NotionSomedayRepository(SomedayRepository):
                 timing=timing,
                 do_tomorrow=do_tomorrow,
                 is_deleted=is_deleted,
+                context=context,
             )
             result.append(someday_item)
         return result
@@ -54,6 +58,8 @@ class NotionSomedayRepository(SomedayRepository):
         page.set_prop(SomedayTimingProp.from_name(item.timing.value))
         page.set_prop(SomedayDoTomorrow.true() if item.do_tomorrow else SomedayDoTomorrow.false())
         page.set_prop(SomedayIsDeleted.false())
+        if item.context:
+            page.set_prop(SomedayContext.from_name(item.context))
         created_page = self.client.update(page)
         return SomedayItem(
             id=created_page.id,
@@ -61,6 +67,7 @@ class NotionSomedayRepository(SomedayRepository):
             timing=item.timing,
             do_tomorrow=item.do_tomorrow,
             is_deleted=False,
+            context=item.context,
         )
 
     def update(self, item: SomedayItem) -> None:
@@ -70,6 +77,8 @@ class NotionSomedayRepository(SomedayRepository):
         page.set_prop(SomedayTimingProp.from_name(item.timing.value))
         page.set_prop(SomedayDoTomorrow.true() if item.do_tomorrow else SomedayDoTomorrow.false())
         page.set_prop(SomedayIsDeleted.true() if item.is_deleted else SomedayIsDeleted.false())
+        if item.context:
+            page.set_prop(SomedayContext.from_name(item.context))
         self.client.update(page)
 
     def delete(self, item_id: str) -> None:

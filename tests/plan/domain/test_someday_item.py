@@ -11,6 +11,7 @@ class TestSomedayItem:
             timing=SomedayTiming.TOMORROW,
             do_tomorrow=True,
             is_deleted=False,
+            context=["外出"],
         )
 
         # Assert
@@ -19,6 +20,7 @@ class TestSomedayItem:
         assert item.timing == SomedayTiming.TOMORROW
         assert item.do_tomorrow is True
         assert item.is_deleted is False
+        assert item.context == ["外出"]
 
     def test_someday_item_default_values(self):
         """SomedayItemのデフォルト値をテスト"""
@@ -32,6 +34,7 @@ class TestSomedayItem:
         # Assert
         assert item.do_tomorrow is False
         assert item.is_deleted is False
+        assert item.context == []
 
     def test_someday_item_create_classmethod(self):
         """SomedayItem.createファクトリメソッドをテスト"""
@@ -40,6 +43,7 @@ class TestSomedayItem:
             title="新規アイテム",
             timing=SomedayTiming.TOMORROW,
             do_tomorrow=True,
+            context=["仕事", "外出"],
         )
 
         # Assert
@@ -48,6 +52,7 @@ class TestSomedayItem:
         assert item.timing == SomedayTiming.TOMORROW
         assert item.do_tomorrow is True
         assert item.is_deleted is False
+        assert item.context == ["仕事", "外出"]
 
     def test_someday_item_create_with_defaults(self):
         """SomedayItem.createのデフォルト値をテスト"""
@@ -60,6 +65,7 @@ class TestSomedayItem:
         assert item.timing == SomedayTiming.SOMEDAY
         assert item.do_tomorrow is False
         assert item.is_deleted is False
+        assert item.context == []
 
 
 class TestSomedayTiming:
