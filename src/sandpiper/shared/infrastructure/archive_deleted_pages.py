@@ -4,6 +4,7 @@ from dataclasses import dataclass
 
 from lotion import Lotion  # type: ignore[import-untyped]
 
+from sandpiper.shared.notion.databases import project_task as project_task_db
 from sandpiper.shared.notion.databases import someday as someday_db
 from sandpiper.shared.notion.databases import todo as todo_db
 
@@ -11,6 +12,7 @@ from sandpiper.shared.notion.databases import todo as todo_db
 DATABASES_WITH_LOGICAL_DELETION: list[str] = [
     todo_db.DATABASE_ID,
     someday_db.DATABASE_ID,
+    project_task_db.DATABASE_ID,
 ]
 
 
