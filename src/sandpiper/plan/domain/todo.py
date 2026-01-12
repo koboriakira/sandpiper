@@ -26,6 +26,7 @@ class ToDo:
     kind: ToDoKind | None = None
     project_page_id: str | None = None
     project_task_page_id: str | None = None
+    routine_page_id: str | None = None
     execution_time: int | None = None
     context: list[str] | None = None
 
