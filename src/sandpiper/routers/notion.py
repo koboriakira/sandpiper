@@ -36,8 +36,8 @@ class CreateCalendarEventApiRequest(BaseModel):
 
 
 class CreateClipApiRequest(BaseModel):
-    title: str
     url: str
+    title: str | None = None
 
 
 @router.post("/todo/start")
