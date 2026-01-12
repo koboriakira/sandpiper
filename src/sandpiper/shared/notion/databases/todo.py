@@ -2,6 +2,7 @@ from lotion import notion_prop  # type: ignore[import-untyped]
 from lotion.properties import (  # type: ignore[import-untyped]
     Checkbox,
     Date,
+    MultiSelect,
     Number,
     Relation,
     Select,
@@ -59,4 +60,9 @@ class TodoExecutionTime(Number):  # type: ignore[misc]
 
 @notion_prop("論理削除")
 class TodoIsDeleted(Checkbox):  # type: ignore[misc]
+    ...
+
+
+@notion_prop("コンテクスト")
+class TodoContext(MultiSelect):  # type: ignore[misc]
     ...
