@@ -4,7 +4,7 @@ from sandpiper.app.message_dispatcher import MessageDispatcher
 from sandpiper.plan.application.create_todo import CreateNewToDoRequest, CreateToDo
 from sandpiper.plan.domain.todo import ToDo, ToDoKind
 from sandpiper.plan.domain.todo_repository import TodoRepository
-from sandpiper.shared.event.todo_created import TodoStarted
+from sandpiper.shared.event.todo_created import TodoCreated
 from sandpiper.shared.valueobject.task_chute_section import TaskChuteSection
 
 
@@ -82,9 +82,9 @@ class TestCreateToDo:
         self.mock_repository.save.assert_called_once()
         self.mock_dispatcher.publish.assert_called_once()
 
-        # TodoStartedイベントが正しく発行されることを確認
+        # TodoCreatedイベントが正しく発行されることを確認
         published_event = self.mock_dispatcher.publish.call_args[0][0]
-        assert isinstance(published_event, TodoStarted)
+        assert isinstance(published_event, TodoCreated)
         assert published_event.page_id == "test-id-123"
 
     def test_create_todo_repository_save_called_with_correct_todo(self):

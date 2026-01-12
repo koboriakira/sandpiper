@@ -2,5 +2,5 @@ from dataclasses import dataclass
 
 
 @dataclass
-class TodoStarted:
+class TodoCreated:
     page_id: str

@@ -7,7 +7,7 @@ from sandpiper.calendar.infrastructure.notion_calendar_repository import NotionC
 from sandpiper.clips.application.create_clip import CreateClip
 from sandpiper.clips.infrastructure.notion_clips_repository import NotionClipsRepository
 from sandpiper.perform.application.complete_todo import CompleteTodo
-from sandpiper.perform.application.handle_todo_start_event import HandleTodoStartEvent
+from sandpiper.perform.application.handle_todo_created import HandleTodoCreated
 from sandpiper.perform.application.handle_todo_started import HandleTodoStarted
 from sandpiper.perform.application.start_todo import StartTodo
 from sandpiper.perform.infrastructure.notion_todo_repository import NotionTodoRepository as PerformNotionTodoRepository
@@ -39,8 +39,8 @@ from sandpiper.review.query.calendar_query import NotionCalendarQuery
 from sandpiper.review.query.github_activity_query import GitHubActivityQuery
 from sandpiper.review.query.todo_query import NotionTodoQuery
 from sandpiper.shared.event.todo_completed import TodoCompleted
-from sandpiper.shared.event.todo_created import TodoStarted
-from sandpiper.shared.event.todo_start_event import TodoStartEvent
+from sandpiper.shared.event.todo_created import TodoCreated
+from sandpiper.shared.event.todo_started import TodoStarted
 from sandpiper.shared.infrastructure.archive_deleted_pages import ArchiveDeletedPages
 from sandpiper.shared.infrastructure.event_bus import EventBus
 from sandpiper.shared.infrastructure.github_client import GitHubClient
@@ -118,14 +118,14 @@ def bootstrap() -> SandPiperApp:
     someday_repository = NotionSomedayRepository()
 
     # Subscribe event handlers
-    handle_todo_started = HandleTodoStarted(perform_notion_todo_repository)
-    event_bus.subscribe(TodoStarted, handle_todo_started)
+    handle_todo_created = HandleTodoCreated(perform_notion_todo_repository)
+    event_bus.subscribe(TodoCreated, handle_todo_created)
     incidental_task_query = NotionIncidentalTaskQuery()
-    handle_todo_start_event = HandleTodoStartEvent(
+    handle_todo_started = HandleTodoStarted(
         incidental_task_query=incidental_task_query,
         slack_messanger=default_notice_messanger,
     )
-    event_bus.subscribe(TodoStartEvent, handle_todo_start_event)
+    event_bus.subscribe(TodoStarted, handle_todo_started)
     handle_todo_completed = HandleCompletedTask(plan_notion_todo_repository, default_notice_messanger, commentator)
     event_bus.subscribe(TodoCompleted, handle_todo_completed)
 

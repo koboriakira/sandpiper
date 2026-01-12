@@ -1,3 +1,5 @@
+import contextlib
+
 from lotion import BasePage, Lotion, notion_database  # type: ignore[import-untyped]
 
 from sandpiper.perform.domain.todo import ToDo
@@ -9,6 +11,7 @@ from sandpiper.shared.notion.databases.todo import (
     TodoSection,
     TodoStatus,
 )
+from sandpiper.shared.valueobject.context import Context
 from sandpiper.shared.valueobject.task_chute_section import TaskChuteSection
 from sandpiper.shared.valueobject.todo_status_enum import ToDoStatusEnum
 
@@ -26,6 +29,8 @@ class TodoPage(BasePage):  # type: ignore[misc]
         log_start_datetime = self.get_date("実施期間").start_datetime
         log_end_datetime = self.get_date("実施期間").end_datetime
         project_task = self.get_relation("プロジェクトタスク").id_list
+        context_prop = self.get_multi_select("コンテクスト")
+        contexts = self._parse_contexts(context_prop)
         return ToDo(
             id=self.id,
             title=self.get_title_text(),
@@ -34,7 +39,17 @@ class TodoPage(BasePage):  # type: ignore[misc]
             log_start_datetime=log_start_datetime,
             log_end_datetime=log_end_datetime,
             project_task_page_id=project_task[0] if project_task else None,
+            contexts=contexts,
         )
+
+    def _parse_contexts(self, context_prop) -> list[Context]:  # type: ignore[no-untyped-def]
+        if not context_prop or not context_prop.values:
+            return []
+        contexts = []
+        for value in context_prop.values:
+            with contextlib.suppress(ValueError):
+                contexts.append(Context(value.name))
+        return contexts
 
 
 class NotionTodoRepository:

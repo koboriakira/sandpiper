@@ -1,15 +1,27 @@
-from sandpiper.perform.domain.todo_repository import TodoRepository
-from sandpiper.shared.event.todo_created import TodoStarted
+from sandpiper.perform.query.incidental_task_query import IncidentalTaskQuery
+from sandpiper.shared.event.todo_started import TodoStarted
+from sandpiper.shared.infrastructure.slack_notice_messanger import SlackNoticeMessanger
+from sandpiper.shared.valueobject.context import Context
 
 
 class HandleTodoStarted:
-    _todo_repository: TodoRepository
-
-    def __init__(self, todo_repository: TodoRepository) -> None:
-        self._todo_repository = todo_repository
+    def __init__(
+        self,
+        incidental_task_query: IncidentalTaskQuery,
+        slack_messanger: SlackNoticeMessanger,
+    ) -> None:
+        self._incidental_task_query = incidental_task_query
+        self._slack_messanger = slack_messanger
 
     def __call__(self, event: TodoStarted) -> None:
-        print(f"ToDo started with page ID: {event.page_id}")
-        todo = self._todo_repository.find(event.page_id)
-        todo.start()
-        self._todo_repository.save(todo)
+        if event.context != Context.OUTING:
+            return
+
+        titles = self._incidental_task_query.fetch_by_context(Context.OUTING)
+
+        if not titles:
+            return
+
+        titles_str = "、".join(titles)
+        message = f"あわせて「{titles_str}」も実行してください"
+        self._slack_messanger.send(message)

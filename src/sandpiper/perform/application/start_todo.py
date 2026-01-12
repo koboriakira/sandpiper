@@ -1,7 +1,8 @@
 from sandpiper.app.message_dispatcher import MessageDispatcher
 from sandpiper.perform.domain.todo_repository import TodoRepository
 from sandpiper.plan.domain.project_task_repository import ProjectTaskRepository
-from sandpiper.shared.event.todo_created import TodoStarted
+from sandpiper.shared.event.todo_started import TodoStarted
+from sandpiper.shared.utils.date_utils import jst_now
 from sandpiper.shared.valueobject.todo_status_enum import ToDoStatusEnum
 
 
@@ -28,7 +29,15 @@ class StartTodo:
         if todo.project_task_page_id:
             self._start_project_task_if_not_in_progress(todo.project_task_page_id)
 
-        self._dispatcher.publish(TodoStarted(page_id=page_id))
+        if todo.contexts:
+            context = todo.contexts[0]
+            self._dispatcher.publish(
+                TodoStarted(
+                    name=todo.title,
+                    context=context,
+                    execution_time=jst_now(),
+                )
+            )
 
     def _start_project_task_if_not_in_progress(self, project_task_page_id: str) -> None:
         """プロジェクトタスクがInProgressでなければInProgressに更新する"""
