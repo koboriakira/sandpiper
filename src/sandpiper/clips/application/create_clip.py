@@ -63,7 +63,11 @@ class CreateClip:
             title = fetch_page_title(request.url) or DEFAULT_TITLE
 
         inbox_type = InboxType.from_url(request.url)
-        clip = Clip(title=title, url=request.url, inbox_type=inbox_type)
+
+        # 種類がVIDEO (Youtube)またはタイトルが取得できなかった場合、自動取得フラグを立てる
+        auto_fetch_title = inbox_type == InboxType.VIDEO or title == DEFAULT_TITLE
+
+        clip = Clip(title=title, url=request.url, inbox_type=inbox_type, auto_fetch_title=auto_fetch_title)
         inserted_clip = self._clips_repository.save(clip)
         print(f"Created Clip: {inserted_clip}")
         return inserted_clip

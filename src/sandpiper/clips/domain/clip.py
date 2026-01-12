@@ -10,6 +10,7 @@ class Clip:
     title: str
     url: str
     inbox_type: InboxType
+    auto_fetch_title: bool = False
 
 
 @dataclass(frozen=True)
@@ -20,3 +21,4 @@ class InsertedClip:
     title: str
     url: str
     inbox_type: InboxType
+    auto_fetch_title: bool = False
