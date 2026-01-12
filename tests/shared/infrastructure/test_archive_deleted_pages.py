@@ -7,6 +7,9 @@ from sandpiper.shared.infrastructure.archive_deleted_pages import (
     ArchiveDeletedPages,
     ArchiveDeletedPagesResult,
 )
+from sandpiper.shared.notion.databases import project_task as project_task_db
+from sandpiper.shared.notion.databases import someday as someday_db
+from sandpiper.shared.notion.databases import todo as todo_db
 
 
 class TestArchiveDeletedPagesResult:
@@ -112,6 +115,13 @@ class TestArchiveDeletedPages:
 
         # Assert
         assert usecase.database_ids == DATABASES_WITH_LOGICAL_DELETION
+
+    def test_default_database_ids_include_all_expected_databases(self):
+        # Assert
+        assert todo_db.DATABASE_ID in DATABASES_WITH_LOGICAL_DELETION
+        assert someday_db.DATABASE_ID in DATABASES_WITH_LOGICAL_DELETION
+        assert project_task_db.DATABASE_ID in DATABASES_WITH_LOGICAL_DELETION
+        assert len(DATABASES_WITH_LOGICAL_DELETION) == 3
 
     def test_execute_with_custom_database_ids(self, mock_lotion):
         # Arrange
