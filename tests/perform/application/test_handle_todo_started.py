@@ -6,6 +6,7 @@ from sandpiper.perform.application.handle_todo_started import HandleTodoStarted
 from sandpiper.perform.domain.todo import ToDo
 from sandpiper.perform.domain.todo_repository import TodoRepository
 from sandpiper.shared.event.todo_created import TodoStarted
+from sandpiper.shared.valueobject.todo_status_enum import ToDoStatusEnum
 
 
 class TestHandleTodoStarted:
@@ -27,12 +28,13 @@ class TestHandleTodoStarted:
 
     @patch("builtins.print")
     def test_call_success(self, mock_print):
-        """正常なToDo開始処理をテスト"""
+        """正常なToDo開始処理をテスト(TODOステータスの場合)"""
         # Arrange
         page_id = "test-page-123"
         event = TodoStarted(page_id=page_id)
 
         mock_todo = Mock(spec=ToDo)
+        mock_todo.status = ToDoStatusEnum.TODO  # 未開始の状態
         self.mock_repository.find.return_value = mock_todo
 
         # Act
@@ -43,6 +45,27 @@ class TestHandleTodoStarted:
         self.mock_repository.find.assert_called_once_with(page_id)
         mock_todo.start.assert_called_once()
         self.mock_repository.save.assert_called_once_with(mock_todo)
+
+    @patch("builtins.print")
+    def test_call_skip_if_already_in_progress(self, mock_print):
+        """すでにIN_PROGRESSの場合はstart()とsave()がスキップされることをテスト"""
+        # Arrange
+        page_id = "test-page-already-started"
+        event = TodoStarted(page_id=page_id)
+
+        mock_todo = Mock(spec=ToDo)
+        mock_todo.status = ToDoStatusEnum.IN_PROGRESS  # すでに開始済み
+        self.mock_repository.find.return_value = mock_todo
+
+        # Act
+        self.handler(event)
+
+        # Assert
+        mock_print.assert_called_once_with(f"ToDo started with page ID: {page_id}")
+        self.mock_repository.find.assert_called_once_with(page_id)
+        # すでにIN_PROGRESSなのでstart()とsave()は呼ばれない
+        mock_todo.start.assert_not_called()
+        self.mock_repository.save.assert_not_called()
 
     @patch("builtins.print")
     def test_call_with_different_page_ids(self, mock_print):
@@ -57,6 +80,7 @@ class TestHandleTodoStarted:
 
             event = TodoStarted(page_id=page_id)
             mock_todo = Mock(spec=ToDo)
+            mock_todo.status = ToDoStatusEnum.TODO  # 未開始の状態
             self.mock_repository.find.return_value = mock_todo
 
             # Act
@@ -91,6 +115,7 @@ class TestHandleTodoStarted:
         event = TodoStarted(page_id=page_id)
 
         mock_todo = Mock(spec=ToDo)
+        mock_todo.status = ToDoStatusEnum.TODO  # 未開始の状態
         mock_todo.start.side_effect = Exception("ToDo start error")
         self.mock_repository.find.return_value = mock_todo
 
@@ -110,6 +135,7 @@ class TestHandleTodoStarted:
         event = TodoStarted(page_id=page_id)
 
         mock_todo = Mock(spec=ToDo)
+        mock_todo.status = ToDoStatusEnum.TODO  # 未開始の状態
         self.mock_repository.find.return_value = mock_todo
         self.mock_repository.save.side_effect = Exception("Repository save error")
 
@@ -131,6 +157,7 @@ class TestHandleTodoStarted:
         mock_todos = []
         for _i in range(len(events)):
             mock_todo = Mock(spec=ToDo)
+            mock_todo.status = ToDoStatusEnum.TODO  # 未開始の状態
             mock_todos.append(mock_todo)
 
         self.mock_repository.find.side_effect = mock_todos
@@ -163,6 +190,7 @@ class TestHandleTodoStarted:
         event = TodoStarted(page_id=page_id)
 
         mock_todo = Mock(spec=ToDo)
+        mock_todo.status = ToDoStatusEnum.TODO  # 未開始の状態
         self.mock_repository.find.return_value = mock_todo
 
         # Act
@@ -182,6 +210,7 @@ class TestHandleTodoStarted:
         event = TodoStarted(page_id=page_id)
 
         mock_todo = Mock(spec=ToDo)
+        mock_todo.status = ToDoStatusEnum.TODO  # 未開始の状態
         self.mock_repository.find.return_value = mock_todo
 
         # Act

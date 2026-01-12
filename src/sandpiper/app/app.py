@@ -184,6 +184,7 @@ def bootstrap() -> SandPiperApp:
         start_todo=StartTodo(
             todo_repository=perform_notion_todo_repository,
             project_task_repository=project_task_repository,
+            dispatcher=dispatcher,
         ),
         complete_todo=CompleteTodo(
             todo_repository=perform_notion_todo_repository,
