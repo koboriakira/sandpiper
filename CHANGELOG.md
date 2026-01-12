@@ -5,6 +5,24 @@
 このプロジェクトは[セマンティックバージョニング](https://semver.org/spec/v2.0.0.html)に従い、
 [Conventional Commits](https://conventionalcommits.org/)を使用して自動的にリリースを生成します。
 
+## [0.9.0](https://github.com/koboriakira/sandpiper/compare/v0.8.0...v0.9.0) (2026-01-12)
+
+
+### Features
+
+* Create handler for TODO start events ([#48](https://github.com/koboriakira/sandpiper/issues/48)) ([6f508ca](https://github.com/koboriakira/sandpiper/commit/6f508ca2f3700a3bebc896d405322fd28cb61d1b))
+* Enhance TodoPage generation with block content retrieval ([#46](https://github.com/koboriakira/sandpiper/issues/46)) ([5350fbe](https://github.com/koboriakira/sandpiper/commit/5350fbea448ced33b969c5cfe0571750c9776a4c))
+
+
+### Bug Fixes
+
+* Fix CI/CD pipeline failures ([#50](https://github.com/koboriakira/sandpiper/issues/50)) ([94ffa7f](https://github.com/koboriakira/sandpiper/commit/94ffa7f114fe9bb85d438313d0508e123fd67349))
+
+
+### Documentation
+
+* Update README and CLAUDE.md to reflect new features and project structure ([#49](https://github.com/koboriakira/sandpiper/issues/49)) ([454d5a5](https://github.com/koboriakira/sandpiper/commit/454d5a57180f0531577f48dceeceb7588f716a59))
+
 ## [0.8.0](https://github.com/koboriakira/sandpiper/compare/v0.7.0...v0.8.0) (2026-01-12)
 
 
