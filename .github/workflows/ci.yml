@@ -43,6 +43,9 @@ jobs:
       - name: Check formatting
         run: uv run ruff format --check .
 
+      - name: Check import layer dependencies (DDD)
+        run: uv run lint-imports
+
       # - name: Upload coverage reports to Codecov
       #   uses: codecov/codecov-action@v5
       #   with:
