@@ -30,7 +30,7 @@ class NotionSomedayRepository(SomedayRepository):
                 continue
 
             timing_name = item.get_select("タイミング").selected_name
-            timing = SomedayTiming.TOMORROW if timing_name == "明日" else SomedayTiming.SOMEDAY
+            timing = self._parse_timing(timing_name)
             do_tomorrow = item.get_checkbox("明日やる").checked
             context_prop = item.get_multi_select("コンテクスト")
             context = [v.name for v in context_prop.values] if context_prop else []
@@ -86,6 +86,26 @@ class NotionSomedayRepository(SomedayRepository):
         page = self.client.retrieve_page(item_id)
         page.set_prop(SomedayIsDeleted.true())
         self.client.update(page)
+
+    def fetch_by_timing_and_context(
+        self, timing: SomedayTiming, context: str
+    ) -> list[SomedayItem]:
+        """タイミングとコンテクストでフィルタリングしたアイテムを取得"""
+        all_items = self.fetch_all(include_deleted=False)
+        return [
+            item
+            for item in all_items
+            if item.timing == timing and context in item.context
+        ]
+
+    def _parse_timing(self, timing_name: str) -> SomedayTiming:
+        """タイミング名からEnumに変換"""
+        timing_map = {
+            "明日": SomedayTiming.TOMORROW,
+            "いつか": SomedayTiming.SOMEDAY,
+            "ついでに": SomedayTiming.INCIDENTALLY,
+        }
+        return timing_map.get(timing_name, SomedayTiming.SOMEDAY)
 
 
 if __name__ == "__main__":

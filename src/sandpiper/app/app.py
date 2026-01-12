@@ -113,10 +113,16 @@ def bootstrap() -> SandPiperApp:
     recipe_repository = NotionRecipeRepository()
     shopping_repository = NotionShoppingRepository()
 
+    # Someday list integration
+    someday_repository = NotionSomedayRepository()
+
     # Subscribe event handlers
     handle_todo_started = HandleTodoStarted(perform_notion_todo_repository)
     event_bus.subscribe(TodoStarted, handle_todo_started)
-    handle_todo_start_event = HandleTodoStartEvent()
+    handle_todo_start_event = HandleTodoStartEvent(
+        someday_repository=someday_repository,
+        slack_messanger=default_notice_messanger,
+    )
     event_bus.subscribe(TodoStartEvent, handle_todo_start_event)
     handle_todo_completed = HandleCompletedTask(plan_notion_todo_repository, default_notice_messanger, commentator)
     event_bus.subscribe(TodoCompleted, handle_todo_completed)
@@ -136,8 +142,6 @@ def bootstrap() -> SandPiperApp:
         todo_query=plan_todo_query,
     )
 
-    # Someday list integration
-    someday_repository = NotionSomedayRepository()
     create_tasks_by_someday_list = CreateTasksBySomedayList(
         someday_repository=someday_repository,
         todo_repository=plan_notion_todo_repository,

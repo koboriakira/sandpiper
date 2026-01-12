@@ -1,6 +1,6 @@
 from typing import Protocol
 
-from sandpiper.plan.domain.someday_item import SomedayItem
+from sandpiper.plan.domain.someday_item import SomedayItem, SomedayTiming
 
 
 class SomedayRepository(Protocol):
@@ -12,6 +12,12 @@ class SomedayRepository(Protocol):
 
     def fetch_tomorrow_items(self) -> list[SomedayItem]:
         """「明日やる」フラグが立っているアイテムを取得"""
+        ...
+
+    def fetch_by_timing_and_context(
+        self, timing: SomedayTiming, context: str
+    ) -> list[SomedayItem]:
+        """タイミングとコンテクストでフィルタリングしたアイテムを取得"""
         ...
 
     def save(self, item: SomedayItem) -> SomedayItem:

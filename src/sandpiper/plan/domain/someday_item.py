@@ -7,6 +7,7 @@ class SomedayTiming(Enum):
 
     TOMORROW = "明日"
     SOMEDAY = "いつか"
+    INCIDENTALLY = "ついでに"
 
 
 @dataclass
