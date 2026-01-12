@@ -3,19 +3,21 @@ from lotion import BasePage, Lotion, notion_database  # type: ignore[import-unty
 from sandpiper.clips.domain.clip import Clip, InsertedClip
 from sandpiper.clips.domain.clips_repository import ClipsRepository
 from sandpiper.shared.notion.databases import clips as clips_db
-from sandpiper.shared.notion.databases.clips import ClipsName, ClipsUrl
+from sandpiper.shared.notion.databases.clips import ClipsName, ClipsTypeProp, ClipsUrl
 
 
 @notion_database(clips_db.DATABASE_ID)
 class ClipsPage(BasePage):  # type: ignore[misc]
     name: ClipsName
     url: ClipsUrl | None = None
+    inbox_type: ClipsTypeProp | None = None
 
     @staticmethod
     def generate(clip: Clip) -> "ClipsPage":
         properties = [
             ClipsName.from_plain_text(clip.title),
             ClipsUrl.from_url(clip.url),
+            ClipsTypeProp.from_name(clip.inbox_type.value),
         ]
         return ClipsPage.create(properties=properties)  # type: ignore[no-any-return]
 
@@ -31,4 +33,5 @@ class NotionClipsRepository(ClipsRepository):
             id=page.id,
             title=clip.title,
             url=clip.url,
+            inbox_type=clip.inbox_type,
         )
