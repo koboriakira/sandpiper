@@ -15,6 +15,7 @@ from sandpiper.plan.application.create_project import CreateProject
 from sandpiper.plan.application.create_project_task import CreateProjectTask
 from sandpiper.plan.application.create_repeat_project_task import CreateRepeatProjectTask
 from sandpiper.plan.application.create_repeat_task import CreateRepeatTask
+from sandpiper.plan.application.create_someday_item import CreateSomedayItem
 from sandpiper.plan.application.create_tasks_by_someday_list import CreateTasksBySomedayList
 from sandpiper.plan.application.create_todo import CreateToDo
 from sandpiper.plan.application.handle_completed_task import HandleCompletedTask
@@ -64,6 +65,7 @@ class SandPiperApp:
         sync_jira_to_project: SyncJiraToProject,
         archive_deleted_pages: ArchiveDeletedPages,
         create_clip: CreateClip,
+        create_someday_item: CreateSomedayItem,
     ) -> None:
         self.create_todo = create_todo
         self.create_project = create_project
@@ -82,6 +84,7 @@ class SandPiperApp:
         self.sync_jira_to_project = sync_jira_to_project
         self.archive_deleted_pages = archive_deleted_pages
         self.create_clip = create_clip
+        self.create_someday_item = create_someday_item
 
 
 def bootstrap() -> SandPiperApp:
@@ -200,5 +203,8 @@ def bootstrap() -> SandPiperApp:
         archive_deleted_pages=ArchiveDeletedPages(),
         create_clip=CreateClip(
             clips_repository=NotionClipsRepository(),
+        ),
+        create_someday_item=CreateSomedayItem(
+            someday_repository=someday_repository,
         ),
     )
