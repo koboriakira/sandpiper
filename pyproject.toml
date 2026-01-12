@@ -192,34 +192,37 @@ include_external_packages = false
 
 # Plan ドメイン内のレイヤー依存ルール
 # 上位レイヤーから下位レイヤーへの依存のみ許可
+# CQRSパターン: applicationがqueryを呼び出す
 [[tool.importlinter.contracts]]
 name = "Plan domain layers"
 type = "layers"
 layers = [
     "sandpiper.plan.infrastructure",
-    "sandpiper.plan.query",
     "sandpiper.plan.application",
+    "sandpiper.plan.query",
     "sandpiper.plan.domain",
 ]
 
 # Perform ドメイン内のレイヤー依存ルール
+# CQRSパターン: applicationがqueryを呼び出す
 [[tool.importlinter.contracts]]
 name = "Perform domain layers"
 type = "layers"
 layers = [
     "sandpiper.perform.infrastructure",
-    "sandpiper.perform.query",
     "sandpiper.perform.application",
+    "sandpiper.perform.query",
     "sandpiper.perform.domain",
 ]
 
 # Review ドメイン内のレイヤー依存ルール
+# CQRSパターン: applicationがqueryを呼び出す
 [[tool.importlinter.contracts]]
 name = "Review domain layers"
 type = "layers"
 layers = [
-    "sandpiper.review.query",
     "sandpiper.review.application",
+    "sandpiper.review.query",
 ]
 
 # Calendar ドメイン内のレイヤー依存ルール
