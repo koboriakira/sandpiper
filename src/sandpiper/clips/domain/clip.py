@@ -1,5 +1,7 @@
 from dataclasses import dataclass
 
+from sandpiper.shared.notion.databases.inbox import InboxType
+
 
 @dataclass(frozen=True)
 class Clip:
@@ -7,6 +9,7 @@ class Clip:
 
     title: str
     url: str
+    inbox_type: InboxType
 
 
 @dataclass(frozen=True)
@@ -16,3 +19,4 @@ class InsertedClip:
     id: str
     title: str
     url: str
+    inbox_type: InboxType

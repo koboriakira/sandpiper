@@ -240,5 +240,6 @@ async def create_clip(
             "id": inserted_clip.id,
             "title": inserted_clip.title,
             "url": inserted_clip.url,
+            "inbox_type": inserted_clip.inbox_type.value,
         }
     )

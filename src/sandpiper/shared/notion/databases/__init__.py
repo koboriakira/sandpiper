@@ -23,11 +23,13 @@ from sandpiper.shared.notion.databases.calendar import (
 )
 from sandpiper.shared.notion.databases.clips import (
     ClipsName,
+    ClipsTypeProp,
     ClipsUrl,
 )
 from sandpiper.shared.notion.databases.inbox import (
     InboxName,
     InboxType,
+    InboxTypeProp,
     InboxUrl,
 )
 from sandpiper.shared.notion.databases.project import (
@@ -94,10 +96,12 @@ __all__ = [
     "CalendarEventName",
     "CalendarEventStartDate",
     "ClipsName",
+    "ClipsTypeProp",
     "ClipsUrl",
     "DatabaseId",
     "InboxName",
     "InboxType",
+    "InboxTypeProp",
     "InboxUrl",
     "ProjectEndDate",
     "ProjectJiraUrl",
