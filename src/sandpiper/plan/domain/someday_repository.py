@@ -14,9 +14,7 @@ class SomedayRepository(Protocol):
         """「明日やる」フラグが立っているアイテムを取得"""
         ...
 
-    def fetch_by_timing_and_context(
-        self, timing: SomedayTiming, context: str
-    ) -> list[SomedayItem]:
+    def fetch_by_timing_and_context(self, timing: SomedayTiming, context: str) -> list[SomedayItem]:
         """タイミングとコンテクストでフィルタリングしたアイテムを取得"""
         ...
 
