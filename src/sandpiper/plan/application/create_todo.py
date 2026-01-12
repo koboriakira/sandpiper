@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from sandpiper.app.message_dispatcher import MessageDispatcher
 from sandpiper.plan.domain.todo import ToDo, ToDoKind
 from sandpiper.plan.domain.todo_repository import TodoRepository
-from sandpiper.shared.event.todo_created import TodoStarted
+from sandpiper.shared.event.todo_created import TodoCreated
 from sandpiper.shared.valueobject.task_chute_section import TaskChuteSection
 
 
@@ -32,7 +32,7 @@ class CreateToDo:
         inserted_todo = self._todo_repository.save(todo)
         print(f"Created ToDo: {inserted_todo}")
         if enableStart:
-            self._dispatcher.publish(TodoStarted(page_id=inserted_todo.id))
+            self._dispatcher.publish(TodoCreated(page_id=inserted_todo.id))
 
 
 # if __name__ == "__main__":

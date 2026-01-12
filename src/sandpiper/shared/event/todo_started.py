@@ -5,7 +5,7 @@ from sandpiper.shared.valueobject.context import Context
 
 
 @dataclass
-class TodoStartEvent:
+class TodoStarted:
     name: str
     context: Context
     execution_time: datetime
