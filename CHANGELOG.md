@@ -5,6 +5,15 @@
 このプロジェクトは[セマンティックバージョニング](https://semver.org/spec/v2.0.0.html)に従い、
 [Conventional Commits](https://conventionalcommits.org/)を使用して自動的にリリースを生成します。
 
+## [0.8.0](https://github.com/koboriakira/sandpiper/compare/v0.7.0...v0.8.0) (2026-01-12)
+
+
+### Features
+
+* Add auto_fetch_title property for clips ([#42](https://github.com/koboriakira/sandpiper/issues/42)) ([ae668c6](https://github.com/koboriakira/sandpiper/commit/ae668c664d6934aab77487e2839fc6f61f50a96f))
+* Add context property to someday list database ([#40](https://github.com/koboriakira/sandpiper/issues/40)) ([91984f1](https://github.com/koboriakira/sandpiper/commit/91984f10b0b13e83db6934be3881c493a76cce95))
+* Add create-someday CLI command for adding someday list items ([#43](https://github.com/koboriakira/sandpiper/issues/43)) ([63571b7](https://github.com/koboriakira/sandpiper/commit/63571b75a87032b0340353386da3e7907a892a6d))
+
 ## [0.7.0](https://github.com/koboriakira/sandpiper/compare/v0.6.0...v0.7.0) (2026-01-12)
 
 
