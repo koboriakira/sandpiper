@@ -1,0 +1,1 @@
+"""Clips application use cases."""

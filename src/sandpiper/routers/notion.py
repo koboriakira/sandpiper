@@ -12,6 +12,7 @@ from sandpiper.app.app import SandPiperApp
 from sandpiper.calendar.application.create_calendar_event import CreateCalendarEventRequest
 from sandpiper.calendar.application.delete_calendar_events import DeleteCalendarEventsRequest
 from sandpiper.calendar.domain.calendar_event import EventCategory
+from sandpiper.clips.application.create_clip import CreateClipRequest
 from sandpiper.routers.dependency.deps import get_sandpiper_app
 
 router = APIRouter(
@@ -32,6 +33,11 @@ class CreateCalendarEventApiRequest(BaseModel):
     category: str  # "仕事", "プライベート", "TJPW"
     start_datetime: datetime
     end_datetime: datetime
+
+
+class CreateClipApiRequest(BaseModel):
+    title: str
+    url: str
 
 
 @router.post("/todo/start")
@@ -209,5 +215,30 @@ async def delete_calendar_events(
         content={
             "deleted_count": result.deleted_count,
             "target_date": date_str,
+        }
+    )
+
+
+@router.post("/clips")
+async def create_clip(
+    request: CreateClipApiRequest,
+    sandpiper_app: SandPiperApp = Depends(get_sandpiper_app),
+) -> JSONResponse:
+    """Clipを作成する
+
+    Args:
+        request: Clipの作成リクエスト(title, url)
+        sandpiper_app: SandPiper アプリケーション
+
+    Returns:
+        JSONResponse: 作成されたClipの情報
+    """
+    create_request = CreateClipRequest(title=request.title, url=request.url)
+    inserted_clip = sandpiper_app.create_clip.execute(create_request)
+    return JSONResponse(
+        content={
+            "id": inserted_clip.id,
+            "title": inserted_clip.title,
+            "url": inserted_clip.url,
         }
     )

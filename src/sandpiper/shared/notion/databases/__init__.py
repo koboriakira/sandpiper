@@ -5,6 +5,7 @@ Each database has its own module with DATABASE_ID and related property classes.
 
 from sandpiper.shared.notion.databases import (
     calendar,
+    clips,
     inbox,
     project,
     project_task,
@@ -19,6 +20,10 @@ from sandpiper.shared.notion.databases.calendar import (
     CalendarEventEndDate,
     CalendarEventName,
     CalendarEventStartDate,
+)
+from sandpiper.shared.notion.databases.clips import (
+    ClipsName,
+    ClipsUrl,
 )
 from sandpiper.shared.notion.databases.inbox import (
     InboxName,
@@ -80,6 +85,7 @@ class DatabaseId:
     SHOPPING = shopping.DATABASE_ID
     SOMEDAY_LIST = someday.DATABASE_ID
     INBOX = inbox.DATABASE_ID
+    CLIPS = clips.DATABASE_ID
 
 
 __all__ = [
@@ -87,6 +93,8 @@ __all__ = [
     "CalendarEventEndDate",
     "CalendarEventName",
     "CalendarEventStartDate",
+    "ClipsName",
+    "ClipsUrl",
     "DatabaseId",
     "InboxName",
     "InboxType",
@@ -121,6 +129,7 @@ __all__ = [
     "TodoSection",
     "TodoStatus",
     "calendar",
+    "clips",
     "inbox",
     "project",
     "project_task",

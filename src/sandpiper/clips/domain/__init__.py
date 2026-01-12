@@ -1,0 +1,1 @@
+"""Clips domain models."""
