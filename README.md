@@ -1,60 +1,17 @@
-# Python Project 2026
+# Sandpiper
 
-2026年の最新Python開発テンプレート - uv、ruff、pytestを使った現代的な開発環境
+個人のタスク管理を支援するPythonアプリケーション - Notion統合によるタスク管理、Slack通知、繰り返しタスクの自動生成
 
-## 🚀 クイックスタート
+## 主な機能
 
-ワンコマンドで新しいPythonプロジェクトを作成：
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/koboriakira/sandpiper/main/install.sh | sh -s my-new-project
-```
-
-作成後：
-
-```bash
-cd my-new-project
-uv run pytest  # テスト実行
-uv run my-new-project --help  # アプリケーション確認
-```
-
-## 📋 テンプレートとして使用
-
-手動でテンプレートを使用する場合：
-
-```bash
-# このリポジトリをクローン
-git clone https://github.com/koboriakira/sandpiper.git
-cd sandpiper
-
-# 新しいプロジェクトを作成
-./install.sh my-new-project
-
-# 作成されたプロジェクトに移動
-cd my-new-project
-
-# 開発開始！
-uv run pytest  # テスト実行
-uv run my-new-project --help  # アプリケーション確認
-```
-
-### install.shの機能
-
-- ✅ **自動ダウンロード**: GitHubから最新のテンプレートを取得
-- ✅ **完全なファイルコピー**: すべてのテンプレートファイルを新しいディレクトリにコピー
-- ✅ **名前の一括置換**: プロジェクト名・パッケージ名を適切に変換
-- ✅ **Git初期化**: 新しいGitリポジトリの初期化と初回コミット
-- ✅ **環境セットアップ**: uv syncによる依存関係のインストール
-- ✅ **エラーハンドリング**: 無効な名前や既存ディレクトリの検証
-
-## 特徴
-
-- 🚀 **超高速**: uvによる爆速パッケージ管理
-- 🛠️ **最新ツール**: ruff、mypy、pytest、Claude Code hooks、pre-commit
-- 📦 **モダンな構成**: pyproject.tomlによる一元管理
-- 🧪 **完全なテスト**: カバレッジ測定とCI/CD
-- 🔧 **開発者体験**: リンター、フォーマッター、型チェック
-- 🚀 **自動リリース**: release-pleaseによるセマンティックバージョニング
+- **タスク管理**: ToDo作成・開始・完了のライフサイクル管理
+- **Notion統合**: NotionデータベースとのリアルタイムWebhook連携
+- **繰り返しタスク**: 複雑な周期ルールに基づく自動タスク生成
+- **GitHub活動ログ**: GitHub活動の可視化と日報機能
+- **JIRA統合**: JIRAチケット検索・Notionプロジェクトへの同期
+- **レシピ管理**: レシピ・買い物リストの管理
+- **Webクリップ**: URL保存と自動タイトル取得
+- **CLI/API**: typerによるCLI + FastAPIによるWebhook受信
 
 ## 必要要件
 
@@ -63,8 +20,6 @@ uv run my-new-project --help  # アプリケーション確認
 
 ## セットアップ
 
-### uvを使用(推奨)
-
 ```bash
 # uvのインストール(まだの場合)
 curl -LsSf https://astral.sh/uv/install.sh | sh
@@ -72,18 +27,9 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 # プロジェクトのセットアップ
 uv sync
 
-# 品質管理ツールのセットアップ
-uv run pre-commit install              # Git hooks(手動開発時)
-# Claude Code hooks(AI統合)は .claude/settings.local.json で設定済み
-```
-
-### 従来の方法
-
-```bash
-python -m venv venv
-source venv/bin/activate  # Windows: venv\Scripts\activate
-pip install -e ".[dev]"
-pre-commit install
+# 環境変数の設定(.env.templateを参考に.envを作成)
+cp .env.template .env
+# .envを編集してAPI トークンを設定
 ```
 
 ## 開発コマンド
@@ -104,30 +50,40 @@ uv run ruff check .
 # 型チェック
 uv run mypy
 
-# 品質チェック実行
-.claude/scripts/pre-commit-replacement.sh   # Claude Code hooks(推奨)
-uv run pre-commit run --all-files           # 従来のpre-commit
-
 # アプリケーション実行
+uv run sandpiper --help
 uv run sandpiper hello --name "開発者"
-uv run sandpiper get-github-activity --help  # GitHub活動ログ取得
 ```
 
-## プロジェクト構造
+## CLIコマンド
 
+```bash
+# タスク管理
+uv run sandpiper create-todo "新しいタスク" --start
+uv run sandpiper create-someday "いつかやるタスク"
+uv run sandpiper get-todo-log --date 2024-03-20 --json
+uv run sandpiper create-repeat-tasks --basis-date 2024-03-20
+
+# プロジェクト管理
+uv run sandpiper create-project "プロジェクト名" --start-date 2024-03-20
+uv run sandpiper create-project-task "タスク名" --project-id "notion-page-id"
+
+# GitHub活動ログ
+uv run sandpiper get-github-activity --date 2024-03-20
+
+# JIRA統合
+uv run sandpiper search-jira-tickets --project "PROJ" --status "Open"
+uv run sandpiper sync-jira-to-project --project "SU"
 ```
-sandpiper/
-├── src/
-│   └── sandpiper/
-│       ├── __init__.py
-│       ├── main.py
-│       └── utils.py
-├── tests/
-│   ├── test_main.py
-│   └── test_utils.py
-├── pyproject.toml
-├── README.md
-└── .pre-commit-config.yaml
+
+## Web API
+
+```bash
+# 開発サーバー起動
+ENVIRONMENT=development uv run uvicorn sandpiper.api:app --reload
+
+# APIドキュメント確認(開発時のみ)
+# http://localhost:8000/docs
 ```
 
 ## 設定ファイル
@@ -146,31 +102,7 @@ GitHub Actionsによる自動化：
 - マルチプラットフォーム(Linux、Windows、macOS)
 - 複数Python バージョン(3.12、3.13)
 - テスト、リンティング、型チェック
-- セキュリティ監査
-
-## 自動リリース管理
-
-[release-please](https://github.com/googleapis/release-please)による自動リリース：
-
-### Conventional Commits使用例
-
-```bash
-# パッチバージョン更新 (0.1.0 → 0.1.1)
-git commit -m "fix: バリデーションエラーを修正"
-
-# マイナーバージョン更新 (0.1.0 → 0.2.0)
-git commit -m "feat: 新しい機能を追加"
-
-# メジャーバージョン更新 (0.1.0 → 1.0.0)
-git commit -m "feat!: 破壊的変更を実装"
-```
-
-### 自動化される処理
-
-- **バージョン更新**: Conventional Commitsに基づいてセマンティックバージョニング
-- **CHANGELOG生成**: コミットメッセージから自動的にCHANGELOGを更新
-- **GitHub Releases**: 新しいバージョンのリリースを自動作成
-- **PyPI公開**: 本番環境とテスト環境への自動パッケージ公開
+- release-pleaseによる自動リリース管理
 
 ## ライセンス
 
