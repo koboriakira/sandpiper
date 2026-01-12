@@ -22,6 +22,8 @@ class NotionRoutineRepository(RoutineRepository):
             section_name = item.get_select("セクション").selected_name
             cycle = item.get_select("周期").selected_name
             execution_time = item.get_number("実行時間").number
+            context_prop = item.get_multi_select("コンテクスト")
+            context = [v.name for v in context_prop.values] if context_prop else []
             routine = Routine(
                 id=item.id,
                 title=item.get_title_text(),
@@ -30,6 +32,7 @@ class NotionRoutineRepository(RoutineRepository):
                 cycle=RoutineCycle(cycle),
                 execution_time=int(execution_time) if execution_time else None,
                 block_children=item.block_children,
+                context=context,
             )
             routines.append(routine)
         return routines

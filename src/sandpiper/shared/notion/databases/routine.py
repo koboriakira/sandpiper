@@ -1,5 +1,5 @@
 from lotion import notion_prop  # type: ignore[import-untyped]
-from lotion.properties import Date, Number  # type: ignore[import-untyped]
+from lotion.properties import Date, MultiSelect, Number  # type: ignore[import-untyped]
 
 DATABASE_ID = "d21db86c92034ff498999d62354e8fe1"
 
@@ -11,4 +11,9 @@ class RoutineNextDate(Date):  # type: ignore[misc]
 
 @notion_prop("実行時間")
 class RoutineExecutionTime(Number):  # type: ignore[misc]
+    ...
+
+
+@notion_prop("コンテクスト")
+class RoutineContext(MultiSelect):  # type: ignore[misc]
     ...
