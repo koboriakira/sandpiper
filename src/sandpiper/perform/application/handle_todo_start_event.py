@@ -1,5 +1,4 @@
-from sandpiper.plan.domain.someday_item import SomedayTiming
-from sandpiper.plan.domain.someday_repository import SomedayRepository
+from sandpiper.perform.query.incidental_task_query import IncidentalTaskQuery
 from sandpiper.shared.event.todo_start_event import TodoStartEvent
 from sandpiper.shared.infrastructure.slack_notice_messanger import SlackNoticeMessanger
 from sandpiper.shared.valueobject.context import Context
@@ -8,24 +7,21 @@ from sandpiper.shared.valueobject.context import Context
 class HandleTodoStartEvent:
     def __init__(
         self,
-        someday_repository: SomedayRepository,
+        incidental_task_query: IncidentalTaskQuery,
         slack_messanger: SlackNoticeMessanger,
     ) -> None:
-        self._someday_repository = someday_repository
+        self._incidental_task_query = incidental_task_query
         self._slack_messanger = slack_messanger
 
     def __call__(self, event: TodoStartEvent) -> None:
         if event.context != Context.OUTING:
             return
 
-        items = self._someday_repository.fetch_by_timing_and_context(
-            timing=SomedayTiming.INCIDENTALLY,
-            context=Context.OUTING.value,
-        )
+        titles = self._incidental_task_query.fetch_by_context(Context.OUTING)
 
-        if not items:
+        if not titles:
             return
 
-        titles = "、".join(item.title for item in items)
-        message = f"あわせて「{titles}」も実行してください"
+        titles_str = "、".join(titles)
+        message = f"あわせて「{titles_str}」も実行してください"
         self._slack_messanger.send(message)

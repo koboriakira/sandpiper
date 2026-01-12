@@ -11,6 +11,7 @@ from sandpiper.perform.application.handle_todo_start_event import HandleTodoStar
 from sandpiper.perform.application.handle_todo_started import HandleTodoStarted
 from sandpiper.perform.application.start_todo import StartTodo
 from sandpiper.perform.infrastructure.notion_todo_repository import NotionTodoRepository as PerformNotionTodoRepository
+from sandpiper.perform.query.incidental_task_query import NotionIncidentalTaskQuery
 from sandpiper.plan.application.convert_to_project import ConvertToProject
 from sandpiper.plan.application.create_project import CreateProject
 from sandpiper.plan.application.create_project_task import CreateProjectTask
@@ -119,8 +120,9 @@ def bootstrap() -> SandPiperApp:
     # Subscribe event handlers
     handle_todo_started = HandleTodoStarted(perform_notion_todo_repository)
     event_bus.subscribe(TodoStarted, handle_todo_started)
+    incidental_task_query = NotionIncidentalTaskQuery()
     handle_todo_start_event = HandleTodoStartEvent(
-        someday_repository=someday_repository,
+        incidental_task_query=incidental_task_query,
         slack_messanger=default_notice_messanger,
     )
     event_bus.subscribe(TodoStartEvent, handle_todo_start_event)

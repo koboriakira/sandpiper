@@ -73,10 +73,12 @@ class TestSomedayTiming:
         """SomedayTimingの値をテスト"""
         assert SomedayTiming.TOMORROW.value == "明日"
         assert SomedayTiming.SOMEDAY.value == "いつか"
+        assert SomedayTiming.INCIDENTALLY.value == "ついでに"
 
     def test_timing_enum_members(self):
         """SomedayTimingのメンバーをテスト"""
         members = list(SomedayTiming)
-        assert len(members) == 2
+        assert len(members) == 3
         assert SomedayTiming.TOMORROW in members
         assert SomedayTiming.SOMEDAY in members
+        assert SomedayTiming.INCIDENTALLY in members
