@@ -9,6 +9,7 @@ from rich.panel import Panel
 
 from sandpiper.app.app import bootstrap
 from sandpiper.plan.application.create_project_task import CreateProjectTaskRequest
+from sandpiper.plan.application.create_someday_item import CreateSomedayItemRequest
 from sandpiper.plan.application.create_todo import CreateNewToDoRequest
 from sandpiper.recipe.application.create_recipe import CreateRecipeRequest, IngredientRequest
 from sandpiper.shared.valueobject.todo_status_enum import ToDoStatusEnum
@@ -55,6 +56,18 @@ def create_todo(title: str, start: bool = typer.Option(False, help="タスクを
         ),
         enableStart=start,
     )
+
+
+@app.command()
+def create_someday(title: str = typer.Argument(..., help="サムデイアイテムのタイトル")) -> None:
+    """サムデイリストにアイテムを追加します
+
+    タイミングは自動的に「明日」が設定されます。
+    """
+    result = sandpiper_app.create_someday_item.execute(
+        request=CreateSomedayItemRequest(title=title),
+    )
+    console.print(f"[green]サムデイアイテムを作成しました: {result.title} (タイミング: {result.timing})[/green]")
 
 
 @app.command()
