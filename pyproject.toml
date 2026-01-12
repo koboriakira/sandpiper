@@ -44,6 +44,7 @@ dev = [
     "pre-commit>=3.6.0",
     "pip-audit>=2.10.0",
     "types-requests>=2.32.4.20260107",
+    "import-linter>=2.9",
 ]
 test = [
     "pytest>=8.0.0",
@@ -183,6 +184,86 @@ exclude_lines = [
 
 [tool.coverage.html]
 directory = "htmlcov"
+
+# Import Linter設定 - DDDレイヤー依存ルール
+[tool.importlinter]
+root_package = "sandpiper"
+include_external_packages = false
+
+# Plan ドメイン内のレイヤー依存ルール
+# 上位レイヤーから下位レイヤーへの依存のみ許可
+[[tool.importlinter.contracts]]
+name = "Plan domain layers"
+type = "layers"
+layers = [
+    "sandpiper.plan.infrastructure",
+    "sandpiper.plan.query",
+    "sandpiper.plan.application",
+    "sandpiper.plan.domain",
+]
+
+# Perform ドメイン内のレイヤー依存ルール
+[[tool.importlinter.contracts]]
+name = "Perform domain layers"
+type = "layers"
+layers = [
+    "sandpiper.perform.infrastructure",
+    "sandpiper.perform.query",
+    "sandpiper.perform.application",
+    "sandpiper.perform.domain",
+]
+
+# Review ドメイン内のレイヤー依存ルール
+[[tool.importlinter.contracts]]
+name = "Review domain layers"
+type = "layers"
+layers = [
+    "sandpiper.review.query",
+    "sandpiper.review.application",
+]
+
+# Calendar ドメイン内のレイヤー依存ルール
+[[tool.importlinter.contracts]]
+name = "Calendar domain layers"
+type = "layers"
+layers = [
+    "sandpiper.calendar.infrastructure",
+    "sandpiper.calendar.application",
+    "sandpiper.calendar.domain",
+]
+
+# Recipe ドメイン内のレイヤー依存ルール
+[[tool.importlinter.contracts]]
+name = "Recipe domain layers"
+type = "layers"
+layers = [
+    "sandpiper.recipe.infrastructure",
+    "sandpiper.recipe.application",
+    "sandpiper.recipe.domain",
+]
+
+# Clips ドメイン内のレイヤー依存ルール
+[[tool.importlinter.contracts]]
+name = "Clips domain layers"
+type = "layers"
+layers = [
+    "sandpiper.clips.infrastructure",
+    "sandpiper.clips.application",
+    "sandpiper.clips.domain",
+]
+
+# ドメイン間の独立性ルール（境界付きコンテキスト）
+[[tool.importlinter.contracts]]
+name = "Bounded contexts independence"
+type = "independence"
+modules = [
+    "sandpiper.plan",
+    "sandpiper.perform",
+    "sandpiper.review",
+    "sandpiper.calendar",
+    "sandpiper.recipe",
+    "sandpiper.clips",
+]
 
 # Release Please設定
 [tool.release-please]
