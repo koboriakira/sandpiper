@@ -14,7 +14,7 @@ from starlette.responses import Response, StreamingResponse
 from sandpiper.app.app import bootstrap
 
 from . import __version__
-from .routers import health, maintenance, notion
+from .routers import health, maintenance, notion, recipe
 
 # 環境設定
 ENVIRONMENT = os.getenv("ENVIRONMENT", "production")  # デフォルトは本番環境
@@ -139,3 +139,4 @@ async def root() -> JSONResponse:
 app.include_router(health.router, prefix="/api", tags=["Health"])
 app.include_router(notion.router, prefix="/api", tags=["Notion"])
 app.include_router(maintenance.router, prefix="/api", tags=["Maintenance"])
+app.include_router(recipe.router, prefix="/api", tags=["Recipe"])
