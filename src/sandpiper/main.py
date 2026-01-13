@@ -11,7 +11,9 @@ from sandpiper.app.app import bootstrap
 from sandpiper.plan.application.create_project_task import CreateProjectTaskRequest
 from sandpiper.plan.application.create_someday_item import CreateSomedayItemRequest
 from sandpiper.plan.application.create_todo import CreateNewToDoRequest
+from sandpiper.plan.domain.todo import ToDoKind
 from sandpiper.recipe.application.create_recipe import CreateRecipeRequest, IngredientRequest
+from sandpiper.shared.valueobject.task_chute_section import TaskChuteSection
 from sandpiper.shared.valueobject.todo_status_enum import ToDoStatusEnum
 
 from . import __version__
@@ -53,6 +55,29 @@ def create_todo(title: str, start: bool = typer.Option(False, help="タスクを
     sandpiper_app.create_todo.execute(
         request=CreateNewToDoRequest(
             title=title,
+        ),
+        enableStart=start,
+    )
+
+
+@app.command()
+def create_todo_next_section(
+    title: str = typer.Argument(..., help="ToDoのタイトル"),
+    start: bool = typer.Option(False, help="タスクをすぐに開始するかどうか"),
+) -> None:
+    """現時刻の次のセクションに単発ToDoを作成します
+
+    現在時刻に該当するセクションの次のセクションにタスクを追加します。
+    例: 現在が10:00-13:00 (B) の場合、13:00-17:00 (C) にタスクが作成されます。
+    """
+    current_section = TaskChuteSection.new()
+    next_section = current_section.next()
+    console.print(f"[dim]現在のセクション: {current_section.value} → 次のセクション: {next_section.value}[/dim]")
+    sandpiper_app.create_todo.execute(
+        request=CreateNewToDoRequest(
+            title=title,
+            kind=ToDoKind.SINGLE,
+            section=next_section,
         ),
         enableStart=start,
     )
