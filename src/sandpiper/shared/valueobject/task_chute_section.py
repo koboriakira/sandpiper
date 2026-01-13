@@ -13,6 +13,13 @@ class TaskChuteSection(Enum):
     F_22_24 = "F_22_24"
     G_24_07 = "G_24_07"
 
+    def next(self) -> "TaskChuteSection":
+        """次のセクションを返す"""
+        sections = list(TaskChuteSection)
+        current_index = sections.index(self)
+        next_index = (current_index + 1) % len(sections)
+        return sections[next_index]
+
     @staticmethod
     def new(dt: datetime | None = None) -> "TaskChuteSection":
         """新しいセクションを返す"""

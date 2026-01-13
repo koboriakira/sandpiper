@@ -88,3 +88,25 @@ class TestTaskChuteSection:
 
         assert TaskChuteSection.new(dt_23_59) == TaskChuteSection.F_22_24
         assert TaskChuteSection.new(dt_00_00) == TaskChuteSection.G_24_07
+
+    @pytest.mark.parametrize(
+        "current_section, expected_next",
+        [
+            (TaskChuteSection.A_07_10, TaskChuteSection.B_10_13),
+            (TaskChuteSection.B_10_13, TaskChuteSection.C_13_17),
+            (TaskChuteSection.C_13_17, TaskChuteSection.D_17_19),
+            (TaskChuteSection.D_17_19, TaskChuteSection.E_19_22),
+            (TaskChuteSection.E_19_22, TaskChuteSection.F_22_24),
+            (TaskChuteSection.F_22_24, TaskChuteSection.G_24_07),
+            (TaskChuteSection.G_24_07, TaskChuteSection.A_07_10),  # 循環
+        ],
+    )
+    def test_next_section(self, current_section: TaskChuteSection, expected_next: TaskChuteSection):
+        # 次のセクションが正しく取得できることを確認
+        assert current_section.next() == expected_next
+
+    def test_next_section_cycles_back_to_first(self):
+        # 最後のセクションから最初のセクションに循環することを確認
+        last_section = TaskChuteSection.G_24_07
+        first_section = TaskChuteSection.A_07_10
+        assert last_section.next() == first_section
