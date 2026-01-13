@@ -1,0 +1,238 @@
+{% extends "base.html" %}
+
+{% block title %}レシピ登録 - Sandpiper{% endblock %}
+
+{% block head %}
+<style>
+    .ingredient-row, .step-row {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        margin-bottom: 10px;
+    }
+    .ingredient-row input[name="ingredient_name[]"] {
+        flex: 2;
+    }
+    .ingredient-row input[name="ingredient_quantity[]"] {
+        flex: 1;
+    }
+    .step-row {
+        align-items: flex-start;
+    }
+    .step-row textarea {
+        flex: 1;
+        min-height: 60px;
+    }
+    .step-number {
+        background-color: #007bff;
+        color: white;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        flex-shrink: 0;
+    }
+    .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+    }
+    .section-header h3 {
+        margin: 0;
+        color: #333;
+    }
+    #result {
+        margin-top: 20px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<h1>レシピ登録</h1>
+
+<div id="result"></div>
+
+<form id="recipe-form" hx-post="/api/recipe" hx-target="#result" hx-swap="innerHTML">
+    <div class="card">
+        <div class="form-group">
+            <label for="title">レシピ名 *</label>
+            <input type="text" id="title" name="title" required placeholder="例: 肉じゃが">
+        </div>
+
+        <div class="form-group">
+            <label for="reference_url">参考URL</label>
+            <input type="url" id="reference_url" name="reference_url" placeholder="https://example.com/recipe">
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="section-header">
+            <h3>食材</h3>
+            <button type="button" class="btn-secondary" onclick="addIngredient()">+ 食材を追加</button>
+        </div>
+        <div id="ingredients-container">
+            <div class="ingredient-row">
+                <input type="text" name="ingredient_name[]" placeholder="食材名" required>
+                <input type="text" name="ingredient_quantity[]" placeholder="分量">
+                <button type="button" class="btn-danger" onclick="removeRow(this)">削除</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="section-header">
+            <h3>調理手順</h3>
+            <button type="button" class="btn-secondary" onclick="addStep()">+ 手順を追加</button>
+        </div>
+        <div id="steps-container">
+            <div class="step-row">
+                <span class="step-number">1</span>
+                <textarea name="steps[]" placeholder="調理手順を入力" required></textarea>
+                <button type="button" class="btn-danger" onclick="removeStep(this)">削除</button>
+            </div>
+        </div>
+    </div>
+
+    <button type="submit">
+        <span class="htmx-indicator">登録中...</span>
+        <span class="htmx-hide-on-request">レシピを登録</span>
+    </button>
+</form>
+
+<script>
+    // フォームデータをJSON形式に変換してPOST
+    document.getElementById('recipe-form').addEventListener('htmx:configRequest', function(evt) {
+        evt.detail.headers['Content-Type'] = 'application/json';
+
+        const form = evt.detail.elt;
+        const formData = new FormData(form);
+
+        const ingredients = [];
+        const names = formData.getAll('ingredient_name[]');
+        const quantities = formData.getAll('ingredient_quantity[]');
+        for (let i = 0; i < names.length; i++) {
+            if (names[i].trim()) {
+                ingredients.push({
+                    name: names[i].trim(),
+                    quantity: quantities[i] ? quantities[i].trim() : ''
+                });
+            }
+        }
+
+        const steps = formData.getAll('steps[]')
+            .map(s => s.trim())
+            .filter(s => s);
+
+        const data = {
+            title: formData.get('title'),
+            reference_url: formData.get('reference_url') || null,
+            ingredients: ingredients,
+            steps: steps
+        };
+
+        evt.detail.body = JSON.stringify(data);
+    });
+
+    // 成功時のハンドリング
+    document.getElementById('recipe-form').addEventListener('htmx:afterRequest', function(evt) {
+        if (evt.detail.successful) {
+            const response = JSON.parse(evt.detail.xhr.responseText);
+            document.getElementById('result').innerHTML = `
+                <div class="alert alert-success">
+                    レシピ「${response.title}」を登録しました！
+                </div>
+            `;
+            // フォームをリセット
+            evt.detail.elt.reset();
+            // 食材と手順を初期状態に戻す
+            resetIngredients();
+            resetSteps();
+        } else {
+            let errorMessage = 'レシピの登録に失敗しました。';
+            try {
+                const response = JSON.parse(evt.detail.xhr.responseText);
+                if (response.detail) {
+                    errorMessage = response.detail;
+                }
+            } catch (e) {}
+            document.getElementById('result').innerHTML = `
+                <div class="alert alert-error">${errorMessage}</div>
+            `;
+        }
+    });
+
+    function addIngredient() {
+        const container = document.getElementById('ingredients-container');
+        const row = document.createElement('div');
+        row.className = 'ingredient-row';
+        row.innerHTML = `
+            <input type="text" name="ingredient_name[]" placeholder="食材名" required>
+            <input type="text" name="ingredient_quantity[]" placeholder="分量">
+            <button type="button" class="btn-danger" onclick="removeRow(this)">削除</button>
+        `;
+        container.appendChild(row);
+    }
+
+    function addStep() {
+        const container = document.getElementById('steps-container');
+        const stepNumber = container.children.length + 1;
+        const row = document.createElement('div');
+        row.className = 'step-row';
+        row.innerHTML = `
+            <span class="step-number">${stepNumber}</span>
+            <textarea name="steps[]" placeholder="調理手順を入力" required></textarea>
+            <button type="button" class="btn-danger" onclick="removeStep(this)">削除</button>
+        `;
+        container.appendChild(row);
+    }
+
+    function removeRow(button) {
+        const container = button.closest('#ingredients-container');
+        if (container.children.length > 1) {
+            button.closest('.ingredient-row').remove();
+        }
+    }
+
+    function removeStep(button) {
+        const container = document.getElementById('steps-container');
+        if (container.children.length > 1) {
+            button.closest('.step-row').remove();
+            updateStepNumbers();
+        }
+    }
+
+    function updateStepNumbers() {
+        const container = document.getElementById('steps-container');
+        const rows = container.querySelectorAll('.step-row');
+        rows.forEach((row, index) => {
+            row.querySelector('.step-number').textContent = index + 1;
+        });
+    }
+
+    function resetIngredients() {
+        const container = document.getElementById('ingredients-container');
+        container.innerHTML = `
+            <div class="ingredient-row">
+                <input type="text" name="ingredient_name[]" placeholder="食材名" required>
+                <input type="text" name="ingredient_quantity[]" placeholder="分量">
+                <button type="button" class="btn-danger" onclick="removeRow(this)">削除</button>
+            </div>
+        `;
+    }
+
+    function resetSteps() {
+        const container = document.getElementById('steps-container');
+        container.innerHTML = `
+            <div class="step-row">
+                <span class="step-number">1</span>
+                <textarea name="steps[]" placeholder="調理手順を入力" required></textarea>
+                <button type="button" class="btn-danger" onclick="removeStep(this)">削除</button>
+            </div>
+        `;
+    }
+</script>
+{% endblock %}

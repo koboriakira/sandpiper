@@ -128,9 +128,13 @@ src/sandpiper/
 │   └── handlers/                # 特殊タスクハンドラー
 ├── routers/                     # FastAPIエンドポイント
 │   ├── notion.py                # Notion Webhook受信
+│   ├── recipe.py                # レシピ管理API(htmxフロントエンド含む)
 │   ├── health.py                # ヘルスチェック
 │   ├── maintenance.py           # メンテナンスAPI
 │   └── dependency/              # 認証・依存性注入
+├── templates/                   # Jinja2テンプレート(htmx)
+│   ├── base.html                # 共通レイアウト
+│   └── recipe_form.html         # レシピ登録フォーム
 ├── main.py                      # CLIエントリーポイント(typer)
 └── api.py                       # FastAPIエントリーポイント
 ```
