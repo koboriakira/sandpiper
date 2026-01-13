@@ -84,7 +84,17 @@ ENVIRONMENT=development uv run uvicorn sandpiper.api:app --reload
 
 # APIドキュメント確認(開発時のみ)
 # http://localhost:8000/docs
+
+# レシピ登録フォーム(htmx)
+# http://localhost:8000/api/recipe/new
 ```
+
+### エンドポイント一覧
+- `GET /api/recipe/new` - レシピ登録フォーム(htmx)
+- `POST /api/recipe` - レシピ作成API
+- `POST /api/notion/todo/start` - タスク開始
+- `POST /api/notion/todo/complete` - タスク完了
+- `POST /api/notion/clips` - Webクリップ作成
 
 ## 設定ファイル
 
