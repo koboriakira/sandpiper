@@ -75,6 +75,22 @@ class TestNextTodoRule:
         expected_section = TaskChuteSection.new(mock_now + timedelta(minutes=60))
         assert result.section == expected_section
 
+    @pytest.mark.parametrize("title", ["入浴"])
+    def test_入浴完了で化粧水を塗るが作成される(self, title: str):
+        # Arrange
+        mock_now = datetime(2024, 3, 20, 22, 0)
+
+        # Act
+        with patch("sandpiper.plan.domain.next_todo_rule.jst_now", return_value=mock_now):
+            result = next_todo_rule(title)
+
+        # Assert
+        assert result is not None
+        assert result.title == "化粧水を塗る"
+        assert result.kind == ToDoKind.REPEAT
+        expected_section = TaskChuteSection.new(mock_now)
+        assert result.section == expected_section
+
     @pytest.mark.parametrize("title", ["会議", "ミーティング", "その他のタスク", ""])
     def test_ルールに該当しないタイトルはNoneを返す(self, title: str):
         # Act
