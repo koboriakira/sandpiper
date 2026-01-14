@@ -31,5 +31,11 @@ def next_todo_rule(title: str) -> ToDo | None:
                 kind=ToDoKind.REPEAT,
                 section=TaskChuteSection.new(jst_now() + timedelta(minutes=60)),
             )
+        case "入浴":
+            return ToDo(
+                title="化粧水を塗る",
+                kind=ToDoKind.REPEAT,
+                section=TaskChuteSection.new(jst_now()),
+            )
         case _:
             return None
