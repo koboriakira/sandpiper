@@ -8,7 +8,9 @@ from sandpiper.shared.notion.databases.project import (
     ProjectJiraUrl,
     ProjectName,
     ProjectStartDate,
+    ProjectStatus,
 )
+from sandpiper.shared.valueobject.todo_status_enum import ToDoStatusEnum
 
 
 @notion_database(project_db.DATABASE_ID)
@@ -17,10 +19,11 @@ class ProjectPage(BasePage):  # type: ignore[misc]
     start_date: ProjectStartDate
     end_date: ProjectEndDate | None = None
     jira_url: ProjectJiraUrl | None = None
+    status: ProjectStatus | None = None
 
     @staticmethod
     def generate(project: Project) -> "ProjectPage":
-        properties: list[ProjectName | ProjectStartDate | ProjectEndDate | ProjectJiraUrl] = [
+        properties: list[ProjectName | ProjectStartDate | ProjectEndDate | ProjectJiraUrl | ProjectStatus] = [
             ProjectName.from_plain_text(project.name),
             ProjectStartDate.from_start_date(project.start_date),
         ]
@@ -28,33 +31,42 @@ class ProjectPage(BasePage):  # type: ignore[misc]
             properties.append(ProjectEndDate.from_start_date(project.end_date))
         if project.jira_url:
             properties.append(ProjectJiraUrl.from_url(project.jira_url))
+        if project.status:
+            properties.append(ProjectStatus.from_status_name(project.status.value))
         return ProjectPage.create(properties=properties)  # type: ignore[no-any-return]
 
     def to_domain(self) -> Project:
         start_date_prop = self.get_date("開始日")
         end_date_prop = self.get_date("終了日")
         jira_url_prop = self.get_url("Jira")
+        status_prop = self.get_status("ステータス")
 
         # start_dateは必須なのでNoneチェック
         if start_date_prop.start_date is None:
             msg = "start_date is required"
             raise ValueError(msg)
 
+        status = ToDoStatusEnum(status_prop.status_name) if status_prop.status_name else None
+
         return Project(
             name=self.get_title_text(),
             start_date=start_date_prop.start_date,
             end_date=end_date_prop.start_date if end_date_prop.start_date else None,
             jira_url=jira_url_prop.url if jira_url_prop else None,
+            status=status,
         )
 
     def to_inserted(self) -> InsertedProject:
         start_date_prop = self.get_date("開始日")
         end_date_prop = self.get_date("終了日")
         jira_url_prop = self.get_url("Jira")
+        status_prop = self.get_status("ステータス")
 
         if start_date_prop.start_date is None:
             msg = "start_date is required"
             raise ValueError(msg)
+
+        status = ToDoStatusEnum(status_prop.status_name) if status_prop.status_name else None
 
         return InsertedProject(
             id=self.id,
@@ -62,6 +74,7 @@ class ProjectPage(BasePage):  # type: ignore[misc]
             start_date=start_date_prop.start_date,
             end_date=end_date_prop.start_date if end_date_prop.start_date else None,
             jira_url=jira_url_prop.url if jira_url_prop else None,
+            status=status,
         )
 
 
@@ -78,6 +91,7 @@ class NotionProjectRepository:
             start_date=project.start_date,
             end_date=project.end_date,
             jira_url=project.jira_url,
+            status=project.status,
         )
 
     def find(self, page_id: str) -> Project:
