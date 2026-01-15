@@ -74,10 +74,12 @@ class SyncJiraToProject:
                 continue
 
             # プロジェクト名はJIRAチケットのsummary
+            # JIRAの"In Progress"ステータスのチケットなのでプロジェクトもIN_PROGRESSで作成
             project = Project(
                 name=ticket.summary,
                 start_date=jst_today(),
                 jira_url=ticket.url,
+                status=ToDoStatusEnum.IN_PROGRESS,
             )
             inserted_project = self._project_repository.save(project)
             created_projects.append(inserted_project)

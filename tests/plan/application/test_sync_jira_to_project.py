@@ -83,10 +83,11 @@ class TestSyncJiraToProject:
         # Verify fetch_all_jira_urls was called once (API optimization)
         mock_project_repository.fetch_all_jira_urls.assert_called_once()
 
-        # Verify project was saved
+        # Verify project was saved with IN_PROGRESS status
         saved_project: Project = mock_project_repository.save.call_args[0][0]
         assert saved_project.name == "Implement new feature"
         assert saved_project.jira_url == "https://jira.example.com/browse/SU-123"
+        assert saved_project.status == ToDoStatusEnum.IN_PROGRESS
 
         # Verify project task was created
         saved_task: ProjectTask = mock_project_task_repository.save.call_args[0][0]

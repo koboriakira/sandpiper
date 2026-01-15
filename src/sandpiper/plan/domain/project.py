@@ -1,6 +1,8 @@
 from dataclasses import dataclass
 from datetime import date
 
+from sandpiper.shared.valueobject.todo_status_enum import ToDoStatusEnum
+
 
 @dataclass
 class Project:
@@ -10,6 +12,7 @@ class Project:
     start_date: date
     end_date: date | None = None
     jira_url: str | None = None
+    status: ToDoStatusEnum | None = None
 
 
 @dataclass
@@ -21,3 +24,4 @@ class InsertedProject:
     start_date: date
     end_date: date | None = None
     jira_url: str | None = None
+    status: ToDoStatusEnum | None = None
