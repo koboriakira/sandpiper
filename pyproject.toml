@@ -46,6 +46,9 @@ dev = [
     "pip-audit>=2.10.0",
     "types-requests>=2.32.4.20260107",
     "import-linter>=2.9",
+    # Security fixes for transitive dependencies
+    "filelock>=3.20.3",      # CVE-2026-22701
+    "virtualenv>=20.36.1",   # CVE-2026-22702
 ]
 test = [
     "pytest>=8.0.0",
