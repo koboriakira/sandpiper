@@ -24,6 +24,8 @@ class NotionRoutineRepository(RoutineRepository):
             execution_time = item.get_number("実行時間").number
             context_prop = item.get_multi_select("コンテクスト")
             context = [v.name for v in context_prop.values] if context_prop else []
+            sort_order_prop = item.get_text("並び順")
+            sort_order = sort_order_prop.text if sort_order_prop else None
             routine = Routine(
                 id=item.id,
                 title=item.get_title_text(),
@@ -33,6 +35,7 @@ class NotionRoutineRepository(RoutineRepository):
                 execution_time=int(execution_time) if execution_time else None,
                 block_children=item.block_children,
                 context=context,
+                sort_order=sort_order,
             )
             routines.append(routine)
         return routines

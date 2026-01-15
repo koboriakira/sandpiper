@@ -46,6 +46,7 @@ class CreateRepeatTask:
                 execution_time=routine.execution_time,
                 context=routine.context if routine.context else None,
                 routine_page_id=routine.id,
+                sort_order=routine.sort_order,
             )
             _inserted_todo = self.todo_repository.save(todo, {"block_children": routine.block_children})
 

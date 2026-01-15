@@ -30,6 +30,8 @@ class NotionProjectTaskQuery(ProjectTaskQuery):
             is_next = item.get_checkbox("次やる").checked
             context_prop = item.get_multi_select("コンテクスト")
             context = [v.name for v in context_prop.values] if context_prop else []
+            sort_order_prop = item.get_text("並び順")
+            sort_order = sort_order_prop.text if sort_order_prop else None
             project_task = ProjectTaskDto(
                 page_id=item.id,
                 title=item.get_title_text(),
@@ -38,6 +40,7 @@ class NotionProjectTaskQuery(ProjectTaskQuery):
                 is_next=is_next,
                 block_children=item.block_children,
                 context=context,
+                sort_order=sort_order,
             )
             project_dtos.append(project_task)
         return project_dtos
