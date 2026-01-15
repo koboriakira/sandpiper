@@ -1,9 +1,10 @@
 """Notion API関連のエンドポイント"""
 
+import logging
 from datetime import datetime
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
 from fastapi.responses import JSONResponse
 from lotion import BasePage  # type: ignore[import-untyped]
 from pydantic import BaseModel
@@ -14,6 +15,8 @@ from sandpiper.calendar.application.delete_calendar_events import DeleteCalendar
 from sandpiper.calendar.domain.calendar_event import EventCategory
 from sandpiper.clips.application.create_clip import CreateClipRequest
 from sandpiper.routers.dependency.deps import get_sandpiper_app
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(
     prefix="/notion",
@@ -40,26 +43,67 @@ class CreateClipApiRequest(BaseModel):
     title: str | None = None
 
 
+def _execute_start_todo(sandpiper_app: SandPiperApp, page_id: str) -> None:
+    """バックグラウンドでTodo開始処理を実行する"""
+    try:
+        sandpiper_app.start_todo.execute(page_id=page_id)
+        logger.info("Todo started successfully: %s", page_id)
+    except Exception:
+        logger.exception("Failed to start todo: %s", page_id)
+
+
+def _execute_complete_todo(sandpiper_app: SandPiperApp, page_id: str) -> None:
+    """バックグラウンドでTodo完了処理を実行する"""
+    try:
+        sandpiper_app.complete_todo.execute(page_id=page_id)
+        logger.info("Todo completed successfully: %s", page_id)
+    except Exception:
+        logger.exception("Failed to complete todo: %s", page_id)
+
+
+def _execute_convert_to_project(sandpiper_app: SandPiperApp, page_id: str) -> None:
+    """バックグラウンドでTodo→Project変換処理を実行する"""
+    try:
+        sandpiper_app.convert_to_project.execute(page_id=page_id)
+        logger.info("Todo converted to project successfully: %s", page_id)
+    except Exception:
+        logger.exception("Failed to convert todo to project: %s", page_id)
+
+
+def _execute_handle_special_todo(sandpiper_app: SandPiperApp, page_id: str) -> None:
+    """バックグラウンドで特殊Todo処理を実行する"""
+    try:
+        result = sandpiper_app.handle_special_todo.execute(page_id=page_id)
+        if result.success:
+            logger.info("Special todo handled successfully: %s (handler: %s)", page_id, result.handler_name)
+        else:
+            logger.warning("Special todo handler not found: %s - %s", page_id, result.message)
+    except Exception:
+        logger.exception("Failed to handle special todo: %s", page_id)
+
+
 @router.post("/todo/start")
 async def start_todo(
     request: NotionWebhookRequest,
+    background_tasks: BackgroundTasks,
     sandpiper_app: SandPiperApp = Depends(get_sandpiper_app),
 ) -> JSONResponse:
-    """Todoタスクを開始する"""
+    """Todoタスクを開始する(非同期処理)"""
     base_page = BasePage.from_data(request.data)
-    sandpiper_app.start_todo.execute(page_id=base_page.id)
-    return JSONResponse(content={"page_id": base_page.id})
+    background_tasks.add_task(_execute_start_todo, sandpiper_app, base_page.id)
+    return JSONResponse(content={"page_id": base_page.id, "status": "accepted"})
 
 
 @router.post("/todo/complete")
 async def complete_todo(
     request: NotionWebhookRequest,
+    background_tasks: BackgroundTasks,
     sandpiper_app: SandPiperApp = Depends(get_sandpiper_app),
 ) -> JSONResponse:
-    """Todoタスクを完了する"""
+    """Todoタスクを完了する(非同期処理)"""
     base_page = BasePage.from_data(request.data)
-    sandpiper_app.complete_todo.execute(page_id=base_page.id)
-    return JSONResponse(content={"page_id": base_page.id})
+    background_tasks.add_task(_execute_complete_todo, sandpiper_app, base_page.id)
+    return JSONResponse(content={"page_id": base_page.id, "status": "accepted"})
 
 
 @router.post("/calendar")
@@ -97,71 +141,49 @@ async def create_calendar_event(
 @router.post("/todo/to_project")
 async def todo_to_project(
     request: NotionWebhookRequest,
+    background_tasks: BackgroundTasks,
     sandpiper_app: SandPiperApp = Depends(get_sandpiper_app),
 ) -> JSONResponse:
-    """TodoをProjectに変換する
+    """TodoをProjectに変換する(非同期処理)
 
     NotionからのWebhookリクエストを受け取り、TodoをProjectに変換する処理を実行します。
     同名のProjectとProjectTaskを作成します。
 
     Args:
         request: Notion Webhookリクエスト
+        background_tasks: バックグラウンドタスク
         sandpiper_app: SandPiper アプリケーション
 
     Returns:
-        JSONResponse: 変換結果のレスポンス
+        JSONResponse: 受付結果のレスポンス
     """
     base_page = BasePage.from_data(request.data)
-    result = sandpiper_app.convert_to_project.execute(page_id=base_page.id)
-    return JSONResponse(
-        content={
-            "page_id": base_page.id,
-            "project_id": result.project_id,
-            "project_task_id": result.project_task_id,
-            "title": result.title,
-            "message": "Todo converted to project successfully",
-        }
-    )
+    background_tasks.add_task(_execute_convert_to_project, sandpiper_app, base_page.id)
+    return JSONResponse(content={"page_id": base_page.id, "status": "accepted"})
 
 
 @router.post("/todo/special")
 async def handle_special_todo(
     request: NotionWebhookRequest,
+    background_tasks: BackgroundTasks,
     sandpiper_app: SandPiperApp = Depends(get_sandpiper_app),
 ) -> JSONResponse:
-    """特定の名前のTODOに対して特殊処理を実行する
+    """特定の名前のTODOに対して特殊処理を実行する(非同期処理)
 
     NotionからのWebhookリクエストを受け取り、TODOの名前に応じた特殊処理を実行します。
-    登録されていない名前のTODOの場合はエラーを返します。
+    処理結果はバックグラウンドで実行され、ログに出力されます。
 
     Args:
         request: Notion Webhookリクエスト
+        background_tasks: バックグラウンドタスク
         sandpiper_app: SandPiper アプリケーション
 
     Returns:
-        JSONResponse: 処理結果のレスポンス
+        JSONResponse: 受付結果のレスポンス
     """
     base_page = BasePage.from_data(request.data)
-    result = sandpiper_app.handle_special_todo.execute(page_id=base_page.id)
-    if not result.success:
-        return JSONResponse(
-            status_code=400,
-            content={
-                "page_id": result.page_id,
-                "title": result.title,
-                "success": result.success,
-                "message": result.message,
-            },
-        )
-    return JSONResponse(
-        content={
-            "page_id": result.page_id,
-            "title": result.title,
-            "handler_name": result.handler_name,
-            "success": result.success,
-            "message": result.message,
-        }
-    )
+    background_tasks.add_task(_execute_handle_special_todo, sandpiper_app, base_page.id)
+    return JSONResponse(content={"page_id": base_page.id, "status": "accepted"})
 
 
 @router.post("/archive")
