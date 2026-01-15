@@ -7,6 +7,7 @@ from lotion.properties import (  # type: ignore[import-untyped]
     Relation,
     Select,
     Status,
+    Text,
     Title,
 )
 
@@ -65,4 +66,9 @@ class TodoIsDeleted(Checkbox):  # type: ignore[misc]
 
 @notion_prop("コンテクスト")
 class TodoContext(MultiSelect):  # type: ignore[misc]
+    ...
+
+
+@notion_prop("並び順")
+class TodoSortOrder(Text):  # type: ignore[misc]
     ...

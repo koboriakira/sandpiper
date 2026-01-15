@@ -10,6 +10,7 @@ class ProjectTask:
     title: str
     status: ToDoStatusEnum
     project_id: str
+    sort_order: str | None = None
 
 
 @dataclass
@@ -20,3 +21,4 @@ class InsertedProjectTask:
     title: str
     status: ToDoStatusEnum
     project_id: str
+    sort_order: str | None = None

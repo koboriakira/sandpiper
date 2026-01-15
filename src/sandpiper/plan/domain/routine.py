@@ -16,6 +16,7 @@ class Routine:
     execution_time: int | None = None
     block_children: list[Any] = field(default_factory=list)
     context: list[str] = field(default_factory=list)
+    sort_order: str | None = None
 
     def next_cycle(self, basis_date: Date | None = None) -> "Routine":
         next_date = self.cycle.next_date(basis_date=basis_date or self.date)
@@ -28,4 +29,5 @@ class Routine:
             execution_time=self.execution_time,
             block_children=self.block_children,
             context=self.context,
+            sort_order=self.sort_order,
         )
