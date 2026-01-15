@@ -35,7 +35,16 @@ class TestProjectTaskDto:
 
         # Assert
         assert hasattr(dto, "__dataclass_fields__")
-        expected_fields = {"page_id", "title", "status", "project_page_id", "is_next", "block_children", "context"}
+        expected_fields = {
+            "page_id",
+            "title",
+            "status",
+            "project_page_id",
+            "is_next",
+            "block_children",
+            "context",
+            "sort_order",
+        }
         actual_fields = set(dto.__dataclass_fields__.keys())
         assert actual_fields == expected_fields
 

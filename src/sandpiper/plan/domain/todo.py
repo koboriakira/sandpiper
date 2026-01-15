@@ -29,6 +29,7 @@ class ToDo:
     routine_page_id: str | None = None
     execution_time: int | None = None
     context: list[str] | None = None
+    sort_order: str | None = None
 
 
 @dataclass
@@ -39,3 +40,4 @@ class InsertedToDo:
     kind: ToDoKind | None = None
     execution_time: int | None = None
     context: list[str] | None = None
+    sort_order: str | None = None
