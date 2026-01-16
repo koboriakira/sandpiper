@@ -42,6 +42,7 @@ from sandpiper.shared.event.todo_completed import TodoCompleted
 from sandpiper.shared.event.todo_created import TodoCreated
 from sandpiper.shared.event.todo_started import TodoStarted
 from sandpiper.shared.infrastructure.archive_deleted_pages import ArchiveDeletedPages
+from sandpiper.shared.infrastructure.archive_old_todos import ArchiveOldTodos
 from sandpiper.shared.infrastructure.event_bus import EventBus
 from sandpiper.shared.infrastructure.github_client import GitHubClient
 from sandpiper.shared.infrastructure.notion_commentator import NotionCommentator
@@ -67,6 +68,7 @@ class SandPiperApp:
         create_recipe: CreateRecipe,
         sync_jira_to_project: SyncJiraToProject,
         archive_deleted_pages: ArchiveDeletedPages,
+        archive_old_todos: ArchiveOldTodos,
         create_clip: CreateClip,
         create_someday_item: CreateSomedayItem,
     ) -> None:
@@ -86,6 +88,7 @@ class SandPiperApp:
         self.create_recipe = create_recipe
         self.sync_jira_to_project = sync_jira_to_project
         self.archive_deleted_pages = archive_deleted_pages
+        self.archive_old_todos = archive_old_todos
         self.create_clip = create_clip
         self.create_someday_item = create_someday_item
 
@@ -212,6 +215,7 @@ def bootstrap() -> SandPiperApp:
             project_task_repository=project_task_repository,
         ),
         archive_deleted_pages=ArchiveDeletedPages(),
+        archive_old_todos=ArchiveOldTodos(),
         create_clip=CreateClip(
             clips_repository=NotionClipsRepository(),
         ),

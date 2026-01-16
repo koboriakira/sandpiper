@@ -658,5 +658,42 @@ def sync_jira_to_project(
         raise typer.Exit(code=1)
 
 
+@app.command()
+def archive_old_todos(
+    days: int = typer.Option(7, help="完了してからの経過日数 (デフォルト: 7日)"),
+    dry_run: bool = typer.Option(False, "--dry-run", help="実際にアーカイブせず対象のみ表示"),
+) -> None:
+    """完了して指定日数経過したTODOをアーカイブします
+
+    DONEステータスで完了日時から指定日数経過したタスクを
+    アーカイブ用のデータベースに移動し、元のデータベースから削除します。
+    """
+    from sandpiper.shared.infrastructure.archive_old_todos import ArchiveOldTodos
+
+    if dry_run:
+        console.print(f"[dim]ドライラン: {days}日以上前に完了したTODOを検索中...[/dim]")
+        archive_service = ArchiveOldTodos(archive_days=days)
+        result = archive_service.execute(dry_run=True)
+        if result.archived_count == 0:
+            console.print("[yellow]アーカイブ対象のTODOはありません[/yellow]")
+        else:
+            console.print(f"[bold]アーカイブ対象: {result.archived_count}件[/bold]")
+            for title in result.archived_titles:
+                console.print(f"  - {title}")
+        console.print("[dim](ドライランのため実際のアーカイブは行われていません)[/dim]")
+        return
+
+    console.print(f"[bold]完了して{days}日以上経過したTODOをアーカイブ中...[/bold]")
+    archive_service = ArchiveOldTodos(archive_days=days)
+    result = archive_service.execute()
+
+    if result.archived_count == 0:
+        console.print("[yellow]アーカイブ対象のTODOはありませんでした[/yellow]")
+    else:
+        console.print(f"[green][bold]アーカイブ完了: {result.archived_count}件[/bold][/green]")
+        for title in result.archived_titles:
+            console.print(f"  - {title}")
+
+
 if __name__ == "__main__":
     app()
