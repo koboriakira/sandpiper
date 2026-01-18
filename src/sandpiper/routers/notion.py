@@ -6,7 +6,7 @@ from typing import Any
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
 from fastapi.responses import JSONResponse
-from lotion import BasePage  # type: ignore[import-untyped]
+from lotion import BasePage
 from pydantic import BaseModel
 
 from sandpiper.app.app import SandPiperApp

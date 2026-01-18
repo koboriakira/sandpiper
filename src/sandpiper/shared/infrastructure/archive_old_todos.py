@@ -3,7 +3,7 @@
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 
-from lotion import BasePage, Lotion, notion_database  # type: ignore[import-untyped]
+from lotion import BasePage, Lotion, notion_database
 
 from sandpiper.shared.notion.databases import todo as todo_db
 from sandpiper.shared.notion.databases import todo_archive as todo_archive_db

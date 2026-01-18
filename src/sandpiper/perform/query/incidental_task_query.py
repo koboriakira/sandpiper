@@ -1,6 +1,6 @@
 from typing import Protocol
 
-from lotion import Lotion  # type: ignore[import-untyped]
+from lotion import Lotion
 
 from sandpiper.shared.notion.databases import someday as someday_db
 from sandpiper.shared.valueobject.context import Context

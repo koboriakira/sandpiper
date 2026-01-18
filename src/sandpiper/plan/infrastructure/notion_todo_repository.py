@@ -1,8 +1,8 @@
 from typing import Any
 
-from lotion import BasePage, Lotion, notion_database  # type: ignore[import-untyped]
-from lotion.block import Block  # type: ignore[import-untyped]
-from lotion.block.rich_text.rich_text_builder import RichTextBuilder  # type: ignore[import-untyped]
+from lotion import BasePage, Lotion, notion_database
+from lotion.block import Block
+from lotion.block.rich_text.rich_text_builder import RichTextBuilder
 
 from sandpiper.plan.domain.todo import InsertedToDo, ToDo, ToDoKind, ToDoStatus
 from sandpiper.shared.notion.databases import todo as todo_db

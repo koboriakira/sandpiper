@@ -1,5 +1,5 @@
-from lotion import BasePage, Lotion, notion_database  # type: ignore[import-untyped]
-from lotion.block import BulletedListItem, Heading  # type: ignore[import-untyped]
+from lotion import BasePage, Lotion, notion_database
+from lotion.block import BulletedListItem, Heading
 
 from sandpiper.recipe.domain.recipe import InsertedRecipe, Recipe
 from sandpiper.shared.notion.databases import recipe as recipe_db

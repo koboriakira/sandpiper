@@ -1,4 +1,4 @@
-from lotion import Lotion  # type: ignore[import-untyped]
+from lotion import Lotion
 
 from sandpiper.plan.domain.someday_item import SomedayItem
 from sandpiper.plan.domain.someday_repository import SomedayRepository
