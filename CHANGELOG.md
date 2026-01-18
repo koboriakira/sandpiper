@@ -5,6 +5,29 @@
 このプロジェクトは[セマンティックバージョニング](https://semver.org/spec/v2.0.0.html)に従い、
 [Conventional Commits](https://conventionalcommits.org/)を使用して自動的にリリースを生成します。
 
+## [0.10.0](https://github.com/koboriakira/sandpiper/compare/v0.9.0...v0.10.0) (2026-01-16)
+
+
+### Features
+
+* Add archive functionality for completed todos older than 7 days ([#66](https://github.com/koboriakira/sandpiper/issues/66)) ([0020bb9](https://github.com/koboriakira/sandpiper/commit/0020bb997bd556eee30691590f323215c7348b7e))
+* Add create-todo-next-section command for adding todos to next time section ([#58](https://github.com/koboriakira/sandpiper/issues/58)) ([55a7fc9](https://github.com/koboriakira/sandpiper/commit/55a7fc976b67c800bc3c6ccca260e30be3dcca44))
+* Add import-linter for DDD layer dependency enforcement ([#53](https://github.com/koboriakira/sandpiper/issues/53)) ([298b08a](https://github.com/koboriakira/sandpiper/commit/298b08a63a9d0f344056f3952170aa189b0e097c))
+* Add In Progress status when syncing JIRA tickets to projects ([#64](https://github.com/koboriakira/sandpiper/issues/64)) ([843897c](https://github.com/koboriakira/sandpiper/commit/843897c03fd3af24b8058f4d5f4b69f4eff45eea))
+* Add routine_page_id when creating repeat task todo ([#59](https://github.com/koboriakira/sandpiper/issues/59)) ([b8004a0](https://github.com/koboriakira/sandpiper/commit/b8004a0422e3e26fd8c18bde74a142ffd3364b15))
+* Add skincare todo creation after bathing completion ([#61](https://github.com/koboriakira/sandpiper/issues/61)) ([284d3ed](https://github.com/koboriakira/sandpiper/commit/284d3ed8b215d7a98716b81a2deb0a5fbf335943))
+* Add soft delete support for project tasks ([#57](https://github.com/koboriakira/sandpiper/issues/57)) ([4a5a80c](https://github.com/koboriakira/sandpiper/commit/4a5a80cd75a14103ff075b00d6337524f14eb717))
+* Add sort order property to all task types ([#65](https://github.com/koboriakira/sandpiper/issues/65)) ([58de7c7](https://github.com/koboriakira/sandpiper/commit/58de7c7cae63cfa6296b637f2cda6741661251ab))
+* Create recipe registration screen with API ([#60](https://github.com/koboriakira/sandpiper/issues/60)) ([95bda9e](https://github.com/koboriakira/sandpiper/commit/95bda9e5f6e1d94c878635cb8c9cd6c7d5fbc0f6))
+* Make Notion webhook endpoints async with BackgroundTasks ([#62](https://github.com/koboriakira/sandpiper/issues/62)) ([5ec64b9](https://github.com/koboriakira/sandpiper/commit/5ec64b9668971cf9d3251bd648cdc1248ac21ff5))
+* Publish event when todo starts ([#52](https://github.com/koboriakira/sandpiper/issues/52)) ([e5bc20b](https://github.com/koboriakira/sandpiper/commit/e5bc20b69f7d28df409932cffcf3522472da968c))
+
+
+### Bug Fixes
+
+* Reorder import-linter layers for CQRS pattern ([#56](https://github.com/koboriakira/sandpiper/issues/56)) ([405196a](https://github.com/koboriakira/sandpiper/commit/405196a63dd59484103717dbbcaeffe66cf20c69))
+* Update filelock and virtualenv to address security vulnerabilities ([#63](https://github.com/koboriakira/sandpiper/issues/63)) ([65b729a](https://github.com/koboriakira/sandpiper/commit/65b729a435a18a8f334fc1f1ff68b5a01be8a330))
+
 ## [0.9.0](https://github.com/koboriakira/sandpiper/compare/v0.8.0...v0.9.0) (2026-01-12)
 
 
