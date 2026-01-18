@@ -5,8 +5,8 @@ from pathlib import Path
 from typing import Any
 
 from google.oauth2 import service_account
-from googleapiclient.discovery import build
-from googleapiclient.errors import HttpError
+from googleapiclient.discovery import build  # type: ignore[import-untyped]
+from googleapiclient.errors import HttpError  # type: ignore[import-untyped]
 
 # サービスアカウントファイルの検索パス(優先順位順)
 SERVICE_ACCOUNT_PATHS = [
@@ -75,7 +75,7 @@ class YouTubeClient:
 
     def _build_service(self) -> Any:
         """YouTube APIサービスを構築する"""
-        credentials = service_account.Credentials.from_service_account_file(
+        credentials = service_account.Credentials.from_service_account_file(  # type: ignore[no-untyped-call]
             str(self._service_account_file),
             scopes=["https://www.googleapis.com/auth/youtube.readonly"],
         )
