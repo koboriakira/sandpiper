@@ -1,6 +1,6 @@
 from typing import Protocol
 
-from lotion import Lotion  # type: ignore[import-untyped]
+from lotion import Lotion
 
 from sandpiper.plan.query.project_task_dto import ProjectTaskDto
 from sandpiper.shared.notion.databases import project_task as project_task_db

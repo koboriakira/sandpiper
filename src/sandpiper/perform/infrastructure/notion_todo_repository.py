@@ -1,6 +1,6 @@
 import contextlib
 
-from lotion import BasePage, Lotion, notion_database  # type: ignore[import-untyped]
+from lotion import BasePage, Lotion, notion_database
 
 from sandpiper.perform.domain.todo import ToDo
 from sandpiper.shared.notion.databases import todo as todo_db

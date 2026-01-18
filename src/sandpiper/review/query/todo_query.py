@@ -1,7 +1,7 @@
 from datetime import date, datetime
 from typing import Protocol
 
-from lotion import BasePage, Lotion  # type: ignore[import-untyped]
+from lotion import BasePage, Lotion
 
 from sandpiper.plan.domain.todo import ToDoKind
 from sandpiper.review.query.activity_log_item import ActivityLogItem, ActivityType

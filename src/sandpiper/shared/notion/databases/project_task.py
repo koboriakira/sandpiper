@@ -1,5 +1,5 @@
-from lotion import notion_prop  # type: ignore[import-untyped]
-from lotion.properties import Checkbox, MultiSelect, Relation, Status, Text, Title  # type: ignore[import-untyped]
+from lotion import notion_prop
+from lotion.properties import Checkbox, MultiSelect, Relation, Status, Text, Title
 
 DATABASE_ID = "2db6567a3bbf80078961d42908b5dd49"
 

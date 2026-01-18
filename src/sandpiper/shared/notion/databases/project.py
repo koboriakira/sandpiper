@@ -1,5 +1,5 @@
-from lotion import notion_prop  # type: ignore[import-untyped]
-from lotion.properties import Date, Status, Title, Url  # type: ignore[import-untyped]
+from lotion import notion_prop
+from lotion.properties import Date, Status, Title, Url
 
 DATABASE_ID = "458c69ce4e1c49fe810cf26c2291e294"
 
