@@ -14,6 +14,7 @@ from sandpiper.shared.notion.databases.todo import (
     TodoProjectProp,
     TodoProjectTaskProp,
     TodoSection,
+    TodoSortOrder,
     TodoStatus,
 )
 from sandpiper.shared.utils.date_utils import jst_today, jst_tommorow
@@ -51,6 +52,8 @@ class TodoPage(BasePage):  # type: ignore[misc]
             start_day = jst_tommorow() if options.get("is_tomorrow") else jst_today()
             rich_text_builder = RichTextBuilder.create().add_text(todo.title).add_date_mention(start=start_day)
             properties.append(TodoName.from_rich_text(rich_text_builder.build()))
+        if todo.sort_order:
+            properties.append(TodoSortOrder.from_plain_text(todo.sort_order))
 
         return TodoPage.create(properties=properties, blocks=blocks)  # type: ignore[no-any-return]
 
