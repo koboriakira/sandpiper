@@ -30,8 +30,9 @@ jobs:
         id: release
         uses: googleapis/release-please-action@v4
         with:
-          release-type: python
           token: ${{ secrets.GITHUB_TOKEN }}
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json
 
       - name: Enable auto-merge for release-please PR
         if: steps.release.outputs.pr
