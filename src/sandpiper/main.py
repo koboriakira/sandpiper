@@ -233,6 +233,12 @@ def create_repeat_tasks(
         console.print("[red]エラー: 日付の形式が正しくありません。YYYY-MM-DD形式で指定してください。[/red]")
         raise typer.Exit(code=1)
 
+    # 論理削除されたページを物理削除してからメイン処理を実行
+    console.print("[dim]論理削除されたページをアーカイブ中...[/dim]")
+    archive_result = sandpiper_app.archive_deleted_pages.execute()
+    if archive_result.total_deleted_count > 0:
+        console.print(f"[green]アーカイブ完了: {archive_result.total_deleted_count}件削除[/green]")
+
     sandpiper_app.create_repeat_task.execute(basis_date=date_obj)
 
 
