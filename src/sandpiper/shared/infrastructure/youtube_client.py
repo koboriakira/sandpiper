@@ -5,8 +5,8 @@ from pathlib import Path
 from typing import Any
 
 from google.oauth2 import service_account
-from googleapiclient.discovery import build  # type: ignore[import-untyped]
-from googleapiclient.errors import HttpError  # type: ignore[import-untyped]
+from googleapiclient.discovery import build
+from googleapiclient.errors import HttpError
 
 # サービスアカウントファイルの検索パス(優先順位順)
 SERVICE_ACCOUNT_PATHS = [

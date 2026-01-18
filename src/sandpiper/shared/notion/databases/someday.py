@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
 
-from lotion import BasePage, Lotion, notion_database, notion_prop  # type: ignore[import-untyped]
-from lotion.properties import Checkbox, MultiSelect, Select, Title  # type: ignore[import-untyped]
+from lotion import BasePage, Lotion, notion_database, notion_prop
+from lotion.properties import Checkbox, MultiSelect, Select, Title
 
 if TYPE_CHECKING:
     from sandpiper.plan.domain.someday_item import SomedayItem

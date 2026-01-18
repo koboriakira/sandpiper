@@ -1,7 +1,7 @@
 from datetime import date, datetime
 from typing import Protocol
 
-from lotion import Lotion  # type: ignore[import-untyped]
+from lotion import Lotion
 
 from sandpiper.calendar.infrastructure.notion_calendar_repository import CalendarEventPage
 from sandpiper.review.query.activity_log_item import ActivityLogItem, ActivityType

@@ -1,6 +1,6 @@
 from datetime import date, datetime
 
-from lotion import BasePage, Lotion, notion_database  # type: ignore[import-untyped]
+from lotion import BasePage, Lotion, notion_database
 
 from sandpiper.calendar.domain.calendar_event import CalendarEvent, EventCategory, InsertedCalendarEvent
 from sandpiper.calendar.domain.calendar_repository import CalendarRepository

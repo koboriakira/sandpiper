@@ -1,5 +1,5 @@
-from lotion import notion_prop  # type: ignore[import-untyped]
-from lotion.properties import Date, MultiSelect, Number, Text  # type: ignore[import-untyped]
+from lotion import notion_prop
+from lotion.properties import Date, MultiSelect, Number, Text
 
 DATABASE_ID = "d21db86c92034ff498999d62354e8fe1"
 

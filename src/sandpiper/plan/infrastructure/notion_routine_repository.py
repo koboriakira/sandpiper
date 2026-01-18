@@ -1,4 +1,4 @@
-from lotion import Lotion  # type: ignore[import-untyped]
+from lotion import Lotion
 
 from sandpiper.plan.domain.routine import Routine
 from sandpiper.plan.domain.routine_cycle import RoutineCycle

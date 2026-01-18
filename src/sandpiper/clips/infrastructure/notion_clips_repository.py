@@ -1,4 +1,4 @@
-from lotion import BasePage, Lotion, notion_database  # type: ignore[import-untyped]
+from lotion import BasePage, Lotion, notion_database
 
 from sandpiper.clips.domain.clip import Clip, InsertedClip
 from sandpiper.clips.domain.clips_repository import ClipsRepository

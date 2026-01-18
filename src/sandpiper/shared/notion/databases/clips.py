@@ -1,5 +1,5 @@
-from lotion import notion_prop  # type: ignore[import-untyped]
-from lotion.properties import Checkbox, Select, Title, Url  # type: ignore[import-untyped]
+from lotion import notion_prop
+from lotion.properties import Checkbox, Select, Title, Url
 
 DATABASE_ID = "2e66567a3bbf80aa8c83f113aa101d44"  # TODO: 実際のNotion Clips Database IDに置き換えてください
 

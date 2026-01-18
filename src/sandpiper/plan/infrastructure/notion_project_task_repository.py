@@ -1,4 +1,4 @@
-from lotion import BasePage, Lotion, notion_database  # type: ignore[import-untyped]
+from lotion import BasePage, Lotion, notion_database
 
 from sandpiper.plan.domain.project_task import InsertedProjectTask, ProjectTask
 from sandpiper.shared.notion.databases import project_task as project_task_db

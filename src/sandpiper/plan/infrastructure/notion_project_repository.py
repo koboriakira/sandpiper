@@ -1,5 +1,5 @@
-from lotion import BasePage, Lotion, notion_database  # type: ignore[import-untyped]
-from lotion.filter import Builder, Cond  # type: ignore[import-untyped]
+from lotion import BasePage, Lotion, notion_database
+from lotion.filter import Builder, Cond
 
 from sandpiper.plan.domain.project import InsertedProject, Project
 from sandpiper.shared.notion.databases import project as project_db

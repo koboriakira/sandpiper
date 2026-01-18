@@ -1,5 +1,5 @@
-from lotion import notion_prop  # type: ignore[import-untyped]
-from lotion.properties import (  # type: ignore[import-untyped]
+from lotion import notion_prop
+from lotion.properties import (
     Checkbox,
     Date,
     MultiSelect,

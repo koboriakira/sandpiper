@@ -102,7 +102,9 @@ def jst_tomorrow() -> datetime:
 jst_tommorow = jst_tomorrow
 
 
-def convert_to_date_or_datetime[D: date](value: str | None, cls: type[D] | None = None) -> D | None:
+def convert_to_date_or_datetime(
+    value: str | None, cls: type[date] | type[datetime] | None = None
+) -> date | datetime | None:
     """ISO形式の文字列をdateまたはdatetimeに変換する.
 
     Args:
@@ -124,13 +126,13 @@ def convert_to_date_or_datetime[D: date](value: str | None, cls: type[D] | None 
         return None
     date_type = DateType.get_datetype(value)
     if date_type == DateType.DATE:
-        return _convert_date(value, cls)  # type: ignore[return-value]
+        return _convert_date(value, cls)
     if date_type == DateType.DATETIME:
-        return _convert_datetime(value, cls)  # type: ignore[return-value]
+        return _convert_datetime(value, cls)
     return None
 
 
-def _convert_date[D: date](value: str, cls: type[D] | None) -> date | datetime:
+def _convert_date(value: str, cls: type[date] | type[datetime] | None) -> date | datetime:
     """日付文字列をdate/datetimeに変換する(内部関数).
 
     Args:
@@ -147,7 +149,7 @@ def _convert_date[D: date](value: str, cls: type[D] | None) -> date | datetime:
     return datetime(parsed_date.year, parsed_date.month, parsed_date.day, tzinfo=JST)
 
 
-def _convert_datetime[D: date](value: str, cls: type[D] | None) -> date | datetime:
+def _convert_datetime(value: str, cls: type[date] | type[datetime] | None) -> date | datetime:
     """日時文字列をdate/datetimeに変換する(内部関数).
 
     Args:

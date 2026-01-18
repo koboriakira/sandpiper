@@ -1,7 +1,7 @@
 from enum import Enum
 
-from lotion import notion_prop  # type: ignore[import-untyped]
-from lotion.properties import Select, Title, Url  # type: ignore[import-untyped]
+from lotion import notion_prop
+from lotion.properties import Select, Title, Url
 
 
 class InboxType(Enum):

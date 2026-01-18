@@ -1,6 +1,6 @@
 from typing import Protocol
 
-from lotion import Lotion  # type: ignore[import-untyped]
+from lotion import Lotion
 
 from sandpiper.plan.domain.todo import ToDo, ToDoKind
 from sandpiper.shared.notion.databases import todo as todo_db
