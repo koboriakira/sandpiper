@@ -5,9 +5,35 @@ import httpx
 
 from sandpiper.clips.domain.clip import Clip, InsertedClip
 from sandpiper.clips.domain.clips_repository import ClipsRepository
+from sandpiper.shared.infrastructure.youtube_client import YouTubeClient
 from sandpiper.shared.notion.databases.inbox import InboxType
 
 DEFAULT_TITLE = "タイトル取得不能"
+
+
+def _is_youtube_url(url: str) -> bool:
+    """URLがYouTubeのURLかどうかを判定する"""
+    return "youtube.com" in url or "youtu.be" in url
+
+
+def fetch_youtube_title(url: str) -> str | None:
+    """YouTube Data API v3を使用して動画タイトルを取得する
+
+    Args:
+        url: YouTube動画のURL
+
+    Returns:
+        動画タイトル。取得できない場合はNone
+    """
+    try:
+        client = YouTubeClient()
+        return client.get_video_title(url)
+    except FileNotFoundError:
+        # サービスアカウントファイルが見つからない場合
+        return None
+    except Exception:
+        # その他のエラー
+        return None
 
 
 def fetch_page_title(url: str, timeout: float = 10.0) -> str | None:
@@ -59,13 +85,16 @@ class CreateClip:
 
     def execute(self, request: CreateClipRequest) -> InsertedClip:
         title = request.title
-        if title is None:
-            title = fetch_page_title(request.url) or DEFAULT_TITLE
-
         inbox_type = InboxType.from_url(request.url)
 
-        # 種類がVIDEO (Youtube)またはタイトルが取得できなかった場合、自動取得フラグを立てる
-        auto_fetch_title = inbox_type == InboxType.VIDEO or title == DEFAULT_TITLE
+        if title is None:
+            # YouTube URLの場合はYouTube Data API v3でタイトルを取得
+            title = fetch_youtube_title(request.url) if _is_youtube_url(request.url) else fetch_page_title(request.url)
+            if title is None:
+                title = DEFAULT_TITLE
+
+        # タイトルが取得できなかった場合のみ、自動取得フラグを立てる
+        auto_fetch_title = title == DEFAULT_TITLE
 
         clip = Clip(title=title, url=request.url, inbox_type=inbox_type, auto_fetch_title=auto_fetch_title)
         inserted_clip = self._clips_repository.save(clip)

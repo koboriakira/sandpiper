@@ -83,3 +83,5 @@ dmypy.json
 # Temporary files
 temp/
 tmp/
+
+google-service-account.json
