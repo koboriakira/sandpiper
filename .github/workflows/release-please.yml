@@ -32,3 +32,9 @@ jobs:
         with:
           release-type: python
           token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Enable auto-merge for release-please PR
+        if: steps.release.outputs.pr
+        run: gh pr merge --auto --squash ${{ steps.release.outputs.pr }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
