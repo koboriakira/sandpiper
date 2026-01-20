@@ -3,6 +3,7 @@ from typing import Protocol
 from lotion import Lotion
 
 from sandpiper.plan.query.project_task_dto import ProjectTaskDto
+from sandpiper.shared.notion.databases import project as project_db
 from sandpiper.shared.notion.databases import project_task as project_task_db
 from sandpiper.shared.valueobject.todo_status_enum import ToDoStatusEnum
 
@@ -16,6 +17,9 @@ class NotionProjectTaskQuery(ProjectTaskQuery):
         self.client = Lotion.get_instance()
 
     def fetch_undone_project_tasks(self) -> list[ProjectTaskDto]:
+        # プロジェクトのステータスを取得してキャッシュ
+        project_status_map = self._fetch_project_status_map()
+
         items = self.client.retrieve_database(project_task_db.DATABASE_ID)
         project_dtos = []
         for item in items:
@@ -27,6 +31,12 @@ class NotionProjectTaskQuery(ProjectTaskQuery):
             if len(project_relations) == 0:
                 continue
 
+            # プロジェクトのステータスがToDoの場合はスキップ
+            project_page_id = project_relations[0]
+            project_status = project_status_map.get(project_page_id)
+            if project_status == ToDoStatusEnum.TODO:
+                continue
+
             is_next = item.get_checkbox("次やる").checked
             context_prop = item.get_multi_select("コンテクスト")
             context = [v.name for v in context_prop.values] if context_prop else []
@@ -36,7 +46,7 @@ class NotionProjectTaskQuery(ProjectTaskQuery):
                 page_id=item.id,
                 title=item.get_title_text(),
                 status=status,
-                project_page_id=project_relations[0],
+                project_page_id=project_page_id,
                 is_next=is_next,
                 block_children=item.block_children,
                 context=context,
@@ -44,3 +54,13 @@ class NotionProjectTaskQuery(ProjectTaskQuery):
             )
             project_dtos.append(project_task)
         return project_dtos
+
+    def _fetch_project_status_map(self) -> dict[str, ToDoStatusEnum | None]:
+        """プロジェクトIDとステータスのマップを取得する"""
+        items = self.client.retrieve_database(project_db.DATABASE_ID)
+        result: dict[str, ToDoStatusEnum | None] = {}
+        for item in items:
+            status_prop = item.get_status("ステータス")
+            status = ToDoStatusEnum(status_prop.status_name) if status_prop.status_name else None
+            result[item.id] = status
+        return result
