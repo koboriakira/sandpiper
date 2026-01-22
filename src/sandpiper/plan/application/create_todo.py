@@ -12,6 +12,7 @@ class CreateNewToDoRequest:
     title: str
     kind: ToDoKind | None = None
     section: TaskChuteSection | None = None
+    sort_order: str | None = None
 
 
 @dataclass
@@ -28,6 +29,7 @@ class CreateToDo:
             title=request.title,
             kind=request.kind,
             section=request.section,
+            sort_order=request.sort_order,
         )
         inserted_todo = self._todo_repository.save(todo)
         print(f"Created ToDo: {inserted_todo}")

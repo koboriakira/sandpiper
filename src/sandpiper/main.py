@@ -13,6 +13,7 @@ from sandpiper.plan.application.create_someday_item import CreateSomedayItemRequ
 from sandpiper.plan.application.create_todo import CreateNewToDoRequest
 from sandpiper.plan.domain.todo import ToDoKind
 from sandpiper.recipe.application.create_recipe import CreateRecipeRequest, IngredientRequest
+from sandpiper.shared.utils.date_utils import jst_now
 from sandpiper.shared.valueobject.task_chute_section import TaskChuteSection
 from sandpiper.shared.valueobject.todo_status_enum import ToDoStatusEnum
 
@@ -50,14 +51,39 @@ def version() -> None:
 
 
 @app.command()
-def create_todo(title: str, start: bool = typer.Option(False, help="タスクをすぐに開始するかどうか")) -> None:
-    """新しいToDoタスクを作成します"""
-    sandpiper_app.create_todo.execute(
-        request=CreateNewToDoRequest(
-            title=title,
-        ),
-        enableStart=start,
-    )
+def create_todo(
+    title: str,
+    start: bool = typer.Option(False, help="タスクをすぐに開始するかどうか"),
+    next_task: bool = typer.Option(False, "--next", help="差し込みタスクとして現在セクションに追加"),
+) -> None:
+    """新しいToDoタスクを作成します
+
+    --next オプションを指定すると、差し込みタスクとして作成されます:
+    - タスク種別: 差し込み
+    - セクション: 現在時刻から判定
+    - 並び順: 現在時刻(HH:mm形式)
+    """
+    if next_task:
+        now = jst_now()
+        current_section = TaskChuteSection.new(now)
+        sort_order = now.strftime("%H:%M")
+        console.print(f"[dim]差し込みタスク: セクション={current_section.value}, 並び順={sort_order}[/dim]")
+        sandpiper_app.create_todo.execute(
+            request=CreateNewToDoRequest(
+                title=title,
+                kind=ToDoKind.INTERRUPTION,
+                section=current_section,
+                sort_order=sort_order,
+            ),
+            enableStart=start,
+        )
+    else:
+        sandpiper_app.create_todo.execute(
+            request=CreateNewToDoRequest(
+                title=title,
+            ),
+            enableStart=start,
+        )
 
 
 @app.command()
