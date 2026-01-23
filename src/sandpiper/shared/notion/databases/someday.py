@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from typing import TYPE_CHECKING, Any
 
 from lotion import BasePage, Lotion, notion_database, notion_prop
@@ -45,7 +43,7 @@ class SomedayPage(BasePage):  # type: ignore[misc]
     context: SomedayContext | None = None
 
     @staticmethod
-    def generate(item: SomedayItem) -> SomedayPage:
+    def generate(item: "SomedayItem") -> "SomedayPage":
         properties: list[Any] = [
             SomedayName.from_plain_text(item.title),
             SomedayTiming.from_name(item.timing.value),
@@ -56,7 +54,7 @@ class SomedayPage(BasePage):  # type: ignore[misc]
             properties.append(SomedayContext.from_name(item.context))
         return SomedayPage.create(properties=properties)  # type: ignore[no-any-return]
 
-    def to_domain(self) -> SomedayItem:
+    def to_domain(self) -> "SomedayItem":
         from sandpiper.plan.domain.someday_item import SomedayItem
         from sandpiper.plan.domain.someday_item import SomedayTiming as DomainSomedayTiming
 
@@ -76,6 +74,6 @@ class SomedayPage(BasePage):  # type: ignore[misc]
         )
 
     @staticmethod
-    def fetch_all(client: Lotion | None = None) -> list[SomedayPage]:
+    def fetch_all(client: Lotion | None = None) -> list["SomedayPage"]:
         lotion = client or Lotion.get_instance()
         return lotion.retrieve_database(DATABASE_ID, cls=SomedayPage)  # type: ignore[no-any-return]
