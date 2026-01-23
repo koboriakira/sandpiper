@@ -5,6 +5,21 @@
 このプロジェクトは[セマンティックバージョニング](https://semver.org/spec/v2.0.0.html)に従い、
 [Conventional Commits](https://conventionalcommits.org/)を使用して自動的にリリースを生成します。
 
+## [0.12.0](https://github.com/koboriakira/sandpiper/compare/sandpiper-v0.11.0...sandpiper-v0.12.0) (2026-01-20)
+
+
+### Features
+
+* Exclude project tasks from ToDo-status projects ([39b4782](https://github.com/koboriakira/sandpiper/commit/39b478214476c88dde76b35a9b5917698eaf24d9))
+* Exclude ToDo status project tasks from creation ([#77](https://github.com/koboriakira/sandpiper/issues/77)) ([39b4782](https://github.com/koboriakira/sandpiper/commit/39b478214476c88dde76b35a9b5917698eaf24d9))
+
+
+### Bug Fixes
+
+* Add debug mode to CreateRepeatTask and update NotionTodoRepository to handle sort order ([e9bd94c](https://github.com/koboriakira/sandpiper/commit/e9bd94c3fa072087d019cbba70eb63bcf7ce7f27))
+* Add type ignore comments for googleapiclient untyped imports ([cd6b92b](https://github.com/koboriakira/sandpiper/commit/cd6b92b9c370697598af3f81abfea2238aaba084))
+* Fix/todo sort order ([#75](https://github.com/koboriakira/sandpiper/issues/75)) ([e9bd94c](https://github.com/koboriakira/sandpiper/commit/e9bd94c3fa072087d019cbba70eb63bcf7ce7f27))
+
 ## [0.11.0](https://github.com/koboriakira/sandpiper/compare/sandpiper-v0.10.0...sandpiper-v0.11.0) (2026-01-18)
 
 
