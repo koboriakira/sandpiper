@@ -37,10 +37,10 @@ class SomedayContext(MultiSelect):  # type: ignore[misc]
 @notion_database(DATABASE_ID)
 class SomedayPage(BasePage):  # type: ignore[misc]
     name: SomedayName
-    timing: SomedayTiming | None = None
-    do_tomorrow: SomedayDoTomorrow | None = None
-    is_deleted: SomedayIsDeleted | None = None
-    context: SomedayContext | None = None
+    timing: SomedayTiming
+    do_tomorrow: SomedayDoTomorrow
+    is_deleted: SomedayIsDeleted
+    context: SomedayContext
 
     @staticmethod
     def generate(item: "SomedayItem") -> "SomedayPage":
