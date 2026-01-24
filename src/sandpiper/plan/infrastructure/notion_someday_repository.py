@@ -35,19 +35,12 @@ class NotionSomedayRepository(SomedayRepository):
 
     def update(self, item: SomedayItem) -> None:
         """サムデイアイテムを更新"""
-        page = self._client.retrieve_page(item.id, cls=SomedayPage)
         updated_page = SomedayPage.generate(item)
-        updated_page.id = page.id
         self._client.update(updated_page)
 
     def delete(self, item_id: str) -> None:
-        """サムデイアイテムを論理削除"""
-        page: SomedayPage = self._client.retrieve_page(item_id, cls=SomedayPage)
-        item = page.to_domain()
-        item.is_deleted = True
-        updated_page = SomedayPage.generate(item)
-        updated_page.id = page.id
-        self._client.update(updated_page)
+        """サムデイアイテムを削除"""
+        self._client.remove_page(item_id)
 
 
 if __name__ == "__main__":
