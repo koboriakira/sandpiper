@@ -691,6 +691,33 @@ def sync_jira_to_project(
 
 
 @app.command()
+def create_tasks_from_someday(
+    dry_run: bool = typer.Option(False, "--dry-run", help="実際に作成せず対象のみ表示"),
+) -> None:
+    """サムデイリストの「明日やる」からTODOを作成します
+
+    「明日やる」にチェックが入っているサムデイリストのアイテムを
+    TODOとして作成し、元のサムデイリストから削除します。
+    """
+    if dry_run:
+        console.print("[dim]ドライラン: 「明日やる」のサムデイアイテムを検索中...[/dim]")
+        # 注: dry_runはアプリケーション層でサポートされていないため、
+        # 実際の実行結果を表示するが、本番ではコメントを残す
+        console.print("[yellow]現在ドライランモードは未対応です。--dry-runオプションなしで実行してください。[/yellow]")
+        return
+
+    console.print("[bold]サムデイリストからTODOを作成中...[/bold]")
+    result = sandpiper_app.create_tasks_by_someday_list.execute()
+
+    if result.created_count == 0:
+        console.print("[yellow]「明日やる」のサムデイアイテムはありませんでした[/yellow]")
+    else:
+        console.print(f"[green][bold]TODO作成完了: {result.created_count}件[/bold][/green]")
+        for title in result.created_titles:
+            console.print(f"  - {title}")
+
+
+@app.command()
 def archive_old_todos(
     days: int = typer.Option(7, help="完了してからの経過日数 (デフォルト: 7日)"),
     dry_run: bool = typer.Option(False, "--dry-run", help="実際にアーカイブせず対象のみ表示"),

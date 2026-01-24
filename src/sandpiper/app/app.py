@@ -71,6 +71,7 @@ class SandPiperApp:
         archive_old_todos: ArchiveOldTodos,
         create_clip: CreateClip,
         create_someday_item: CreateSomedayItem,
+        create_tasks_by_someday_list: CreateTasksBySomedayList,
     ) -> None:
         self.create_todo = create_todo
         self.create_project = create_project
@@ -91,6 +92,7 @@ class SandPiperApp:
         self.archive_old_todos = archive_old_todos
         self.create_clip = create_clip
         self.create_someday_item = create_someday_item
+        self.create_tasks_by_someday_list = create_tasks_by_someday_list
 
 
 def bootstrap() -> SandPiperApp:
@@ -222,4 +224,5 @@ def bootstrap() -> SandPiperApp:
         create_someday_item=CreateSomedayItem(
             someday_repository=someday_repository,
         ),
+        create_tasks_by_someday_list=create_tasks_by_someday_list,
     )
