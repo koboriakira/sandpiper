@@ -5,6 +5,7 @@ from sandpiper.plan.domain.project import InsertedProject, Project
 from sandpiper.shared.notion.databases import project as project_db
 from sandpiper.shared.notion.databases.project import (
     ProjectEndDate,
+    ProjectIsWork,
     ProjectJiraUrl,
     ProjectName,
     ProjectStartDate,
@@ -20,10 +21,13 @@ class ProjectPage(BasePage):  # type: ignore[misc]
     end_date: ProjectEndDate | None = None
     jira_url: ProjectJiraUrl | None = None
     status: ProjectStatus | None = None
+    is_work: ProjectIsWork | None = None
 
     @staticmethod
     def generate(project: Project) -> "ProjectPage":
-        properties: list[ProjectName | ProjectStartDate | ProjectEndDate | ProjectJiraUrl | ProjectStatus] = [
+        properties: list[
+            ProjectName | ProjectStartDate | ProjectEndDate | ProjectJiraUrl | ProjectStatus | ProjectIsWork
+        ] = [
             ProjectName.from_plain_text(project.name),
             ProjectStartDate.from_start_date(project.start_date),
         ]
@@ -33,6 +37,8 @@ class ProjectPage(BasePage):  # type: ignore[misc]
             properties.append(ProjectJiraUrl.from_url(project.jira_url))
         if project.status:
             properties.append(ProjectStatus.from_status_name(project.status.value))
+        if project.is_work:
+            properties.append(ProjectIsWork.true())
         return ProjectPage.create(properties=properties)  # type: ignore[no-any-return]
 
     def to_domain(self) -> Project:
@@ -40,6 +46,7 @@ class ProjectPage(BasePage):  # type: ignore[misc]
         end_date_prop = self.get_date("終了日")
         jira_url_prop = self.get_url("Jira")
         status_prop = self.get_status("ステータス")
+        is_work_prop = self.get_checkbox("仕事")
 
         # start_dateは必須なのでNoneチェック
         if start_date_prop.start_date is None:
@@ -54,6 +61,7 @@ class ProjectPage(BasePage):  # type: ignore[misc]
             end_date=end_date_prop.start_date if end_date_prop.start_date else None,
             jira_url=jira_url_prop.url if jira_url_prop else None,
             status=status,
+            is_work=is_work_prop.checkbox if is_work_prop else False,
         )
 
     def to_inserted(self) -> InsertedProject:
@@ -61,6 +69,7 @@ class ProjectPage(BasePage):  # type: ignore[misc]
         end_date_prop = self.get_date("終了日")
         jira_url_prop = self.get_url("Jira")
         status_prop = self.get_status("ステータス")
+        is_work_prop = self.get_checkbox("仕事")
 
         if start_date_prop.start_date is None:
             msg = "start_date is required"
@@ -75,6 +84,7 @@ class ProjectPage(BasePage):  # type: ignore[misc]
             end_date=end_date_prop.start_date if end_date_prop.start_date else None,
             jira_url=jira_url_prop.url if jira_url_prop else None,
             status=status,
+            is_work=is_work_prop.checkbox if is_work_prop else False,
         )
 
 
@@ -92,6 +102,7 @@ class NotionProjectRepository:
             end_date=project.end_date,
             jira_url=project.jira_url,
             status=project.status,
+            is_work=project.is_work,
         )
 
     def find(self, page_id: str) -> Project:

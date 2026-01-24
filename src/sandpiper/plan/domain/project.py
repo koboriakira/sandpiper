@@ -13,6 +13,7 @@ class Project:
     end_date: date | None = None
     jira_url: str | None = None
     status: ToDoStatusEnum | None = None
+    is_work: bool = False
 
 
 @dataclass
@@ -25,3 +26,4 @@ class InsertedProject:
     end_date: date | None = None
     jira_url: str | None = None
     status: ToDoStatusEnum | None = None
+    is_work: bool = False
