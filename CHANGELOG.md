@@ -5,6 +5,29 @@
 このプロジェクトは[セマンティックバージョニング](https://semver.org/spec/v2.0.0.html)に従い、
 [Conventional Commits](https://conventionalcommits.org/)を使用して自動的にリリースを生成します。
 
+## [0.13.0](https://github.com/koboriakira/sandpiper/compare/sandpiper-v0.12.0...sandpiper-v0.13.0) (2026-01-24)
+
+
+### Features
+
+* Add additional statuses to ToDoStatusEnum ([#79](https://github.com/koboriakira/sandpiper/issues/79)) ([03365b0](https://github.com/koboriakira/sandpiper/commit/03365b0d07b84bf3797d43824df68ee0dd86f516))
+* Add CLI command for creating TODOs from someday list ([3c3a521](https://github.com/koboriakira/sandpiper/commit/3c3a521cdd622be20b24630a10e98e9432060ffc))
+* Add is_work checkbox field to Project ([#82](https://github.com/koboriakira/sandpiper/issues/82)) ([fc18c44](https://github.com/koboriakira/sandpiper/commit/fc18c448d2f1a8e66afd0b87f4b9a9843403d956))
+* Add is_work property support to Project domain ([fc18c44](https://github.com/koboriakira/sandpiper/commit/fc18c448d2f1a8e66afd0b87f4b9a9843403d956))
+* サムデイリストから TODO を作成する機能を追加 ([#83](https://github.com/koboriakira/sandpiper/issues/83)) ([3c3a521](https://github.com/koboriakira/sandpiper/commit/3c3a521cdd622be20b24630a10e98e9432060ffc))
+
+
+### Bug Fixes
+
+* Simplify update and delete methods in NotionSomedayRepository; e… ([#84](https://github.com/koboriakira/sandpiper/issues/84)) ([84416af](https://github.com/koboriakira/sandpiper/commit/84416af3e4f0a5430f4056e7cb294513b9ab8147))
+* Simplify update and delete methods in NotionSomedayRepository; enhance SomedayPage attributes ([84416af](https://github.com/koboriakira/sandpiper/commit/84416af3e4f0a5430f4056e7cb294513b9ab8147))
+
+
+### Documentation
+
+* Add detailed description to /todo/special endpoint ([7795b85](https://github.com/koboriakira/sandpiper/commit/7795b858d3fc662fda78962ce6ecbf320f2c5bcc))
+* Notion webhook エンドポイントのドキュメント拡充 ([#81](https://github.com/koboriakira/sandpiper/issues/81)) ([7795b85](https://github.com/koboriakira/sandpiper/commit/7795b858d3fc662fda78962ce6ecbf320f2c5bcc))
+
 ## [0.12.0](https://github.com/koboriakira/sandpiper/compare/sandpiper-v0.11.0...sandpiper-v0.12.0) (2026-01-20)
 
 
