@@ -1,5 +1,5 @@
 from lotion import notion_prop
-from lotion.properties import Date, Status, Title, Url
+from lotion.properties import Checkbox, Date, Status, Title, Url
 
 DATABASE_ID = "458c69ce4e1c49fe810cf26c2291e294"
 
@@ -26,4 +26,9 @@ class ProjectJiraUrl(Url):  # type: ignore[misc]
 
 @notion_prop("ステータス")
 class ProjectStatus(Status):  # type: ignore[misc]
+    ...
+
+
+@notion_prop("仕事")
+class ProjectIsWork(Checkbox):  # type: ignore[misc]
     ...
