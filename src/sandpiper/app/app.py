@@ -173,6 +173,7 @@ def bootstrap() -> SandPiperApp:
         ),
         create_project=CreateProject(
             project_repository=project_repository,
+            project_task_repository=project_task_repository,
         ),
         create_project_task=CreateProjectTask(
             project_task_repository=project_task_repository,
