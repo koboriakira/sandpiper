@@ -14,7 +14,7 @@ class ProjectStartDate(Date):  # type: ignore[misc]
     ...
 
 
-@notion_prop("終了日")
+@notion_prop("締切日")
 class ProjectEndDate(Date):  # type: ignore[misc]
     ...
 
