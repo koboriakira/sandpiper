@@ -59,6 +59,7 @@ class SandPiperApp:
         create_project_task: CreateProjectTask,
         create_repeat_task: CreateRepeatTask,
         create_repeat_project_task: CreateRepeatProjectTask,
+        create_schedule_tasks: CreateScheduleTasks,
         get_todo_log: GetTodoLog,
         get_github_activity: GetGitHubActivity,
         start_todo: StartTodo,
@@ -80,6 +81,7 @@ class SandPiperApp:
         self.create_project_task = create_project_task
         self.create_repeat_task = create_repeat_task
         self.create_repeat_project_task = create_repeat_project_task
+        self.create_schedule_tasks = create_schedule_tasks
         self.get_todo_log = get_todo_log
         self.get_github_activity = get_github_activity
         self.start_todo = start_todo
@@ -194,6 +196,7 @@ def bootstrap() -> SandPiperApp:
         ),
         create_repeat_task=create_repeat_task,
         create_repeat_project_task=create_repeat_project_task,
+        create_schedule_tasks=create_schedule_tasks,
         get_todo_log=GetTodoLog(
             todo_query=todo_query,
             calendar_query=calendar_query,

@@ -269,6 +269,31 @@ def create_repeat_tasks(
 
 
 @app.command()
+def create_schedule_tasks(
+    target_date: str = typer.Option(..., "--date", help="スケジュールタスクを作成する対象日 (YYYY-MM-DD形式)"),
+) -> None:
+    """カレンダーイベントからスケジュールタスクを作成します
+
+    指定された日付のカレンダーイベントを取得し、
+    それぞれをスケジュールタスクとしてTODOリストに登録します。
+
+    - 実行時間: イベントの開始時刻と終了時刻から計算
+    - 並び順: 開始時刻(HH:mm形式)
+    - タスク種別: スケジュール
+    """
+    from datetime import datetime
+
+    try:
+        date_obj = datetime.strptime(target_date, "%Y-%m-%d").date()
+    except ValueError:
+        console.print("[red]エラー: 日付の形式が正しくありません。YYYY-MM-DD形式で指定してください。[/red]")
+        raise typer.Exit(code=1)
+
+    result = sandpiper_app.create_schedule_tasks.execute(target_date=date_obj)
+    console.print(f"[green]スケジュールタスク作成完了: {result.created_count}件[/green]")
+
+
+@app.command()
 def get_github_activity(
     date: str = typer.Option(None, help="対象日 (YYYY-MM-DD形式)"),
     username: str = typer.Option("koboriakira", help="GitHubユーザー名"),
