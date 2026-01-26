@@ -154,6 +154,9 @@ def bootstrap() -> SandPiperApp:
         todo_repository=plan_notion_todo_repository,
     )
 
+    # Archive service for logical deletion cleanup
+    archive_deleted_pages = ArchiveDeletedPages()
+
     # Create special todo handler and register handlers
     handle_special_todo = HandleSpecialTodo(
         todo_repository=perform_notion_todo_repository,
@@ -163,6 +166,7 @@ def bootstrap() -> SandPiperApp:
             create_repeat_project_task=create_repeat_project_task,
             create_repeat_task=create_repeat_task,
             create_tasks_by_someday_list=create_tasks_by_someday_list,
+            archive_deleted_pages=archive_deleted_pages,
         )
     )
 
@@ -216,7 +220,7 @@ def bootstrap() -> SandPiperApp:
             project_repository=project_repository,
             project_task_repository=project_task_repository,
         ),
-        archive_deleted_pages=ArchiveDeletedPages(),
+        archive_deleted_pages=archive_deleted_pages,
         archive_old_todos=ArchiveOldTodos(),
         create_clip=CreateClip(
             clips_repository=NotionClipsRepository(),
