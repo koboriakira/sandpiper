@@ -17,6 +17,7 @@ from sandpiper.plan.application.create_project import CreateProject
 from sandpiper.plan.application.create_project_task import CreateProjectTask
 from sandpiper.plan.application.create_repeat_project_task import CreateRepeatProjectTask
 from sandpiper.plan.application.create_repeat_task import CreateRepeatTask
+from sandpiper.plan.application.create_schedule_tasks import CreateScheduleTasks
 from sandpiper.plan.application.create_someday_item import CreateSomedayItem
 from sandpiper.plan.application.create_tasks_by_someday_list import CreateTasksBySomedayList
 from sandpiper.plan.application.create_todo import CreateToDo
@@ -27,6 +28,7 @@ from sandpiper.plan.infrastructure.notion_project_task_repository import NotionP
 from sandpiper.plan.infrastructure.notion_routine_repository import NotionRoutineRepository
 from sandpiper.plan.infrastructure.notion_someday_repository import NotionSomedayRepository
 from sandpiper.plan.infrastructure.notion_todo_repository import NotionTodoRepository as PlanNotionTodoRepository
+from sandpiper.plan.query.calendar_event_query import NotionCalendarEventQuery
 from sandpiper.plan.query.jira_ticket_query import RestApiJiraTicketQuery
 from sandpiper.plan.query.project_task_query import NotionProjectTaskQuery
 from sandpiper.plan.query.todo_query import NotionTodoQuery as PlanNotionTodoQuery
@@ -154,6 +156,14 @@ def bootstrap() -> SandPiperApp:
         todo_repository=plan_notion_todo_repository,
     )
 
+    # Schedule tasks creation from calendar events
+    calendar_event_query = NotionCalendarEventQuery()
+    create_schedule_tasks = CreateScheduleTasks(
+        calendar_event_query=calendar_event_query,
+        todo_repository=plan_notion_todo_repository,
+        todo_query=plan_todo_query,
+    )
+
     # Archive service for logical deletion cleanup
     archive_deleted_pages = ArchiveDeletedPages()
 
@@ -166,6 +176,7 @@ def bootstrap() -> SandPiperApp:
             create_repeat_project_task=create_repeat_project_task,
             create_repeat_task=create_repeat_task,
             create_tasks_by_someday_list=create_tasks_by_someday_list,
+            create_schedule_tasks=create_schedule_tasks,
             archive_deleted_pages=archive_deleted_pages,
         )
     )
