@@ -79,18 +79,22 @@ class CreateScheduleTasks:
             # 実行時間を計算
             execution_time = event.calculate_duration_minutes()
 
-            # 並び順を取得(HH:mm形式)
+            # 並び順を取得(HH:mm形式、JST)
             sort_order = event.get_sort_order()
+
+            # セクションを取得(JST開始時刻から判定)
+            section = event.get_section()
 
             # TODOを作成
             todo = ToDo(
                 title=event.name,
                 kind=ToDoKind.SCHEDULE,
+                section=section,
                 execution_time=execution_time,
                 sort_order=sort_order,
             )
 
-            print(f"Create schedule task: {event.name} (duration: {execution_time}min, sort: {sort_order})")
+            print(f"Create schedule task: {event.name} (section: {section.value}, duration: {execution_time}min, sort: {sort_order})")
 
             if not self.is_debug:
                 self.todo_repository.save(todo)

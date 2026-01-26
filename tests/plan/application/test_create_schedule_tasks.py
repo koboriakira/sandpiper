@@ -1,4 +1,4 @@
-from datetime import date, datetime
+from datetime import date, datetime, timedelta, timezone
 from unittest.mock import Mock
 
 from sandpiper.plan.application.create_schedule_tasks import (
@@ -9,6 +9,11 @@ from sandpiper.plan.domain.todo import ToDo, ToDoKind
 from sandpiper.plan.domain.todo_repository import TodoRepository
 from sandpiper.plan.query.calendar_event_query import CalendarEventDto, CalendarEventQuery
 from sandpiper.plan.query.todo_query import TodoQuery
+from sandpiper.shared.valueobject.task_chute_section import TaskChuteSection
+
+# テスト用タイムゾーン
+UTC = timezone.utc
+JST = timezone(timedelta(hours=9))
 
 
 class TestCalendarEventDto:
@@ -39,32 +44,65 @@ class TestCalendarEventDto:
         )
         assert event.calculate_duration_minutes() == 120
 
-    def test_get_sort_order_morning(self):
-        """午前のイベントの並び順取得"""
+    def test_get_sort_order_morning_utc(self):
+        """UTC午前のイベントの並び順取得（JST変換後）"""
+        # UTC 00:30 → JST 09:30
         event = CalendarEventDto(
             name="朝会",
-            start_datetime=datetime(2024, 3, 20, 9, 30),
-            end_datetime=datetime(2024, 3, 20, 10, 0),
+            start_datetime=datetime(2024, 3, 20, 0, 30),
+            end_datetime=datetime(2024, 3, 20, 1, 0),
         )
         assert event.get_sort_order() == "09:30"
 
-    def test_get_sort_order_afternoon(self):
-        """午後のイベントの並び順取得"""
+    def test_get_sort_order_afternoon_utc(self):
+        """UTC午後のイベントの並び順取得（JST変換後）"""
+        # UTC 05:15 → JST 14:15
         event = CalendarEventDto(
             name="午後の会議",
-            start_datetime=datetime(2024, 3, 20, 14, 15),
-            end_datetime=datetime(2024, 3, 20, 15, 0),
+            start_datetime=datetime(2024, 3, 20, 5, 15),
+            end_datetime=datetime(2024, 3, 20, 6, 0),
         )
         assert event.get_sort_order() == "14:15"
 
-    def test_get_sort_order_midnight(self):
-        """深夜のイベントの並び順取得"""
+    def test_get_sort_order_midnight_utc(self):
+        """UTC深夜のイベントの並び順取得（JST変換後）"""
+        # UTC 15:05 → JST 翌日00:05
         event = CalendarEventDto(
             name="深夜作業",
-            start_datetime=datetime(2024, 3, 20, 0, 5),
-            end_datetime=datetime(2024, 3, 20, 1, 0),
+            start_datetime=datetime(2024, 3, 20, 15, 5),
+            end_datetime=datetime(2024, 3, 20, 16, 0),
         )
         assert event.get_sort_order() == "00:05"
+
+    def test_get_section_morning(self):
+        """午前セクションの判定"""
+        # UTC 00:00 → JST 09:00 → A_07_10セクション
+        event = CalendarEventDto(
+            name="朝会",
+            start_datetime=datetime(2024, 3, 20, 0, 0),
+            end_datetime=datetime(2024, 3, 20, 1, 0),
+        )
+        assert event.get_section() == TaskChuteSection.A_07_10
+
+    def test_get_section_afternoon(self):
+        """午後セクションの判定"""
+        # UTC 05:00 → JST 14:00 → C_13_17セクション
+        event = CalendarEventDto(
+            name="午後の会議",
+            start_datetime=datetime(2024, 3, 20, 5, 0),
+            end_datetime=datetime(2024, 3, 20, 6, 0),
+        )
+        assert event.get_section() == TaskChuteSection.C_13_17
+
+    def test_get_section_evening(self):
+        """夕方セクションの判定"""
+        # UTC 10:00 → JST 19:00 → E_19_22セクション
+        event = CalendarEventDto(
+            name="夕方の会議",
+            start_datetime=datetime(2024, 3, 20, 10, 0),
+            end_datetime=datetime(2024, 3, 20, 11, 0),
+        )
+        assert event.get_section() == TaskChuteSection.E_19_22
 
 
 class TestCreateScheduleTasks:
@@ -93,11 +131,11 @@ class TestCreateScheduleTasks:
 
     def test_execute_with_single_event(self):
         """1つのカレンダーイベントがある場合のテスト"""
-        # Arrange
+        # Arrange: UTC 01:00 → JST 10:00
         event = CalendarEventDto(
             name="チームミーティング",
-            start_datetime=datetime(2024, 3, 20, 10, 0),
-            end_datetime=datetime(2024, 3, 20, 11, 0),
+            start_datetime=datetime(2024, 3, 20, 1, 0),
+            end_datetime=datetime(2024, 3, 20, 2, 0),
         )
         self.mock_calendar_event_query.fetch_events_by_date.return_value = [event]
         self.mock_todo_query.fetch_todos_not_is_today.return_value = []
@@ -116,6 +154,7 @@ class TestCreateScheduleTasks:
         assert saved_todo.kind == ToDoKind.SCHEDULE
         assert saved_todo.execution_time == 60
         assert saved_todo.sort_order == "10:00"
+        assert saved_todo.section == TaskChuteSection.B_10_13
 
     def test_execute_with_multiple_events(self):
         """複数のカレンダーイベントがある場合のテスト"""
@@ -226,11 +265,11 @@ class TestCreateScheduleTasks:
 
     def test_todo_has_correct_sort_order(self):
         """TODOの並び順が正しく設定されることを確認"""
-        # Arrange
+        # Arrange: UTC 05:30 → JST 14:30
         event = CalendarEventDto(
             name="午後の会議",
-            start_datetime=datetime(2024, 3, 20, 14, 30),
-            end_datetime=datetime(2024, 3, 20, 15, 30),
+            start_datetime=datetime(2024, 3, 20, 5, 30),
+            end_datetime=datetime(2024, 3, 20, 6, 30),
         )
         self.mock_calendar_event_query.fetch_events_by_date.return_value = [event]
         self.mock_todo_query.fetch_todos_not_is_today.return_value = []
@@ -242,6 +281,7 @@ class TestCreateScheduleTasks:
         # Assert
         saved_todo = self.mock_todo_repository.save.call_args[0][0]
         assert saved_todo.sort_order == "14:30"
+        assert saved_todo.section == TaskChuteSection.C_13_17
 
 
 class TestCreateScheduleTasksResult:
