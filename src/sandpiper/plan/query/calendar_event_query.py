@@ -4,12 +4,16 @@
 """
 
 from dataclasses import dataclass
-from datetime import date, datetime
+from datetime import date, datetime, timedelta, timezone
 from typing import Protocol
 
 from lotion import Lotion
 
 from sandpiper.calendar.infrastructure.notion_calendar_repository import CalendarEventPage
+from sandpiper.shared.valueobject.task_chute_section import TaskChuteSection
+
+# 東京タイムゾーン(UTC+9)
+JST = timezone(timedelta(hours=9))
 
 
 @dataclass
@@ -22,6 +26,20 @@ class CalendarEventDto:
     name: str
     start_datetime: datetime
     end_datetime: datetime
+
+    def get_start_datetime_jst(self) -> datetime:
+        """開始時刻をJSTで取得する
+
+        Notionから取得した時刻がUTCの場合、9時間追加してJSTに変換する
+
+        Returns:
+            JSTの開始時刻
+        """
+        # タイムゾーン情報がない場合はUTCとして扱い、JSTに変換
+        if self.start_datetime.tzinfo is None:
+            return self.start_datetime + timedelta(hours=9)
+        # タイムゾーン情報がある場合はJSTに変換
+        return self.start_datetime.astimezone(JST)
 
     def calculate_duration_minutes(self) -> int:
         """実行時間を分単位で計算する
@@ -36,9 +54,17 @@ class CalendarEventDto:
         """並び順を取得する
 
         Returns:
-            開始時刻をHH:mm形式で返す
+            開始時刻(JST)をHH:mm形式で返す
         """
-        return self.start_datetime.strftime("%H:%M")
+        return self.get_start_datetime_jst().strftime("%H:%M")
+
+    def get_section(self) -> TaskChuteSection:
+        """開始時刻(JST)からセクションを判定する
+
+        Returns:
+            該当するTaskChuteSection
+        """
+        return TaskChuteSection.new(self.get_start_datetime_jst())
 
 
 class CalendarEventQuery(Protocol):
