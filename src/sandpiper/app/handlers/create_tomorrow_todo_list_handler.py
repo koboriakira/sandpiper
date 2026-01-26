@@ -17,6 +17,7 @@ from sandpiper.app.handlers.special_todo_handler import (
 from sandpiper.plan.application.create_repeat_project_task import CreateRepeatProjectTask
 from sandpiper.plan.application.create_repeat_task import CreateRepeatTask
 from sandpiper.plan.application.create_tasks_by_someday_list import CreateTasksBySomedayList
+from sandpiper.shared.infrastructure.archive_deleted_pages import ArchiveDeletedPages
 
 JST = ZoneInfo("Asia/Tokyo")
 
@@ -67,6 +68,7 @@ class CreateTomorrowTodoListHandler(SpecialTodoHandler):
         create_repeat_project_task: CreateRepeatProjectTask,
         create_repeat_task: CreateRepeatTask,
         create_tasks_by_someday_list: CreateTasksBySomedayList,
+        archive_deleted_pages: ArchiveDeletedPages,
     ) -> None:
         """初期化
 
@@ -74,10 +76,12 @@ class CreateTomorrowTodoListHandler(SpecialTodoHandler):
             create_repeat_project_task: プロジェクトタスクからTODOを作成するユースケース
             create_repeat_task: ルーチンタスクからTODOを作成するユースケース
             create_tasks_by_someday_list: サムデイリストからTODOを作成するユースケース
+            archive_deleted_pages: 論理削除されたページをアーカイブするサービス
         """
         self._create_repeat_project_task = create_repeat_project_task
         self._create_repeat_task = create_repeat_task
         self._create_tasks_by_someday_list = create_tasks_by_someday_list
+        self._archive_deleted_pages = archive_deleted_pages
 
     @property
     def handler_name(self) -> str:
@@ -101,6 +105,9 @@ class CreateTomorrowTodoListHandler(SpecialTodoHandler):
             HandleSpecialTodoResult: 処理結果
         """
         try:
+            # 論理削除されたページをアーカイブ
+            self._archive_deleted_pages.execute()
+
             is_tomorrow = _should_create_for_tomorrow()
             basis_date = _get_basis_date()
             target_day = "明日" if is_tomorrow else "今日"
