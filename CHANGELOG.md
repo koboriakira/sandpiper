@@ -5,6 +5,27 @@
 このプロジェクトは[セマンティックバージョニング](https://semver.org/spec/v2.0.0.html)に従い、
 [Conventional Commits](https://conventionalcommits.org/)を使用して自動的にリリースを生成します。
 
+## [0.14.0](https://github.com/koboriakira/sandpiper/compare/sandpiper-v0.13.0...sandpiper-v0.14.0) (2026-01-31)
+
+
+### Features
+
+* Notion側にのみ存在するプロジェクトの検出機能を追加 ([#91](https://github.com/koboriakira/sandpiper/issues/91)) ([a7b0c81](https://github.com/koboriakira/sandpiper/commit/a7b0c81a0baa55dba1329eff27e4d95c9a5583a1))
+* Show Notion-only projects in SyncJiraToProject output ([a7b0c81](https://github.com/koboriakira/sandpiper/commit/a7b0c81a0baa55dba1329eff27e4d95c9a5583a1))
+* カレンダーイベントからスケジュールタスクを自動作成 ([#88](https://github.com/koboriakira/sandpiper/issues/88)) ([f1e6937](https://github.com/koboriakira/sandpiper/commit/f1e6937adee23a320e8749431716947d2ace4828))
+* 明日のTODOリスト作成時に論理削除ページをアーカイブ ([28af85d](https://github.com/koboriakira/sandpiper/commit/28af85df2cf037e817c739f15f1cb51475fa0a5d))
+
+
+### Bug Fixes
+
+* **ci:** ignore CVE-2026-0994 in pip-audit until fix is available ([2e417d2](https://github.com/koboriakira/sandpiper/commit/2e417d23ee85b3ea8cfa120dfa4764c2ea6d2263))
+* Correct property name for ProjectEndDate from "終了日" to "締切日" ([#85](https://github.com/koboriakira/sandpiper/issues/85)) ([9507e46](https://github.com/koboriakira/sandpiper/commit/9507e46d0d09084bad3ab8795bac0e21f6305c34))
+
+
+### Code Refactoring
+
+* Inject ArchiveDeletedPages into HandleSpecialTodo ([#87](https://github.com/koboriakira/sandpiper/issues/87)) ([28af85d](https://github.com/koboriakira/sandpiper/commit/28af85df2cf037e817c739f15f1cb51475fa0a5d))
+
 ## [0.13.0](https://github.com/koboriakira/sandpiper/compare/sandpiper-v0.12.0...sandpiper-v0.13.0) (2026-01-24)
 
 
