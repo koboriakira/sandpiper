@@ -44,6 +44,7 @@ class TestProjectTaskDto:
             "block_children",
             "context",
             "sort_order",
+            "scheduled_date",
         }
         actual_fields = set(dto.__dataclass_fields__.keys())
         assert actual_fields == expected_fields

@@ -53,6 +53,7 @@ class CreateRepeatTask:
                 context=routine.context if routine.context else None,
                 routine_page_id=routine.id,
                 sort_order=routine.sort_order,
+                scheduled_date=routine.scheduled_date,
             )
             if not self.is_debug:
                 self.todo_repository.save(todo, {"block_children": routine.block_children})

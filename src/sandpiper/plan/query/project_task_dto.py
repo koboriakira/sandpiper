@@ -1,4 +1,5 @@
 from dataclasses import dataclass, field
+from datetime import date
 from typing import Any
 
 from sandpiper.plan.domain.todo import ToDo, ToDoKind
@@ -15,6 +16,7 @@ class ProjectTaskDto:
     block_children: list[Any] = field(default_factory=list)
     context: list[str] = field(default_factory=list)
     sort_order: str | None = None
+    scheduled_date: date | None = None
 
     def to_todo_model(self) -> ToDo:
         return ToDo(
@@ -26,4 +28,5 @@ class ProjectTaskDto:
             execution_time=30,
             context=self.context if self.context else None,
             sort_order=self.sort_order,
+            scheduled_date=self.scheduled_date,
         )
