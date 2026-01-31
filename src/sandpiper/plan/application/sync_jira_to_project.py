@@ -16,6 +16,7 @@ class SyncJiraToProjectResult:
 
     created_projects: list[InsertedProject]
     skipped_tickets: list[JiraTicketDto]
+    notion_only_projects: list[InsertedProject]  # Notion側にのみ存在(JIRA側で完了済み等)
 
 
 class SyncJiraToProject:
@@ -56,8 +57,22 @@ class SyncJiraToProject:
             max_results=100,
         )
 
-        # 既存のJira URLを一括取得(API呼び出し最適化)
-        existing_jira_urls = self._project_repository.fetch_all_jira_urls()
+        # Notion側のJira URL付きプロジェクトを一括取得
+        notion_projects = self._project_repository.fetch_projects_with_jira_url()
+
+        # JIRAから取得したチケットのURLセット
+        jira_ticket_urls = {ticket.url for ticket in tickets if ticket.url}
+
+        # 既存のNotion Jira URLセット(重複チェック用)
+        existing_jira_urls = {p.jira_url for p in notion_projects if p.jira_url}
+
+        # Notion側にのみ存在するプロジェクトを特定
+        # (対象JIRAプロジェクトのURLパターンでフィルタリング)
+        notion_only_projects = [
+            p
+            for p in notion_projects
+            if p.jira_url and f"/browse/{jira_project}-" in p.jira_url and p.jira_url not in jira_ticket_urls
+        ]
 
         created_projects: list[InsertedProject] = []
         skipped_tickets: list[JiraTicketDto] = []
@@ -98,4 +113,5 @@ class SyncJiraToProject:
         return SyncJiraToProjectResult(
             created_projects=created_projects,
             skipped_tickets=skipped_tickets,
+            notion_only_projects=notion_only_projects,
         )
