@@ -131,3 +131,11 @@ class NotionProjectRepository:
             if jira_url_prop and jira_url_prop.url:
                 jira_urls.add(jira_url_prop.url)
         return jira_urls
+
+    def fetch_projects_with_jira_url(self) -> list[InsertedProject]:
+        """Jira URLを持つすべてのプロジェクトを取得する"""
+        filter_param = Builder.create().add(ProjectJiraUrl, Cond.IS_NOT_EMPTY).build()
+        pages: list[ProjectPage] = self.client.retrieve_database(
+            database_id=project_db.DATABASE_ID, filter_param=filter_param, cls=ProjectPage
+        )
+        return [page.to_inserted() for page in pages]

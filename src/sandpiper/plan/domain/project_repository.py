@@ -21,3 +21,7 @@ class ProjectRepository(Protocol):
     def fetch_all_jira_urls(self) -> set[str]:
         """すべてのプロジェクトからJira URLの一覧を取得する"""
         ...
+
+    def fetch_projects_with_jira_url(self) -> list[InsertedProject]:
+        """Jira URLを持つすべてのプロジェクトを取得する"""
+        ...

@@ -43,7 +43,7 @@ class TestSyncJiraToProject:
             url="https://jira.example.com/browse/SU-123",
         )
         mock_jira_ticket_query.search_tickets.return_value = [ticket]
-        mock_project_repository.fetch_all_jira_urls.return_value = set()  # No existing URLs
+        mock_project_repository.fetch_projects_with_jira_url.return_value = []  # No existing projects
 
         inserted_project = InsertedProject(
             id="project-id-123",
@@ -67,6 +67,7 @@ class TestSyncJiraToProject:
         # Assert
         assert len(result.created_projects) == 1
         assert len(result.skipped_tickets) == 0
+        assert len(result.notion_only_projects) == 0
         assert result.created_projects[0].id == "project-id-123"
         assert result.created_projects[0].name == "Implement new feature"
         assert result.created_projects[0].jira_url == "https://jira.example.com/browse/SU-123"
@@ -80,8 +81,8 @@ class TestSyncJiraToProject:
             max_results=100,
         )
 
-        # Verify fetch_all_jira_urls was called once (API optimization)
-        mock_project_repository.fetch_all_jira_urls.assert_called_once()
+        # Verify fetch_projects_with_jira_url was called once (API optimization)
+        mock_project_repository.fetch_projects_with_jira_url.assert_called_once()
 
         # Verify project was saved with IN_PROGRESS status
         saved_project: Project = mock_project_repository.save.call_args[0][0]
@@ -109,7 +110,13 @@ class TestSyncJiraToProject:
         mock_jira_ticket_query.search_tickets.return_value = [ticket]
 
         # URL already exists in the project database
-        mock_project_repository.fetch_all_jira_urls.return_value = {"https://jira.example.com/browse/SU-456"}
+        existing_project = InsertedProject(
+            id="existing-project-id",
+            name="Existing feature",
+            start_date=date.today(),
+            jira_url="https://jira.example.com/browse/SU-456",
+        )
+        mock_project_repository.fetch_projects_with_jira_url.return_value = [existing_project]
 
         # Act
         result = sync_jira_to_project.execute(jira_project="SU")
@@ -117,10 +124,11 @@ class TestSyncJiraToProject:
         # Assert
         assert len(result.created_projects) == 0
         assert len(result.skipped_tickets) == 1
+        assert len(result.notion_only_projects) == 0
         assert result.skipped_tickets[0].issue_key == "SU-456"
 
-        # Verify fetch_all_jira_urls was called once
-        mock_project_repository.fetch_all_jira_urls.assert_called_once()
+        # Verify fetch_projects_with_jira_url was called once
+        mock_project_repository.fetch_projects_with_jira_url.assert_called_once()
 
         # Verify project was NOT saved
         mock_project_repository.save.assert_not_called()
@@ -147,7 +155,13 @@ class TestSyncJiraToProject:
         mock_jira_ticket_query.search_tickets.return_value = [new_ticket, existing_ticket]
 
         # Only SU-200 exists
-        mock_project_repository.fetch_all_jira_urls.return_value = {"https://jira.example.com/browse/SU-200"}
+        existing_project = InsertedProject(
+            id="existing-project-id",
+            name="Existing feature",
+            start_date=date.today(),
+            jira_url="https://jira.example.com/browse/SU-200",
+        )
+        mock_project_repository.fetch_projects_with_jira_url.return_value = [existing_project]
 
         inserted_project = InsertedProject(
             id="new-project-id",
@@ -171,18 +185,19 @@ class TestSyncJiraToProject:
         # Assert
         assert len(result.created_projects) == 1
         assert len(result.skipped_tickets) == 1
+        assert len(result.notion_only_projects) == 0
         assert result.created_projects[0].name == "New feature"
         assert result.skipped_tickets[0].issue_key == "SU-200"
 
-        # Verify fetch_all_jira_urls was called once (not per ticket)
-        mock_project_repository.fetch_all_jira_urls.assert_called_once()
+        # Verify fetch_projects_with_jira_url was called once (not per ticket)
+        mock_project_repository.fetch_projects_with_jira_url.assert_called_once()
 
     def test_execute_with_no_tickets(
         self, sync_jira_to_project, mock_jira_ticket_query, mock_project_repository, mock_project_task_repository
     ):
         # Arrange
         mock_jira_ticket_query.search_tickets.return_value = []
-        mock_project_repository.fetch_all_jira_urls.return_value = set()
+        mock_project_repository.fetch_projects_with_jira_url.return_value = []
 
         # Act
         result = sync_jira_to_project.execute(jira_project="SU")
@@ -190,6 +205,7 @@ class TestSyncJiraToProject:
         # Assert
         assert len(result.created_projects) == 0
         assert len(result.skipped_tickets) == 0
+        assert len(result.notion_only_projects) == 0
         mock_project_repository.save.assert_not_called()
         mock_project_task_repository.save.assert_not_called()
 
@@ -202,7 +218,7 @@ class TestSyncJiraToProject:
     ):
         # Arrange
         mock_jira_ticket_query.search_tickets.return_value = []
-        mock_project_repository.fetch_all_jira_urls.return_value = set()
+        mock_project_repository.fetch_projects_with_jira_url.return_value = []
 
         # Act
         sync_jira_to_project.execute(jira_project="OTHER")
@@ -236,7 +252,7 @@ class TestSyncJiraToProject:
             url="https://jira.example.com/browse/SU-300",  # Same URL as ticket1
         )
         mock_jira_ticket_query.search_tickets.return_value = [ticket1, ticket2]
-        mock_project_repository.fetch_all_jira_urls.return_value = set()
+        mock_project_repository.fetch_projects_with_jira_url.return_value = []
 
         inserted_project = InsertedProject(
             id="project-id-300",
@@ -260,9 +276,112 @@ class TestSyncJiraToProject:
         # Assert
         assert len(result.created_projects) == 1
         assert len(result.skipped_tickets) == 1
+        assert len(result.notion_only_projects) == 0
         assert result.created_projects[0].name == "Feature A"
         assert result.skipped_tickets[0].issue_key == "SU-301"  # Second ticket was skipped
 
         # Verify save was called only once
         assert mock_project_repository.save.call_count == 1
         assert mock_project_task_repository.save.call_count == 1
+
+    def test_execute_detects_notion_only_projects(
+        self, sync_jira_to_project, mock_jira_ticket_query, mock_project_repository, mock_project_task_repository
+    ):
+        """JIRA側に存在しないNotionプロジェクトをnotion_only_projectsとして検出する"""
+        # Arrange
+        # JIRAにはSU-500のみ存在
+        ticket = JiraTicketDto(
+            issue_key="SU-500",
+            summary="Active feature",
+            issue_type="Task",
+            status="In Progress",
+            url="https://jira.example.com/browse/SU-500",
+        )
+        mock_jira_ticket_query.search_tickets.return_value = [ticket]
+
+        # NotionにはSU-500とSU-999の両方が存在（SU-999はJIRA側で完了済み）
+        active_project = InsertedProject(
+            id="active-project-id",
+            name="Active feature",
+            start_date=date.today(),
+            jira_url="https://jira.example.com/browse/SU-500",
+        )
+        completed_project = InsertedProject(
+            id="completed-project-id",
+            name="Completed feature",
+            start_date=date.today(),
+            jira_url="https://jira.example.com/browse/SU-999",
+        )
+        mock_project_repository.fetch_projects_with_jira_url.return_value = [active_project, completed_project]
+
+        # Act
+        result = sync_jira_to_project.execute(jira_project="SU")
+
+        # Assert
+        assert len(result.created_projects) == 0
+        assert len(result.skipped_tickets) == 1  # SU-500 is skipped (already exists)
+        assert len(result.notion_only_projects) == 1
+        assert result.notion_only_projects[0].id == "completed-project-id"
+        assert result.notion_only_projects[0].name == "Completed feature"
+        assert result.notion_only_projects[0].jira_url == "https://jira.example.com/browse/SU-999"
+
+    def test_execute_notion_only_filters_by_jira_project(
+        self, sync_jira_to_project, mock_jira_ticket_query, mock_project_repository, mock_project_task_repository
+    ):
+        """notion_only_projectsは対象JIRAプロジェクトのものだけをフィルタリングする"""
+        # Arrange
+        mock_jira_ticket_query.search_tickets.return_value = []  # JIRAにはチケットなし
+
+        # Notionには別プロジェクト(OTHER)のURLを持つプロジェクトが存在
+        other_project = InsertedProject(
+            id="other-project-id",
+            name="Other project feature",
+            start_date=date.today(),
+            jira_url="https://jira.example.com/browse/OTHER-123",  # 別プロジェクト
+        )
+        su_project = InsertedProject(
+            id="su-project-id",
+            name="SU project feature",
+            start_date=date.today(),
+            jira_url="https://jira.example.com/browse/SU-888",  # 対象プロジェクト
+        )
+        mock_project_repository.fetch_projects_with_jira_url.return_value = [other_project, su_project]
+
+        # Act
+        result = sync_jira_to_project.execute(jira_project="SU")
+
+        # Assert
+        # OTHER-123は対象外なので含まれない、SU-888のみがnotion_only_projectsに含まれる
+        assert len(result.notion_only_projects) == 1
+        assert result.notion_only_projects[0].id == "su-project-id"
+        assert result.notion_only_projects[0].jira_url == "https://jira.example.com/browse/SU-888"
+
+    def test_execute_no_notion_only_when_all_match(
+        self, sync_jira_to_project, mock_jira_ticket_query, mock_project_repository, mock_project_task_repository
+    ):
+        """JIRAとNotionのプロジェクトがすべて一致する場合はnotion_only_projectsは空"""
+        # Arrange
+        ticket = JiraTicketDto(
+            issue_key="SU-600",
+            summary="Matching feature",
+            issue_type="Task",
+            status="In Progress",
+            url="https://jira.example.com/browse/SU-600",
+        )
+        mock_jira_ticket_query.search_tickets.return_value = [ticket]
+
+        matching_project = InsertedProject(
+            id="matching-project-id",
+            name="Matching feature",
+            start_date=date.today(),
+            jira_url="https://jira.example.com/browse/SU-600",
+        )
+        mock_project_repository.fetch_projects_with_jira_url.return_value = [matching_project]
+
+        # Act
+        result = sync_jira_to_project.execute(jira_project="SU")
+
+        # Assert
+        assert len(result.created_projects) == 0
+        assert len(result.skipped_tickets) == 1
+        assert len(result.notion_only_projects) == 0

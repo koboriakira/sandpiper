@@ -701,9 +701,20 @@ def sync_jira_to_project(
             for ticket in result.skipped_tickets:
                 console.print(f"  - {ticket.issue_key}: {ticket.summary}")
 
+        # Notionにのみ存在するプロジェクト (JIRA側で完了済み等)
+        if result.notion_only_projects:
+            console.print(f"\n[magenta][bold]Notionのみに存在 ({len(result.notion_only_projects)}件):[/bold][/magenta]")
+            console.print("[dim]※JIRA側で完了済みまたはステータス変更の可能性があります[/dim]")
+            for project in result.notion_only_projects:
+                console.print(f"  - {project.name}")
+                if project.jira_url:
+                    console.print(f"    [blue]{project.jira_url}[/blue]")
+
         # サマリー
         console.print(
-            f"\n[bold]同期完了: {len(result.created_projects)}件作成, {len(result.skipped_tickets)}件スキップ[/bold]"
+            f"\n[bold]同期完了: {len(result.created_projects)}件作成, "
+            f"{len(result.skipped_tickets)}件スキップ, "
+            f"{len(result.notion_only_projects)}件Notionのみ[/bold]"
         )
 
     except ValueError as e:
