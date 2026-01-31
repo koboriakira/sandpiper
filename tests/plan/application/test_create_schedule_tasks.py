@@ -12,7 +12,6 @@ from sandpiper.plan.query.todo_query import TodoQuery
 from sandpiper.shared.valueobject.task_chute_section import TaskChuteSection
 
 # テスト用タイムゾーン
-UTC = timezone.utc
 JST = timezone(timedelta(hours=9))
 
 
@@ -45,7 +44,7 @@ class TestCalendarEventDto:
         assert event.calculate_duration_minutes() == 120
 
     def test_get_sort_order_morning_utc(self):
-        """UTC午前のイベントの並び順取得（JST変換後）"""
+        """UTC午前のイベントの並び順取得(JST変換後)"""
         # UTC 00:30 → JST 09:30
         event = CalendarEventDto(
             name="朝会",
@@ -55,7 +54,7 @@ class TestCalendarEventDto:
         assert event.get_sort_order() == "09:30"
 
     def test_get_sort_order_afternoon_utc(self):
-        """UTC午後のイベントの並び順取得（JST変換後）"""
+        """UTC午後のイベントの並び順取得(JST変換後)"""
         # UTC 05:15 → JST 14:15
         event = CalendarEventDto(
             name="午後の会議",
@@ -65,7 +64,7 @@ class TestCalendarEventDto:
         assert event.get_sort_order() == "14:15"
 
     def test_get_sort_order_midnight_utc(self):
-        """UTC深夜のイベントの並び順取得（JST変換後）"""
+        """UTC深夜のイベントの並び順取得(JST変換後)"""
         # UTC 15:05 → JST 翌日00:05
         event = CalendarEventDto(
             name="深夜作業",

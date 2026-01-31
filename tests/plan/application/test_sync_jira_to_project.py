@@ -285,7 +285,11 @@ class TestSyncJiraToProject:
         assert mock_project_task_repository.save.call_count == 1
 
     def test_execute_detects_notion_only_projects(
-        self, sync_jira_to_project, mock_jira_ticket_query, mock_project_repository, mock_project_task_repository
+        self,
+        sync_jira_to_project,
+        mock_jira_ticket_query,
+        mock_project_repository,
+        mock_project_task_repository,  # noqa: ARG002
     ):
         """JIRA側に存在しないNotionプロジェクトをnotion_only_projectsとして検出する"""
         # Arrange
@@ -299,7 +303,7 @@ class TestSyncJiraToProject:
         )
         mock_jira_ticket_query.search_tickets.return_value = [ticket]
 
-        # NotionにはSU-500とSU-999の両方が存在（SU-999はJIRA側で完了済み）
+        # NotionにはSU-500とSU-999の両方が存在(SU-999はJIRA側で完了済み)
         active_project = InsertedProject(
             id="active-project-id",
             name="Active feature",
@@ -326,7 +330,11 @@ class TestSyncJiraToProject:
         assert result.notion_only_projects[0].jira_url == "https://jira.example.com/browse/SU-999"
 
     def test_execute_notion_only_filters_by_jira_project(
-        self, sync_jira_to_project, mock_jira_ticket_query, mock_project_repository, mock_project_task_repository
+        self,
+        sync_jira_to_project,
+        mock_jira_ticket_query,
+        mock_project_repository,
+        mock_project_task_repository,  # noqa: ARG002
     ):
         """notion_only_projectsは対象JIRAプロジェクトのものだけをフィルタリングする"""
         # Arrange
@@ -357,7 +365,11 @@ class TestSyncJiraToProject:
         assert result.notion_only_projects[0].jira_url == "https://jira.example.com/browse/SU-888"
 
     def test_execute_no_notion_only_when_all_match(
-        self, sync_jira_to_project, mock_jira_ticket_query, mock_project_repository, mock_project_task_repository
+        self,
+        sync_jira_to_project,
+        mock_jira_ticket_query,
+        mock_project_repository,
+        mock_project_task_repository,  # noqa: ARG002
     ):
         """JIRAとNotionのプロジェクトがすべて一致する場合はnotion_only_projectsは空"""
         # Arrange

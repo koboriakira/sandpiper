@@ -94,7 +94,9 @@ class CreateScheduleTasks:
                 sort_order=sort_order,
             )
 
-            print(f"Create schedule task: {event.name} (section: {section.value}, duration: {execution_time}min, sort: {sort_order})")
+            print(
+                f"Create schedule task: {event.name} (section: {section.value}, duration: {execution_time}min, sort: {sort_order})"
+            )
 
             if not self.is_debug:
                 self.todo_repository.save(todo)
