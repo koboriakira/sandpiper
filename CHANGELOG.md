@@ -5,6 +5,14 @@
 このプロジェクトは[セマンティックバージョニング](https://semver.org/spec/v2.0.0.html)に従い、
 [Conventional Commits](https://conventionalcommits.org/)を使用して自動的にリリースを生成します。
 
+## [0.15.0](https://github.com/koboriakira/sandpiper/compare/sandpiper-v0.14.0...sandpiper-v0.15.0) (2026-01-31)
+
+
+### Features
+
+* Add scheduled_date field to tasks and routines ([#93](https://github.com/koboriakira/sandpiper/issues/93)) ([dfbe21c](https://github.com/koboriakira/sandpiper/commit/dfbe21c37b8a5fce3540963850a3cc0026e49c07))
+* 土日の仕事系プロジェクトタスク自動除外機能を追加 ([#92](https://github.com/koboriakira/sandpiper/issues/92)) ([fcc7e00](https://github.com/koboriakira/sandpiper/commit/fcc7e00352b6ebcd026f14aa5cc08d753aac4f9b))
+
 ## [0.14.0](https://github.com/koboriakira/sandpiper/compare/sandpiper-v0.13.0...sandpiper-v0.14.0) (2026-01-31)
 
 
