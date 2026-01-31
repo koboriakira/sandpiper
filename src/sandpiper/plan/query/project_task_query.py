@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from typing import Protocol
 
 from lotion import Lotion
@@ -6,6 +7,14 @@ from sandpiper.plan.query.project_task_dto import ProjectTaskDto
 from sandpiper.shared.notion.databases import project as project_db
 from sandpiper.shared.notion.databases import project_task as project_task_db
 from sandpiper.shared.valueobject.todo_status_enum import ToDoStatusEnum
+
+
+@dataclass
+class ProjectInfo:
+    """プロジェクト情報を保持するデータクラス"""
+
+    status: ToDoStatusEnum | None
+    has_jira_url: bool
 
 
 class ProjectTaskQuery(Protocol):
@@ -17,8 +26,8 @@ class NotionProjectTaskQuery(ProjectTaskQuery):
         self.client = Lotion.get_instance()
 
     def fetch_undone_project_tasks(self) -> list[ProjectTaskDto]:
-        # プロジェクトのステータスを取得してキャッシュ
-        project_status_map = self._fetch_project_status_map()
+        # プロジェクト情報(ステータス、Jira URL有無)を取得してキャッシュ
+        project_info_map = self._fetch_project_info_map()
 
         items = self.client.retrieve_database(project_task_db.DATABASE_ID)
         project_dtos = []
@@ -33,8 +42,8 @@ class NotionProjectTaskQuery(ProjectTaskQuery):
 
             # プロジェクトのステータスがToDoの場合はスキップ
             project_page_id = project_relations[0]
-            project_status = project_status_map.get(project_page_id)
-            if project_status == ToDoStatusEnum.TODO:
+            project_info = project_info_map.get(project_page_id)
+            if project_info is None or project_info.status == ToDoStatusEnum.TODO:
                 continue
 
             is_next = item.get_checkbox("次やる").checked
@@ -53,16 +62,19 @@ class NotionProjectTaskQuery(ProjectTaskQuery):
                 context=context,
                 sort_order=sort_order,
                 scheduled_date=scheduled_date,
+                is_work_project=project_info.has_jira_url,
             )
             project_dtos.append(project_task)
         return project_dtos
 
-    def _fetch_project_status_map(self) -> dict[str, ToDoStatusEnum | None]:
-        """プロジェクトIDとステータスのマップを取得する"""
+    def _fetch_project_info_map(self) -> dict[str, ProjectInfo]:
+        """プロジェクトIDとプロジェクト情報のマップを取得する"""
         items = self.client.retrieve_database(project_db.DATABASE_ID)
-        result: dict[str, ToDoStatusEnum | None] = {}
+        result: dict[str, ProjectInfo] = {}
         for item in items:
             status_prop = item.get_status("ステータス")
             status = ToDoStatusEnum(status_prop.status_name) if status_prop.status_name else None
-            result[item.id] = status
+            jira_url_prop = item.get_url("Jira")
+            has_jira_url = jira_url_prop.url is not None and jira_url_prop.url != ""
+            result[item.id] = ProjectInfo(status=status, has_jira_url=has_jira_url)
         return result

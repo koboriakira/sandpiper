@@ -45,9 +45,39 @@ class TestProjectTaskDto:
             "context",
             "sort_order",
             "scheduled_date",
+            "is_work_project",
         }
         actual_fields = set(dto.__dataclass_fields__.keys())
         assert actual_fields == expected_fields
+
+    def test_project_task_dto_is_work_project_default(self):
+        """is_work_projectフィールドのデフォルト値がFalseであることをテスト"""
+        # Arrange & Act
+        dto = ProjectTaskDto(
+            page_id="task-page-123",
+            title="プロジェクトタスク",
+            status=ToDoStatusEnum.TODO,
+            project_page_id="project-page-456",
+            is_next=True,
+        )
+
+        # Assert
+        assert dto.is_work_project is False
+
+    def test_project_task_dto_is_work_project_true(self):
+        """is_work_project=Trueでの作成をテスト"""
+        # Arrange & Act
+        dto = ProjectTaskDto(
+            page_id="task-page-123",
+            title="仕事プロジェクトタスク",
+            status=ToDoStatusEnum.TODO,
+            project_page_id="project-page-456",
+            is_next=True,
+            is_work_project=True,
+        )
+
+        # Assert
+        assert dto.is_work_project is True
 
     def test_to_todo_model(self):
         """to_todo_model()メソッドの基本的な動作をテスト"""

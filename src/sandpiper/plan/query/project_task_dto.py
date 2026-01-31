@@ -17,6 +17,7 @@ class ProjectTaskDto:
     context: list[str] = field(default_factory=list)
     sort_order: str | None = None
     scheduled_date: date | None = None
+    is_work_project: bool = False
 
     def to_todo_model(self) -> ToDo:
         return ToDo(
