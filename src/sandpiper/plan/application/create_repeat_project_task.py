@@ -25,7 +25,7 @@ class CreateRepeatProjectTask:
 
         # プロジェクトタスクをToDoに変換(プロジェクトタスクのブロックもコピーする)
         for project_task in grouped_tasks.values():
-            todo = project_task.to_todo_model()
+            todo = project_task.to_todo_model(basis_date)
             print(todo)
             # ToDoを保存
             options = {

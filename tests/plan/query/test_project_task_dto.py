@@ -1,3 +1,5 @@
+from datetime import date, datetime, time
+
 from sandpiper.plan.domain.todo import ToDo, ToDoKind
 from sandpiper.plan.query.project_task_dto import ProjectTaskDto
 from sandpiper.shared.valueobject.todo_status_enum import ToDoStatusEnum
@@ -44,7 +46,8 @@ class TestProjectTaskDto:
             "block_children",
             "context",
             "sort_order",
-            "scheduled_date",
+            "scheduled_start_time",
+            "scheduled_end_time",
             "is_work_project",
         }
         actual_fields = set(dto.__dataclass_fields__.keys())
@@ -89,9 +92,10 @@ class TestProjectTaskDto:
             project_page_id="project-789",
             is_next=False,
         )
+        basis_date = date(2024, 3, 20)
 
         # Act
-        todo = dto.to_todo_model()
+        todo = dto.to_todo_model(basis_date)
 
         # Assert
         assert isinstance(todo, ToDo)
@@ -101,10 +105,51 @@ class TestProjectTaskDto:
         assert todo.project_page_id == "project-789"
         assert todo.project_task_page_id == "task-123"
 
+    def test_to_todo_model_with_scheduled_time(self):
+        """to_todo_model()が時刻を基準日と組み合わせて日時を生成することをテスト"""
+        # Arrange
+        dto = ProjectTaskDto(
+            page_id="task-123",
+            title="時刻付きタスク",
+            status=ToDoStatusEnum.TODO,
+            project_page_id="project-789",
+            is_next=False,
+            scheduled_start_time=time(9, 0),
+            scheduled_end_time=time(10, 30),
+        )
+        basis_date = date(2024, 3, 20)
+
+        # Act
+        todo = dto.to_todo_model(basis_date)
+
+        # Assert
+        assert todo.scheduled_start_datetime == datetime(2024, 3, 20, 9, 0)
+        assert todo.scheduled_end_datetime == datetime(2024, 3, 20, 10, 30)
+
+    def test_to_todo_model_without_scheduled_time(self):
+        """to_todo_model()が時刻なしの場合はNoneを返すことをテスト"""
+        # Arrange
+        dto = ProjectTaskDto(
+            page_id="task-123",
+            title="時刻なしタスク",
+            status=ToDoStatusEnum.TODO,
+            project_page_id="project-789",
+            is_next=False,
+        )
+        basis_date = date(2024, 3, 20)
+
+        # Act
+        todo = dto.to_todo_model(basis_date)
+
+        # Assert
+        assert todo.scheduled_start_datetime is None
+        assert todo.scheduled_end_datetime is None
+
     def test_to_todo_model_different_statuses(self):
         """異なるステータスでのto_todo_model()をテスト"""
         # 複数のステータスをテスト
         test_cases = [ToDoStatusEnum.TODO, ToDoStatusEnum.IN_PROGRESS, ToDoStatusEnum.DONE]
+        basis_date = date(2024, 3, 20)
 
         for status in test_cases:
             # Arrange
@@ -117,7 +162,7 @@ class TestProjectTaskDto:
             )
 
             # Act
-            todo = dto.to_todo_model()
+            todo = dto.to_todo_model(basis_date)
 
             # Assert
             assert todo.title == f"タスク-{status.value}"
@@ -129,6 +174,7 @@ class TestProjectTaskDto:
         """is_nextフィールドの異なる値でのto_todo_model()をテスト"""
         # is_nextの値をテスト(ToDoモデルには影響しないが、DTOの動作確認)
         test_cases = [True, False]
+        basis_date = date(2024, 3, 20)
 
         for is_next in test_cases:
             # Arrange
@@ -141,7 +187,7 @@ class TestProjectTaskDto:
             )
 
             # Act
-            todo = dto.to_todo_model()
+            todo = dto.to_todo_model(basis_date)
 
             # Assert
             assert todo.title == "Next フラグテスト"
@@ -159,9 +205,10 @@ class TestProjectTaskDto:
             project_page_id="unique-project-id",
             is_next=True,
         )
+        basis_date = date(2024, 3, 20)
 
         # Act
-        todo = dto.to_todo_model()
+        todo = dto.to_todo_model(basis_date)
 
         # Assert
         assert todo.project_page_id == "unique-project-id"
@@ -214,9 +261,10 @@ class TestProjectTaskDto:
         """空文字列でのto_todo_model()をテスト"""
         # Arrange
         dto = ProjectTaskDto(page_id="", title="", status=ToDoStatusEnum.TODO, project_page_id="", is_next=False)
+        basis_date = date(2024, 3, 20)
 
         # Act
-        todo = dto.to_todo_model()
+        todo = dto.to_todo_model(basis_date)
 
         # Assert
         assert todo.title == ""
