@@ -5,6 +5,7 @@ from sandpiper.plan.domain.routine_repository import RoutineRepository
 from sandpiper.plan.domain.todo import ToDo, ToDoKind
 from sandpiper.plan.domain.todo_repository import TodoRepository
 from sandpiper.plan.query.todo_query import TodoQuery
+from sandpiper.shared.utils.date_utils import JST
 
 
 @dataclass
@@ -48,9 +49,9 @@ class CreateRepeatTask:
             scheduled_start_datetime = None
             scheduled_end_datetime = None
             if routine.scheduled_start_time:
-                scheduled_start_datetime = datetime.combine(basis_date, routine.scheduled_start_time)
+                scheduled_start_datetime = datetime.combine(basis_date, routine.scheduled_start_time, tzinfo=JST)
             if routine.scheduled_end_time:
-                scheduled_end_datetime = datetime.combine(basis_date, routine.scheduled_end_time)
+                scheduled_end_datetime = datetime.combine(basis_date, routine.scheduled_end_time, tzinfo=JST)
             todo = ToDo(
                 title=routine.title,
                 section=routine.section,

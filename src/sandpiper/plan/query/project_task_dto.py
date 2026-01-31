@@ -3,6 +3,7 @@ from datetime import date, datetime, time
 from typing import Any
 
 from sandpiper.plan.domain.todo import ToDo, ToDoKind
+from sandpiper.shared.utils.date_utils import JST
 from sandpiper.shared.valueobject.todo_status_enum import ToDoStatusEnum
 
 
@@ -24,9 +25,9 @@ class ProjectTaskDto:
         scheduled_start_datetime = None
         scheduled_end_datetime = None
         if self.scheduled_start_time:
-            scheduled_start_datetime = datetime.combine(basis_date, self.scheduled_start_time)
+            scheduled_start_datetime = datetime.combine(basis_date, self.scheduled_start_time, tzinfo=JST)
         if self.scheduled_end_time:
-            scheduled_end_datetime = datetime.combine(basis_date, self.scheduled_end_time)
+            scheduled_end_datetime = datetime.combine(basis_date, self.scheduled_end_time, tzinfo=JST)
 
         return ToDo(
             title=self.title,
