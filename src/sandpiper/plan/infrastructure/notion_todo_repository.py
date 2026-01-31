@@ -13,6 +13,7 @@ from sandpiper.shared.notion.databases.todo import (
     TodoName,
     TodoProjectProp,
     TodoProjectTaskProp,
+    TodoScheduledDate,
     TodoSection,
     TodoSortOrder,
     TodoStatus,
@@ -54,6 +55,8 @@ class TodoPage(BasePage):  # type: ignore[misc]
             properties.append(TodoName.from_rich_text(rich_text_builder.build()))
         if todo.sort_order:
             properties.append(TodoSortOrder.from_plain_text(todo.sort_order))
+        if todo.scheduled_date:
+            properties.append(TodoScheduledDate.from_start_date(todo.scheduled_date))
 
         return TodoPage.create(properties=properties, blocks=blocks)  # type: ignore[no-any-return]
 
@@ -65,6 +68,7 @@ class TodoPage(BasePage):  # type: ignore[misc]
         execution_time = self.get_number("実行時間").number
         context_prop = self.get_multi_select("コンテクスト")
         context = [v.name for v in context_prop.values] if context_prop else []
+        scheduled_date = self.get_date("予定").start_date
         return ToDo(
             title=self.get_title_text(),
             kind=ToDoKind(kind.selected_name) if kind.selected_name else None,
@@ -73,6 +77,7 @@ class TodoPage(BasePage):  # type: ignore[misc]
             project_task_page_id=project_task[0] if project_task else None,
             execution_time=int(execution_time) if execution_time else None,
             context=context if context else None,
+            scheduled_date=scheduled_date,
         )
 
 
@@ -92,6 +97,7 @@ class NotionTodoRepository:
             kind=todo.kind,
             execution_time=todo.execution_time,
             context=todo.context,
+            scheduled_date=todo.scheduled_date,
         )
 
     def fetch(self) -> list[ToDo]:

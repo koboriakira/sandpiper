@@ -22,3 +22,8 @@ class RoutineContext(MultiSelect):  # type: ignore[misc]
 @notion_prop("並び順")
 class RoutineSortOrder(Text):  # type: ignore[misc]
     ...
+
+
+@notion_prop("予定")
+class RoutineScheduledDate(Date):  # type: ignore[misc]
+    ...

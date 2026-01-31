@@ -72,3 +72,8 @@ class TodoContext(MultiSelect):  # type: ignore[misc]
 @notion_prop("並び順")
 class TodoSortOrder(Text):  # type: ignore[misc]
     ...
+
+
+@notion_prop("予定")
+class TodoScheduledDate(Date):  # type: ignore[misc]
+    ...

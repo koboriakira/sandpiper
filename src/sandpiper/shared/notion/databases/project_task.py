@@ -1,5 +1,5 @@
 from lotion import notion_prop
-from lotion.properties import Checkbox, MultiSelect, Relation, Status, Text, Title
+from lotion.properties import Checkbox, Date, MultiSelect, Relation, Status, Text, Title
 
 DATABASE_ID = "2db6567a3bbf80078961d42908b5dd49"
 
@@ -31,4 +31,9 @@ class ProjectTaskIsDeleted(Checkbox):  # type: ignore[misc]
 
 @notion_prop("並び順")
 class ProjectTaskSortOrder(Text):  # type: ignore[misc]
+    ...
+
+
+@notion_prop("予定")
+class ProjectTaskScheduledDate(Date):  # type: ignore[misc]
     ...

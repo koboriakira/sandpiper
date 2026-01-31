@@ -26,6 +26,7 @@ class NotionRoutineRepository(RoutineRepository):
             context = [v.name for v in context_prop.values] if context_prop else []
             sort_order_prop = item.get_text("並び順")
             sort_order = sort_order_prop.text if sort_order_prop else None
+            scheduled_date = item.get_date("予定").start_date
             routine = Routine(
                 id=item.id,
                 title=item.get_title_text(),
@@ -36,6 +37,7 @@ class NotionRoutineRepository(RoutineRepository):
                 block_children=item.block_children,
                 context=context,
                 sort_order=sort_order,
+                scheduled_date=scheduled_date,
             )
             routines.append(routine)
         return routines
