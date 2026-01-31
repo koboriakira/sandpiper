@@ -15,6 +15,7 @@ class ProjectTaskDto:
     block_children: list[Any] = field(default_factory=list)
     context: list[str] = field(default_factory=list)
     sort_order: str | None = None
+    is_work_project: bool = False
 
     def to_todo_model(self) -> ToDo:
         return ToDo(
