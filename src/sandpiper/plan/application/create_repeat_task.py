@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from datetime import date
+from datetime import date, datetime
 
 from sandpiper.plan.domain.routine_repository import RoutineRepository
 from sandpiper.plan.domain.todo import ToDo, ToDoKind
@@ -45,6 +45,12 @@ class CreateRepeatTask:
 
             # Todoを作成する(Routineのブロックもコピーする)
             print(f"Create repeat task: {routine.title}")
+            scheduled_start_datetime = None
+            scheduled_end_datetime = None
+            if routine.scheduled_start_time:
+                scheduled_start_datetime = datetime.combine(basis_date, routine.scheduled_start_time)
+            if routine.scheduled_end_time:
+                scheduled_end_datetime = datetime.combine(basis_date, routine.scheduled_end_time)
             todo = ToDo(
                 title=routine.title,
                 section=routine.section,
@@ -53,7 +59,8 @@ class CreateRepeatTask:
                 context=routine.context if routine.context else None,
                 routine_page_id=routine.id,
                 sort_order=routine.sort_order,
-                scheduled_date=routine.scheduled_date,
+                scheduled_start_datetime=scheduled_start_datetime,
+                scheduled_end_datetime=scheduled_end_datetime,
             )
             if not self.is_debug:
                 self.todo_repository.save(todo, {"block_children": routine.block_children})

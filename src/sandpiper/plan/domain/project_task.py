@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from datetime import date
+from datetime import time
 
 from sandpiper.shared.valueobject.todo_status_enum import ToDoStatusEnum
 
@@ -12,7 +12,8 @@ class ProjectTask:
     status: ToDoStatusEnum
     project_id: str
     sort_order: str | None = None
-    scheduled_date: date | None = None
+    scheduled_start_time: time | None = None
+    scheduled_end_time: time | None = None
 
 
 @dataclass
@@ -24,4 +25,5 @@ class InsertedProjectTask:
     status: ToDoStatusEnum
     project_id: str
     sort_order: str | None = None
-    scheduled_date: date | None = None
+    scheduled_start_time: time | None = None
+    scheduled_end_time: time | None = None

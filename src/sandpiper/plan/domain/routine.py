@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from datetime import date as Date
+from datetime import date as Date, time
 from typing import Any
 
 from sandpiper.plan.domain.routine_cycle import RoutineCycle
@@ -17,7 +17,8 @@ class Routine:
     block_children: list[Any] = field(default_factory=list)
     context: list[str] = field(default_factory=list)
     sort_order: str | None = None
-    scheduled_date: Date | None = None
+    scheduled_start_time: time | None = None
+    scheduled_end_time: time | None = None
 
     def next_cycle(self, basis_date: Date | None = None) -> "Routine":
         next_date = self.cycle.next_date(basis_date=basis_date or self.date)
@@ -31,5 +32,6 @@ class Routine:
             block_children=self.block_children,
             context=self.context,
             sort_order=self.sort_order,
-            scheduled_date=self.scheduled_date,
+            scheduled_start_time=self.scheduled_start_time,
+            scheduled_end_time=self.scheduled_end_time,
         )

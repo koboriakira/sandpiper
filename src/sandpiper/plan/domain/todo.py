@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from datetime import date
+from datetime import datetime
 from enum import Enum
 
 from sandpiper.shared.valueobject.task_chute_section import TaskChuteSection
@@ -31,7 +31,8 @@ class ToDo:
     execution_time: int | None = None
     context: list[str] | None = None
     sort_order: str | None = None
-    scheduled_date: date | None = None
+    scheduled_start_datetime: datetime | None = None
+    scheduled_end_datetime: datetime | None = None
 
 
 @dataclass
@@ -43,4 +44,5 @@ class InsertedToDo:
     execution_time: int | None = None
     context: list[str] | None = None
     sort_order: str | None = None
-    scheduled_date: date | None = None
+    scheduled_start_datetime: datetime | None = None
+    scheduled_end_datetime: datetime | None = None
