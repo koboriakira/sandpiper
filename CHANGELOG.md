@@ -5,6 +5,13 @@
 このプロジェクトは[セマンティックバージョニング](https://semver.org/spec/v2.0.0.html)に従い、
 [Conventional Commits](https://conventionalcommits.org/)を使用して自動的にリリースを生成します。
 
+## [0.16.0](https://github.com/koboriakira/sandpiper/compare/sandpiper-v0.15.0...sandpiper-v0.16.0) (2026-01-31)
+
+
+### Features
+
+* 日時を適宜計算してコピーする ([#95](https://github.com/koboriakira/sandpiper/issues/95)) ([0b7efe2](https://github.com/koboriakira/sandpiper/commit/0b7efe238bcc989b009663a0d979782cd240ccfe))
+
 ## [0.15.0](https://github.com/koboriakira/sandpiper/compare/sandpiper-v0.14.0...sandpiper-v0.15.0) (2026-01-31)
 
 
