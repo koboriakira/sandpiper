@@ -843,23 +843,36 @@ def archive_old_todos(
 
 @app.command()
 def override_section_by_schedule(
-    page_id: str = typer.Argument(..., help="TODOのNotion ページID"),
+    page_id: str = typer.Argument(None, help="TODOのNotion ページID (省略時はステータスがTODOのすべてのタスクを処理)"),
 ) -> None:
     """TODOの予定開始時刻からセクションを上書きします
 
     指定されたTODOの「予定」プロパティの開始時刻を取得し、
     その時刻に基づいてセクションプロパティを上書きします。
 
-    - 予定開始時刻が設定されていない場合はエラーとなります
+    - page_idを省略した場合、ステータスがTODOのすべてのタスクを対象とします
+    - 予定開始時刻が設定されていない場合はスキップされます (単体実行時はエラー)
     - セクションは時刻に応じて自動計算されます (A_07_10, B_10_13, etc.)
     """
     try:
-        result = sandpiper_app.override_section_by_schedule.execute(page_id=page_id)
-        old_section_str = result.old_section.value if result.old_section else "なし"
-        console.print("[green][bold]セクション上書き完了[/bold][/green]")
-        console.print(f"  タイトル: {result.title}")
-        console.print(f"  予定開始: {result.scheduled_start_datetime_str}")
-        console.print(f"  セクション: {old_section_str} → {result.new_section.value}")
+        if page_id:
+            # 単体実行
+            result = sandpiper_app.override_section_by_schedule.execute(page_id=page_id)
+            old_section_str = result.old_section.value if result.old_section else "なし"
+            console.print("[green][bold]セクション上書き完了[/bold][/green]")
+            console.print(f"  タイトル: {result.title}")
+            console.print(f"  予定開始: {result.scheduled_start_datetime_str}")
+            console.print(f"  セクション: {old_section_str} → {result.new_section.value}")
+        else:
+            # 一括実行
+            console.print("[dim]ステータスがTODOのすべてのタスクを処理中...[/dim]")
+            bulk_result = sandpiper_app.override_section_by_schedule.execute_all()
+            console.print(f"[green][bold]セクション上書き完了: {bulk_result.success_count}件[/bold][/green]")
+            if bulk_result.skipped_count > 0:
+                console.print(f"[yellow]スキップ: {bulk_result.skipped_count}件 (予定開始時刻なし)[/yellow]")
+            for result in bulk_result.results:
+                old_section_str = result.old_section.value if result.old_section else "なし"
+                console.print(f"  - {result.title}: {old_section_str} → {result.new_section.value}")
     except ValueError as e:
         console.print(f"[red]エラー: {e}[/red]")
         raise typer.Exit(code=1)

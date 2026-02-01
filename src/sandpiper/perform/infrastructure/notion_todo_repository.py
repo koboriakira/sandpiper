@@ -85,3 +85,14 @@ class NotionTodoRepository:
         page = self.client.retrieve_page(page_id, TodoPage)
         page.set_prop(TodoSection.from_name(section.value))
         self.client.update(page)
+
+    def find_by_status(self, status: ToDoStatusEnum) -> list[ToDo]:
+        """指定されたステータスのTODOリストを取得する"""
+        pages = self.client.retrieve_database(todo_db.DATABASE_ID)
+        result: list[ToDo] = []
+        for page in pages:
+            page_status = ToDoStatusEnum(page.get_status("ステータス").status_name)
+            if page_status == status:
+                todo_page = self.client.retrieve_page(page.id, TodoPage)
+                result.append(todo_page.to_domain())
+        return result
