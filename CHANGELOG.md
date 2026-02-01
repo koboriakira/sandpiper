@@ -5,6 +5,25 @@
 このプロジェクトは[セマンティックバージョニング](https://semver.org/spec/v2.0.0.html)に従い、
 [Conventional Commits](https://conventionalcommits.org/)を使用して自動的にリリースを生成します。
 
+## [0.17.0](https://github.com/koboriakira/sandpiper/compare/sandpiper-v0.16.0...sandpiper-v0.17.0) (2026-02-01)
+
+
+### Features
+
+* Support date-only scheduling for tasks without specific times ([#103](https://github.com/koboriakira/sandpiper/issues/103)) ([f944d2f](https://github.com/koboriakira/sandpiper/commit/f944d2f87e27a0553ce81e0b11142f2ed14275f2))
+* サムデイアイテム作成にタイミング・フラグ・コンテクスト機能を追加 ([#99](https://github.com/koboriakira/sandpiper/issues/99)) ([7aba5e8](https://github.com/koboriakira/sandpiper/commit/7aba5e8a2a934a033f0ac0b4f5e150a9abe4a76a))
+* 予定開始時刻からセクションを上書きする機能を追加 ([#102](https://github.com/koboriakira/sandpiper/issues/102)) ([5594415](https://github.com/koboriakira/sandpiper/commit/55944155a04e1622b536224d801529a91d9859c8))
+
+
+### Bug Fixes
+
+* プロジェクトタスクからTODOコピー時に予定未定の場合は日付のみを設定 ([f944d2f](https://github.com/koboriakira/sandpiper/commit/f944d2f87e27a0553ce81e0b11142f2ed14275f2))
+
+
+### Code Refactoring
+
+* move domain models to shared layer for better reusability ([#101](https://github.com/koboriakira/sandpiper/issues/101)) ([629850a](https://github.com/koboriakira/sandpiper/commit/629850aefc21c2e91a0f0c0b462ad3cc2f2e560a))
+
 ## [0.16.0](https://github.com/koboriakira/sandpiper/compare/sandpiper-v0.15.0...sandpiper-v0.16.0) (2026-01-31)
 
 
