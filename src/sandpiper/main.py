@@ -11,6 +11,7 @@ from sandpiper.app.app import bootstrap
 from sandpiper.plan.application.create_project_task import CreateProjectTaskRequest
 from sandpiper.plan.application.create_someday_item import CreateSomedayItemRequest
 from sandpiper.plan.application.create_todo import CreateNewToDoRequest
+from sandpiper.plan.domain.someday_item import SomedayTiming
 from sandpiper.plan.domain.todo import ToDoKind
 from sandpiper.recipe.application.create_recipe import CreateRecipeRequest, IngredientRequest
 from sandpiper.shared.utils.date_utils import jst_now
@@ -110,15 +111,65 @@ def create_todo_next_section(
 
 
 @app.command()
-def create_someday(title: str = typer.Argument(..., help="サムデイアイテムのタイトル")) -> None:
+def create_someday(
+    title: str = typer.Argument(..., help="サムデイアイテムのタイトル"),
+    timing: str = typer.Option(
+        "明日",
+        "--timing",
+        "-t",
+        help="タイミングを指定 (明日/いつか/ついでに)",
+    ),
+    do_tomorrow: bool = typer.Option(
+        False,
+        "--do-tomorrow",
+        "-d",
+        help="明日やるフラグを設定",
+    ),
+    context: str = typer.Option(
+        None,
+        "--context",
+        "-c",
+        help="コンテクストを指定 (カンマ区切りで複数指定可能: 外出,仕事)",
+    ),
+) -> None:
     """サムデイリストにアイテムを追加します
 
-    タイミングは自動的に「明日」が設定されます。
+    デフォルトではタイミングが「明日」に設定されます。
     """
+    # タイミングをEnum値に変換
+    timing_map = {
+        "明日": SomedayTiming.TOMORROW,
+        "いつか": SomedayTiming.SOMEDAY,
+        "ついでに": SomedayTiming.INCIDENTALLY,
+    }
+    timing_value = timing_map.get(timing)
+    if timing_value is None:
+        console.print(f"[red]エラー: 不正なタイミング値です: {timing}[/red]")
+        console.print("[yellow]有効な値: 明日, いつか, ついでに[/yellow]")
+        raise typer.Exit(1)
+
+    # コンテクストをリストに変換
+    context_list: list[str] = []
+    if context:
+        context_list = [c.strip() for c in context.split(",") if c.strip()]
+
     result = sandpiper_app.create_someday_item.execute(
-        request=CreateSomedayItemRequest(title=title),
+        request=CreateSomedayItemRequest(
+            title=title,
+            timing=timing_value,
+            do_tomorrow=do_tomorrow,
+            context=context_list,
+        ),
     )
-    console.print(f"[green]サムデイアイテムを作成しました: {result.title} (タイミング: {result.timing})[/green]")
+
+    # 結果を表示
+    output_parts = [f"サムデイアイテムを作成しました: {result.title}"]
+    output_parts.append(f"タイミング: {result.timing}")
+    if result.do_tomorrow:
+        output_parts.append("明日やる: ✓")
+    if result.context:
+        output_parts.append(f"コンテクスト: {', '.join(result.context)}")
+    console.print(f"[green]{' | '.join(output_parts)}[/green]")
 
 
 @app.command()

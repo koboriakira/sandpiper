@@ -1,6 +1,6 @@
 """サムデイリストにアイテムを追加するユースケース"""
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from sandpiper.plan.domain.someday_item import SomedayItem, SomedayTiming
 from sandpiper.plan.domain.someday_repository import SomedayRepository
@@ -11,6 +11,9 @@ class CreateSomedayItemRequest:
     """サムデイアイテム作成リクエスト"""
 
     title: str
+    timing: SomedayTiming = SomedayTiming.TOMORROW
+    do_tomorrow: bool = False
+    context: list[str] = field(default_factory=list)
 
 
 @dataclass
@@ -20,12 +23,15 @@ class CreateSomedayItemResult:
     id: str
     title: str
     timing: str
+    do_tomorrow: bool
+    context: list[str]
 
 
 class CreateSomedayItem:
     """サムデイリストにアイテムを追加するユースケース
 
-    タイミングは必ず「明日」が設定されます。
+    デフォルトではタイミングが「明日」に設定されます。
+    オプションでタイミング、明日やるフラグ、コンテクストを指定できます。
     """
 
     def __init__(self, someday_repository: SomedayRepository) -> None:
@@ -42,7 +48,9 @@ class CreateSomedayItem:
         """
         item = SomedayItem.create(
             title=request.title,
-            timing=SomedayTiming.TOMORROW,
+            timing=request.timing,
+            do_tomorrow=request.do_tomorrow,
+            context=request.context,
         )
         saved_item = self.someday_repository.save(item)
 
@@ -50,4 +58,6 @@ class CreateSomedayItem:
             id=saved_item.id,
             title=saved_item.title,
             timing=saved_item.timing.value,
+            do_tomorrow=saved_item.do_tomorrow,
+            context=saved_item.context,
         )
