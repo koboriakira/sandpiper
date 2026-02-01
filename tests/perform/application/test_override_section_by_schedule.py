@@ -4,6 +4,7 @@ from unittest.mock import Mock
 import pytest
 
 from sandpiper.perform.application.override_section_by_schedule import (
+    OverrideSectionBulkResult,
     OverrideSectionBySchedule,
     OverrideSectionResult,
 )
@@ -245,3 +246,107 @@ class TestOverrideSectionBySchedule:
 
         # Assert
         assert result.new_section == expected_section
+
+
+class TestOverrideSectionByScheduleExecuteAll:
+    """execute_allメソッドのテスト"""
+
+    def setup_method(self) -> None:
+        self.mock_repository = Mock(spec=TodoRepository)
+        self.use_case = OverrideSectionBySchedule(self.mock_repository)
+
+    def test_execute_all_with_scheduled_todos(self) -> None:
+        """予定開始日時が設定されたTODOがある場合の一括実行テスト"""
+        # Arrange
+        todo1 = ToDo(
+            id="page-1",
+            title="タスク1",
+            status=ToDoStatusEnum.TODO,
+            section=TaskChuteSection.A_07_10,
+            scheduled_start_datetime=datetime(2024, 3, 19, 23, 30),  # JST 8:30
+        )
+        todo2 = ToDo(
+            id="page-2",
+            title="タスク2",
+            status=ToDoStatusEnum.TODO,
+            section=None,
+            scheduled_start_datetime=datetime(2024, 3, 20, 5, 0),  # JST 14:00
+        )
+        self.mock_repository.find_by_status.return_value = [todo1, todo2]
+        self.mock_repository.find.side_effect = [todo1, todo2]
+
+        # Act
+        result = self.use_case.execute_all()
+
+        # Assert
+        assert isinstance(result, OverrideSectionBulkResult)
+        assert result.success_count == 2
+        assert result.skipped_count == 0
+        assert len(result.results) == 2
+        self.mock_repository.find_by_status.assert_called_once_with(ToDoStatusEnum.TODO)
+
+    def test_execute_all_with_mixed_todos(self) -> None:
+        """予定開始日時があるものとないものが混在する場合のテスト"""
+        # Arrange
+        todo_with_schedule = ToDo(
+            id="page-1",
+            title="タスク1（予定あり）",
+            status=ToDoStatusEnum.TODO,
+            section=None,
+            scheduled_start_datetime=datetime(2024, 3, 19, 23, 30),  # JST 8:30
+        )
+        todo_without_schedule = ToDo(
+            id="page-2",
+            title="タスク2（予定なし）",
+            status=ToDoStatusEnum.TODO,
+            section=None,
+            scheduled_start_datetime=None,
+        )
+        self.mock_repository.find_by_status.return_value = [todo_with_schedule, todo_without_schedule]
+        self.mock_repository.find.return_value = todo_with_schedule
+
+        # Act
+        result = self.use_case.execute_all()
+
+        # Assert
+        assert result.success_count == 1
+        assert result.skipped_count == 1
+
+    def test_execute_all_with_no_scheduled_todos(self) -> None:
+        """予定開始日時が設定されたTODOがない場合のテスト"""
+        # Arrange
+        todo1 = ToDo(
+            id="page-1",
+            title="タスク1",
+            status=ToDoStatusEnum.TODO,
+            section=None,
+            scheduled_start_datetime=None,
+        )
+        todo2 = ToDo(
+            id="page-2",
+            title="タスク2",
+            status=ToDoStatusEnum.TODO,
+            section=None,
+            scheduled_start_datetime=None,
+        )
+        self.mock_repository.find_by_status.return_value = [todo1, todo2]
+
+        # Act
+        result = self.use_case.execute_all()
+
+        # Assert
+        assert result.success_count == 0
+        assert result.skipped_count == 2
+
+    def test_execute_all_with_empty_list(self) -> None:
+        """TODOステータスのタスクが存在しない場合のテスト"""
+        # Arrange
+        self.mock_repository.find_by_status.return_value = []
+
+        # Act
+        result = self.use_case.execute_all()
+
+        # Assert
+        assert result.success_count == 0
+        assert result.skipped_count == 0
+        assert result.results == []
