@@ -114,6 +114,7 @@ class TestToDo:
             "log_end_datetime",
             "project_task_page_id",
             "contexts",
+            "scheduled_start_datetime",
         }
         actual_fields = set(todo.__dataclass_fields__.keys())
         assert actual_fields == expected_fields
