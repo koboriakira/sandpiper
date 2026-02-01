@@ -8,6 +8,7 @@ from sandpiper.shared.notion.databases.todo import (
     TodoLogDate,
     TodoName,
     TodoProjectTaskProp,
+    TodoScheduledDate,
     TodoSection,
     TodoStatus,
 )
@@ -23,6 +24,7 @@ class TodoPage(BasePage):  # type: ignore[misc]
     section: TodoSection | None = None
     log_date: TodoLogDate | None = None
     project_task_relation: TodoProjectTaskProp | None = None
+    scheduled_date: TodoScheduledDate | None = None
 
     def to_domain(self) -> ToDo:
         section_name = self.get_select("セクション").selected_name
@@ -31,6 +33,7 @@ class TodoPage(BasePage):  # type: ignore[misc]
         project_task = self.get_relation("プロジェクトタスク").id_list
         context_prop = self.get_multi_select("コンテクスト")
         contexts = self._parse_contexts(context_prop)
+        scheduled_start_datetime = self.get_date("予定").start_datetime
         return ToDo(
             id=self.id,
             title=self.get_title_text(),
@@ -40,6 +43,7 @@ class TodoPage(BasePage):  # type: ignore[misc]
             log_end_datetime=log_end_datetime,
             project_task_page_id=project_task[0] if project_task else None,
             contexts=contexts,
+            scheduled_start_datetime=scheduled_start_datetime,
         )
 
     def _parse_contexts(self, context_prop) -> list[Context]:  # type: ignore[no-untyped-def]
@@ -74,4 +78,10 @@ class NotionTodoRepository:
         if todo.section:
             page.set_prop(TodoSection.from_name(todo.section.value))
 
+        self.client.update(page)
+
+    def update_section(self, page_id: str, section: TaskChuteSection) -> None:
+        """セクションのみを更新する"""
+        page = self.client.retrieve_page(page_id, TodoPage)
+        page.set_prop(TodoSection.from_name(section.value))
         self.client.update(page)

@@ -17,6 +17,7 @@ class ToDo:
     log_end_datetime: datetime | None = None
     project_task_page_id: str | None = None
     contexts: list[Context] = field(default_factory=list)
+    scheduled_start_datetime: datetime | None = None
 
     def start(self) -> None:
         self.status = ToDoStatusEnum.IN_PROGRESS
