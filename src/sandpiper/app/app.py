@@ -9,6 +9,7 @@ from sandpiper.clips.infrastructure.notion_clips_repository import NotionClipsRe
 from sandpiper.perform.application.complete_todo import CompleteTodo
 from sandpiper.perform.application.handle_todo_created import HandleTodoCreated
 from sandpiper.perform.application.handle_todo_started import HandleTodoStarted
+from sandpiper.perform.application.override_section_by_schedule import OverrideSectionBySchedule
 from sandpiper.perform.application.start_todo import StartTodo
 from sandpiper.perform.infrastructure.notion_todo_repository import NotionTodoRepository as PerformNotionTodoRepository
 from sandpiper.perform.query.incidental_task_query import NotionIncidentalTaskQuery
@@ -75,6 +76,7 @@ class SandPiperApp:
         create_clip: CreateClip,
         create_someday_item: CreateSomedayItem,
         create_tasks_by_someday_list: CreateTasksBySomedayList,
+        override_section_by_schedule: OverrideSectionBySchedule,
     ) -> None:
         self.create_todo = create_todo
         self.create_project = create_project
@@ -97,6 +99,7 @@ class SandPiperApp:
         self.create_clip = create_clip
         self.create_someday_item = create_someday_item
         self.create_tasks_by_someday_list = create_tasks_by_someday_list
+        self.override_section_by_schedule = override_section_by_schedule
 
 
 def bootstrap() -> SandPiperApp:
@@ -243,4 +246,7 @@ def bootstrap() -> SandPiperApp:
             someday_repository=someday_repository,
         ),
         create_tasks_by_someday_list=create_tasks_by_someday_list,
+        override_section_by_schedule=OverrideSectionBySchedule(
+            todo_repository=perform_notion_todo_repository,
+        ),
     )

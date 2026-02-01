@@ -82,6 +82,22 @@ def _execute_handle_special_todo(sandpiper_app: SandPiperApp, page_id: str) -> N
         logger.exception("Failed to handle special todo: %s", page_id)
 
 
+def _execute_override_section(sandpiper_app: SandPiperApp, page_id: str) -> None:
+    """バックグラウンドでセクション上書き処理を実行する"""
+    try:
+        result = sandpiper_app.override_section_by_schedule.execute(page_id=page_id)
+        logger.info(
+            "Section overridden successfully: %s (%s -> %s)",
+            page_id,
+            result.old_section.value if result.old_section else "None",
+            result.new_section.value,
+        )
+    except ValueError as e:
+        logger.warning("Failed to override section: %s - %s", page_id, str(e))
+    except Exception:
+        logger.exception("Failed to override section: %s", page_id)
+
+
 @router.post("/todo/start")
 async def start_todo(
     request: NotionWebhookRequest,
@@ -273,3 +289,27 @@ async def create_clip(
             "inbox_type": inserted_clip.inbox_type.value,
         }
     )
+
+
+@router.post("/todo/override-section")
+async def override_section_by_schedule(
+    request: NotionWebhookRequest,
+    background_tasks: BackgroundTasks,
+    sandpiper_app: SandPiperApp = Depends(get_sandpiper_app),
+) -> JSONResponse:
+    """TODOの予定開始時刻からセクションを上書きする(非同期処理)
+
+    NotionからのWebhookリクエストを受け取り、TODOの「予定」プロパティの
+    開始時刻からセクションを計算して上書きします。
+
+    Args:
+        request: Notion Webhookリクエスト
+        background_tasks: バックグラウンドタスク
+        sandpiper_app: SandPiper アプリケーション
+
+    Returns:
+        JSONResponse: 受付結果のレスポンス
+    """
+    base_page = BasePage.from_data(request.data)
+    background_tasks.add_task(_execute_override_section, sandpiper_app, base_page.id)
+    return JSONResponse(content={"page_id": base_page.id, "status": "accepted"})

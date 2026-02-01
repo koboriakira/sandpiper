@@ -841,5 +841,32 @@ def archive_old_todos(
             console.print(f"  - {title}")
 
 
+@app.command()
+def override_section_by_schedule(
+    page_id: str = typer.Argument(..., help="TODOのNotion ページID"),
+) -> None:
+    """TODOの予定開始時刻からセクションを上書きします
+
+    指定されたTODOの「予定」プロパティの開始時刻を取得し、
+    その時刻に基づいてセクションプロパティを上書きします。
+
+    - 予定開始時刻が設定されていない場合はエラーとなります
+    - セクションは時刻に応じて自動計算されます (A_07_10, B_10_13, etc.)
+    """
+    try:
+        result = sandpiper_app.override_section_by_schedule.execute(page_id=page_id)
+        old_section_str = result.old_section.value if result.old_section else "なし"
+        console.print("[green][bold]セクション上書き完了[/bold][/green]")
+        console.print(f"  タイトル: {result.title}")
+        console.print(f"  予定開始: {result.scheduled_start_datetime_str}")
+        console.print(f"  セクション: {old_section_str} → {result.new_section.value}")
+    except ValueError as e:
+        console.print(f"[red]エラー: {e}[/red]")
+        raise typer.Exit(code=1)
+    except Exception as e:
+        console.print(f"[red]エラー: {e}[/red]")
+        raise typer.Exit(code=1)
+
+
 if __name__ == "__main__":
     app()
