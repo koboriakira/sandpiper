@@ -103,22 +103,3 @@ class CreateScheduleTasks:
                 created_count += 1
 
         return CreateScheduleTasksResult(created_count=created_count)
-
-
-if __name__ == "__main__":
-    # uv run python -m sandpiper.plan.application.create_schedule_tasks
-    from sandpiper.plan.infrastructure.notion_todo_repository import NotionTodoRepository
-    from sandpiper.plan.query.calendar_event_query import NotionCalendarEventQuery
-    from sandpiper.plan.query.todo_query import NotionTodoQuery
-
-    calendar_query = NotionCalendarEventQuery()
-    todo_repo = NotionTodoRepository()
-    todo_query = NotionTodoQuery()
-
-    create_schedule_tasks = CreateScheduleTasks(
-        calendar_event_query=calendar_query,
-        todo_repository=todo_repo,
-        todo_query=todo_query,
-        is_debug=True,
-    )
-    create_schedule_tasks.execute(target_date=date.today())

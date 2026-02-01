@@ -3,15 +3,9 @@ from datetime import datetime
 from enum import Enum
 
 from sandpiper.shared.valueobject.task_chute_section import TaskChuteSection
+from sandpiper.shared.valueobject.todo_kind import ToDoKind
 
-
-class ToDoKind(Enum):
-    SCHEDULE = "スケジュール"
-    PROJECT = "プロジェクト"
-    REPEAT = "リピート"
-    INTERRUPTION = "差し込み"
-    SINGLE = "単発"
-    SUBTASK = "サブタスク"
+__all__ = ["InsertedToDo", "ToDo", "ToDoKind", "ToDoStatus"]
 
 
 class ToDoStatus(Enum):

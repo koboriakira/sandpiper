@@ -3,8 +3,8 @@ from typing import Protocol
 
 from lotion import Lotion
 
-from sandpiper.calendar.infrastructure.notion_calendar_repository import CalendarEventPage
 from sandpiper.review.query.activity_log_item import ActivityLogItem, ActivityType
+from sandpiper.shared.notion.databases.calendar import CalendarEventPage
 
 
 class CalendarQuery(Protocol):

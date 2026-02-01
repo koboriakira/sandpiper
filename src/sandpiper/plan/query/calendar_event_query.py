@@ -9,7 +9,7 @@ from typing import Protocol
 
 from lotion import Lotion
 
-from sandpiper.calendar.infrastructure.notion_calendar_repository import CalendarEventPage
+from sandpiper.shared.notion.databases.calendar import CalendarEventPage
 from sandpiper.shared.valueobject.task_chute_section import TaskChuteSection
 
 # 東京タイムゾーン(UTC+9)

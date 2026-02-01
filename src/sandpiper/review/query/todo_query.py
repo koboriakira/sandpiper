@@ -3,10 +3,10 @@ from typing import Protocol
 
 from lotion import BasePage, Lotion
 
-from sandpiper.plan.domain.todo import ToDoKind
 from sandpiper.review.query.activity_log_item import ActivityLogItem, ActivityType
 from sandpiper.shared.notion.databases import project as project_db
 from sandpiper.shared.notion.databases import todo as todo_db
+from sandpiper.shared.valueobject.todo_kind import ToDoKind
 from sandpiper.shared.valueobject.todo_status_enum import ToDoStatusEnum
 
 
