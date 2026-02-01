@@ -1,9 +1,9 @@
 from datetime import date, timedelta
 
-from sandpiper.plan.domain.project_task_rule import group_next_project_tasks_by_project
 from sandpiper.plan.domain.todo_repository import TodoRepository
 from sandpiper.plan.query.project_task_dto import ProjectTaskDto
 from sandpiper.plan.query.project_task_query import ProjectTaskQuery
+from sandpiper.plan.query.project_task_rule import group_next_project_tasks_by_project
 from sandpiper.shared.utils.date_utils import jst_today
 
 

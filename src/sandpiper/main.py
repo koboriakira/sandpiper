@@ -12,10 +12,10 @@ from sandpiper.plan.application.create_project_task import CreateProjectTaskRequ
 from sandpiper.plan.application.create_someday_item import CreateSomedayItemRequest
 from sandpiper.plan.application.create_todo import CreateNewToDoRequest
 from sandpiper.plan.domain.someday_item import SomedayTiming
-from sandpiper.plan.domain.todo import ToDoKind
 from sandpiper.recipe.application.create_recipe import CreateRecipeRequest, IngredientRequest
 from sandpiper.shared.utils.date_utils import jst_now
 from sandpiper.shared.valueobject.task_chute_section import TaskChuteSection
+from sandpiper.shared.valueobject.todo_kind import ToDoKind
 from sandpiper.shared.valueobject.todo_status_enum import ToDoStatusEnum
 
 from . import __version__

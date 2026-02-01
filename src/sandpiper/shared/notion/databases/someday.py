@@ -4,7 +4,7 @@ from lotion import BasePage, Lotion, notion_database, notion_prop
 from lotion.properties import Checkbox, MultiSelect, Select, Title
 
 if TYPE_CHECKING:
-    from sandpiper.plan.domain.someday_item import SomedayItem
+    from sandpiper.shared.model.someday_item import SomedayItem
 
 DATABASE_ID = "2db6567a3bbf80a8b3f3e3560cfe380f"
 
@@ -55,8 +55,8 @@ class SomedayPage(BasePage):  # type: ignore[misc]
         return SomedayPage.create(properties=properties)  # type: ignore[no-any-return]
 
     def to_domain(self) -> "SomedayItem":
-        from sandpiper.plan.domain.someday_item import SomedayItem
-        from sandpiper.plan.domain.someday_item import SomedayTiming as DomainSomedayTiming
+        from sandpiper.shared.model.someday_item import SomedayItem
+        from sandpiper.shared.valueobject.someday_timing import SomedayTiming as DomainSomedayTiming
 
         timing_name = self.timing.selected_name if self.timing else None
         timing = DomainSomedayTiming.TOMORROW if timing_name == "明日" else DomainSomedayTiming.SOMEDAY

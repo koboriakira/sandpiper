@@ -71,22 +71,3 @@ class CreateRepeatTask:
             print(f"Update routine next date: {routine.title} -> {routine.date}")
             if not self.is_debug:
                 self.routine_repository.update(routine)
-
-
-if __name__ == "__main__":
-    # uv run python -m src.sandpiper.plan.application.create_repeat_task
-    from sandpiper.plan.infrastructure.notion_routine_repository import NotionRoutineRepository
-    from sandpiper.plan.infrastructure.notion_todo_repository import NotionTodoRepository
-    from sandpiper.plan.query.todo_query import NotionTodoQuery
-
-    routine_repo = NotionRoutineRepository()
-    todo_repo = NotionTodoRepository()
-    todo_query = NotionTodoQuery()
-
-    create_repeat_task = CreateRepeatTask(
-        routine_repository=routine_repo,
-        todo_repository=todo_repo,
-        todo_query=todo_query,
-        is_debug=True,
-    )
-    create_repeat_task.execute(basis_date=date.today())

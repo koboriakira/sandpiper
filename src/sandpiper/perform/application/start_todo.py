@@ -1,7 +1,7 @@
 from sandpiper.app.message_dispatcher import MessageDispatcher
 from sandpiper.perform.domain.todo_repository import TodoRepository
-from sandpiper.plan.domain.project_task_repository import ProjectTaskRepository
 from sandpiper.shared.event.todo_started import TodoStarted
+from sandpiper.shared.repository.project_task_repository import ProjectTaskRepository
 from sandpiper.shared.utils.date_utils import jst_now
 from sandpiper.shared.valueobject.todo_status_enum import ToDoStatusEnum
 

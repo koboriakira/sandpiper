@@ -2,6 +2,7 @@ from datetime import date, datetime, time
 
 from sandpiper.plan.domain.todo import ToDo, ToDoKind
 from sandpiper.plan.query.project_task_dto import ProjectTaskDto
+from sandpiper.shared.utils.date_utils import JST
 from sandpiper.shared.valueobject.todo_status_enum import ToDoStatusEnum
 
 
@@ -123,8 +124,8 @@ class TestProjectTaskDto:
         todo = dto.to_todo_model(basis_date)
 
         # Assert
-        assert todo.scheduled_start_datetime == datetime(2024, 3, 20, 9, 0)
-        assert todo.scheduled_end_datetime == datetime(2024, 3, 20, 10, 30)
+        assert todo.scheduled_start_datetime == datetime(2024, 3, 20, 9, 0, tzinfo=JST)
+        assert todo.scheduled_end_datetime == datetime(2024, 3, 20, 10, 30, tzinfo=JST)
 
     def test_to_todo_model_without_scheduled_time(self):
         """to_todo_model()が時刻なしの場合はNoneを返すことをテスト"""
