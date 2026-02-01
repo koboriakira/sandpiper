@@ -22,12 +22,15 @@ class ProjectTaskDto:
     is_work_project: bool = False
 
     def to_todo_model(self, basis_date: date) -> ToDo:
-        scheduled_start_datetime = None
-        scheduled_end_datetime = None
+        scheduled_start_datetime: datetime | date | None = None
+        scheduled_end_datetime: datetime | None = None
         if self.scheduled_start_time:
             scheduled_start_datetime = datetime.combine(basis_date, self.scheduled_start_time, tzinfo=JST)
         if self.scheduled_end_time:
             scheduled_end_datetime = datetime.combine(basis_date, self.scheduled_end_time, tzinfo=JST)
+        # 予定時刻が未定の場合は、日付のみを設定
+        if scheduled_start_datetime is None and scheduled_end_datetime is None:
+            scheduled_start_datetime = basis_date
 
         return ToDo(
             title=self.title,
