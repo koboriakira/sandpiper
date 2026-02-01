@@ -128,7 +128,7 @@ class TestProjectTaskDto:
         assert todo.scheduled_end_datetime == datetime(2024, 3, 20, 10, 30, tzinfo=JST)
 
     def test_to_todo_model_without_scheduled_time(self):
-        """to_todo_model()が時刻なしの場合はNoneを返すことをテスト"""
+        """to_todo_model()が時刻なしの場合は日付のみを設定することをテスト"""
         # Arrange
         dto = ProjectTaskDto(
             page_id="task-123",
@@ -142,8 +142,8 @@ class TestProjectTaskDto:
         # Act
         todo = dto.to_todo_model(basis_date)
 
-        # Assert
-        assert todo.scheduled_start_datetime is None
+        # Assert - 予定時刻が未定の場合は、日付のみが設定される
+        assert todo.scheduled_start_datetime == basis_date
         assert todo.scheduled_end_datetime is None
 
     def test_to_todo_model_different_statuses(self):
