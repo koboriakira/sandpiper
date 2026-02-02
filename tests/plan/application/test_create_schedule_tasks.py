@@ -103,6 +103,29 @@ class TestCalendarEventDto:
         )
         assert event.get_section() == TaskChuteSection.E_19_22
 
+    def test_get_end_datetime_jst_utc(self):
+        """UTC終了時刻のJST変換"""
+        # UTC 06:00 → JST 15:00
+        event = CalendarEventDto(
+            name="会議",
+            start_datetime=datetime(2024, 3, 20, 5, 0),
+            end_datetime=datetime(2024, 3, 20, 6, 0),
+        )
+        result = event.get_end_datetime_jst()
+        assert result == datetime(2024, 3, 20, 15, 0)
+
+    def test_get_end_datetime_jst_with_timezone(self):
+        """タイムゾーン付き終了時刻のJST変換"""
+        # UTC 06:00 (timezone aware) → JST 15:00
+        event = CalendarEventDto(
+            name="会議",
+            start_datetime=datetime(2024, 3, 20, 5, 0, tzinfo=timezone.utc),  # noqa: UP017
+            end_datetime=datetime(2024, 3, 20, 6, 0, tzinfo=timezone.utc),  # noqa: UP017
+        )
+        result = event.get_end_datetime_jst()
+        assert result.hour == 15
+        assert result.minute == 0
+
 
 class TestCreateScheduleTasks:
     def setup_method(self):
@@ -281,6 +304,28 @@ class TestCreateScheduleTasks:
         saved_todo = self.mock_todo_repository.save.call_args[0][0]
         assert saved_todo.sort_order == "14:30"
         assert saved_todo.section == TaskChuteSection.C_13_17
+
+    def test_todo_has_scheduled_datetime(self):
+        """TODOに予定開始・終了時刻が設定されることを確認"""
+        # Arrange: UTC 05:30 → JST 14:30, UTC 06:30 → JST 15:30
+        event = CalendarEventDto(
+            name="予定付き会議",
+            start_datetime=datetime(2024, 3, 20, 5, 30),
+            end_datetime=datetime(2024, 3, 20, 6, 30),
+        )
+        self.mock_calendar_event_query.fetch_events_by_date.return_value = [event]
+        self.mock_todo_query.fetch_todos_not_is_today.return_value = []
+        target_date = date(2024, 3, 20)
+
+        # Act
+        self.service.execute(target_date=target_date)
+
+        # Assert
+        saved_todo = self.mock_todo_repository.save.call_args[0][0]
+        # 開始時刻: UTC 05:30 → JST 14:30
+        assert saved_todo.scheduled_start_datetime == datetime(2024, 3, 20, 14, 30)
+        # 終了時刻: UTC 06:30 → JST 15:30
+        assert saved_todo.scheduled_end_datetime == datetime(2024, 3, 20, 15, 30)
 
 
 class TestCreateScheduleTasksResult:
