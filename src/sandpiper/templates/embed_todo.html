@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Current Task</title>
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background-color: transparent;
+            padding: 8px;
+        }
+        .todo-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 8px;
+            padding: 16px;
+            color: white;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .todo-label {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            opacity: 0.8;
+            margin-bottom: 4px;
+        }
+        .todo-title {
+            font-size: 16px;
+            font-weight: 600;
+            line-height: 1.4;
+            word-break: break-word;
+        }
+        .todo-meta {
+            margin-top: 8px;
+            font-size: 11px;
+            opacity: 0.8;
+            display: flex;
+            gap: 12px;
+        }
+        .todo-section {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .empty-state {
+            background: #f0f0f0;
+            border-radius: 8px;
+            padding: 16px;
+            text-align: center;
+            color: #666;
+        }
+        .empty-icon {
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+        .empty-text {
+            font-size: 14px;
+        }
+        .htmx-indicator {
+            display: none;
+        }
+        .htmx-request .htmx-indicator {
+            display: inline;
+        }
+    </style>
+</head>
+<body
+    hx-get="/api/embed/todo/in-progress"
+    hx-trigger="every 30s"
+    hx-swap="innerHTML"
+    hx-select="body > *"
+>
+    {% if todo %}
+    <div class="todo-card">
+        <div class="todo-label">In Progress</div>
+        <div class="todo-title">{{ todo.title }}</div>
+        {% if todo.section or todo.log_start_datetime %}
+        <div class="todo-meta">
+            {% if todo.section %}
+            <span class="todo-section">{{ todo.section.value }}</span>
+            {% endif %}
+            {% if todo.log_start_datetime %}
+            <span>{{ todo.log_start_datetime.strftime('%H:%M') }}~</span>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <div class="empty-icon">-</div>
+        <div class="empty-text">No active task</div>
+    </div>
+    {% endif %}
+</body>
+</html>
