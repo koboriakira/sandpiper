@@ -41,6 +41,20 @@ class CalendarEventDto:
         # タイムゾーン情報がある場合はJSTに変換
         return self.start_datetime.astimezone(JST)
 
+    def get_end_datetime_jst(self) -> datetime:
+        """終了時刻をJSTで取得する
+
+        Notionから取得した時刻がUTCの場合、9時間追加してJSTに変換する
+
+        Returns:
+            JSTの終了時刻
+        """
+        # タイムゾーン情報がない場合はUTCとして扱い、JSTに変換
+        if self.end_datetime.tzinfo is None:
+            return self.end_datetime + timedelta(hours=9)
+        # タイムゾーン情報がある場合はJSTに変換
+        return self.end_datetime.astimezone(JST)
+
     def calculate_duration_minutes(self) -> int:
         """実行時間を分単位で計算する
 

@@ -85,6 +85,10 @@ class CreateScheduleTasks:
             # セクションを取得(JST開始時刻から判定)
             section = event.get_section()
 
+            # 予定時刻を取得(JST変換後)
+            scheduled_start = event.get_start_datetime_jst()
+            scheduled_end = event.get_end_datetime_jst()
+
             # TODOを作成
             todo = ToDo(
                 title=event.name,
@@ -92,6 +96,8 @@ class CreateScheduleTasks:
                 section=section,
                 execution_time=execution_time,
                 sort_order=sort_order,
+                scheduled_start_datetime=scheduled_start,
+                scheduled_end_datetime=scheduled_end,
             )
 
             print(
