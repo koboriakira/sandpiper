@@ -74,6 +74,66 @@ class TestRoutineCycleNextDate:
         result = RoutineCycle.WEEKLY_SAT.next_date(basis_date)
         assert result == date(2026, 1, 17)  # 土曜日
 
+    def test_weekly_sun_on_monday(self):
+        """WEEKLY_SUNの月曜日の場合、次の日曜日が返される."""
+        basis_date = date(2026, 1, 5)  # 月曜日
+        result = RoutineCycle.WEEKLY_SUN.next_date(basis_date)
+        assert result == date(2026, 1, 11)  # 日曜日
+
+    def test_weekly_sun_on_sunday(self):
+        """WEEKLY_SUNの日曜日の場合、次の日曜日が返される."""
+        basis_date = date(2026, 1, 11)  # 日曜日
+        result = RoutineCycle.WEEKLY_SUN.next_date(basis_date)
+        assert result == date(2026, 1, 18)  # 日曜日
+
+    def test_weekly_mon_on_tuesday(self):
+        """WEEKLY_MONの火曜日の場合、次の月曜日が返される."""
+        basis_date = date(2026, 1, 6)  # 火曜日
+        result = RoutineCycle.WEEKLY_MON.next_date(basis_date)
+        assert result == date(2026, 1, 12)  # 月曜日
+
+    def test_weekly_mon_on_monday(self):
+        """WEEKLY_MONの月曜日の場合、次の月曜日が返される."""
+        basis_date = date(2026, 1, 5)  # 月曜日
+        result = RoutineCycle.WEEKLY_MON.next_date(basis_date)
+        assert result == date(2026, 1, 12)  # 月曜日
+
+    def test_weekly_tue_on_wednesday(self):
+        """WEEKLY_TUEの水曜日の場合、次の火曜日が返される."""
+        basis_date = date(2026, 1, 7)  # 水曜日
+        result = RoutineCycle.WEEKLY_TUE.next_date(basis_date)
+        assert result == date(2026, 1, 13)  # 火曜日
+
+    def test_weekly_tue_on_tuesday(self):
+        """WEEKLY_TUEの火曜日の場合、次の火曜日が返される."""
+        basis_date = date(2026, 1, 6)  # 火曜日
+        result = RoutineCycle.WEEKLY_TUE.next_date(basis_date)
+        assert result == date(2026, 1, 13)  # 火曜日
+
+    def test_weekly_thu_on_friday(self):
+        """WEEKLY_THUの金曜日の場合、次の木曜日が返される."""
+        basis_date = date(2026, 1, 9)  # 金曜日
+        result = RoutineCycle.WEEKLY_THU.next_date(basis_date)
+        assert result == date(2026, 1, 15)  # 木曜日
+
+    def test_weekly_thu_on_thursday(self):
+        """WEEKLY_THUの木曜日の場合、次の木曜日が返される."""
+        basis_date = date(2026, 1, 8)  # 木曜日
+        result = RoutineCycle.WEEKLY_THU.next_date(basis_date)
+        assert result == date(2026, 1, 15)  # 木曜日
+
+    def test_weekly_fri_on_saturday(self):
+        """WEEKLY_FRIの土曜日の場合、次の金曜日が返される."""
+        basis_date = date(2026, 1, 10)  # 土曜日
+        result = RoutineCycle.WEEKLY_FRI.next_date(basis_date)
+        assert result == date(2026, 1, 16)  # 金曜日
+
+    def test_weekly_fri_on_friday(self):
+        """WEEKLY_FRIの金曜日の場合、次の金曜日が返される."""
+        basis_date = date(2026, 1, 9)  # 金曜日
+        result = RoutineCycle.WEEKLY_FRI.next_date(basis_date)
+        assert result == date(2026, 1, 16)  # 金曜日
+
     def test_after_3_days(self):
         """AFTER_3_DAYSの場合、3日後が返される."""
         basis_date = date(2026, 1, 15)
@@ -109,6 +169,30 @@ class TestRoutineCycleNextDate:
         basis_date = date(2025, 12, 15)
         result = RoutineCycle.MONTHLY_1ST.next_date(basis_date)
         assert result == date(2026, 1, 1)
+
+    def test_monthly_2nd_before_2nd(self):
+        """MONTHLY_2NDで2日より前の場合、当月2日が返される."""
+        basis_date = date(2026, 1, 1)
+        result = RoutineCycle.MONTHLY_2ND.next_date(basis_date)
+        assert result == date(2026, 1, 2)
+
+    def test_monthly_2nd_after_2nd(self):
+        """MONTHLY_2NDで2日以降の場合、翌月2日が返される."""
+        basis_date = date(2026, 1, 3)
+        result = RoutineCycle.MONTHLY_2ND.next_date(basis_date)
+        assert result == date(2026, 2, 2)
+
+    def test_monthly_2nd_on_2nd(self):
+        """MONTHLY_2NDで2日の場合、翌月2日が返される."""
+        basis_date = date(2026, 1, 2)
+        result = RoutineCycle.MONTHLY_2ND.next_date(basis_date)
+        assert result == date(2026, 2, 2)
+
+    def test_monthly_2nd_december(self):
+        """MONTHLY_2NDで12月の場合、翌年1月2日が返される."""
+        basis_date = date(2025, 12, 15)
+        result = RoutineCycle.MONTHLY_2ND.next_date(basis_date)
+        assert result == date(2026, 1, 2)
 
     def test_monthly_25th_before_25th(self):
         """MONTHLY_25THで25日より前の場合、当月25日が返される."""
@@ -206,6 +290,36 @@ class TestRoutineCycleFromText:
         """from_textで「第1・3木」からFIRST_THIRD_THUが取得できる."""
         result = RoutineCycle.from_text("第1・3木")
         assert result == RoutineCycle.FIRST_THIRD_THU
+
+    def test_from_text_weekly_sun(self):
+        """from_textで「毎週日」からWEEKLY_SUNが取得できる."""
+        result = RoutineCycle.from_text("毎週日")
+        assert result == RoutineCycle.WEEKLY_SUN
+
+    def test_from_text_weekly_mon(self):
+        """from_textで「毎週月」からWEEKLY_MONが取得できる."""
+        result = RoutineCycle.from_text("毎週月")
+        assert result == RoutineCycle.WEEKLY_MON
+
+    def test_from_text_weekly_tue(self):
+        """from_textで「毎週火」からWEEKLY_TUEが取得できる."""
+        result = RoutineCycle.from_text("毎週火")
+        assert result == RoutineCycle.WEEKLY_TUE
+
+    def test_from_text_weekly_thu(self):
+        """from_textで「毎週木」からWEEKLY_THUが取得できる."""
+        result = RoutineCycle.from_text("毎週木")
+        assert result == RoutineCycle.WEEKLY_THU
+
+    def test_from_text_weekly_fri(self):
+        """from_textで「毎週金」からWEEKLY_FRIが取得できる."""
+        result = RoutineCycle.from_text("毎週金")
+        assert result == RoutineCycle.WEEKLY_FRI
+
+    def test_from_text_monthly_2nd(self):
+        """from_textで「毎月2日」からMONTHLY_2NDが取得できる."""
+        result = RoutineCycle.from_text("毎月2日")
+        assert result == RoutineCycle.MONTHLY_2ND
 
     def test_from_text_not_found(self):
         """from_textで存在しないテキストの場合、ValueErrorが発生する."""

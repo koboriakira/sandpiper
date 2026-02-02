@@ -2,8 +2,11 @@ from datetime import date, timedelta
 from enum import Enum
 
 MONTHLY_OVERFLOW = 13
-FRIDAY = 4
+SUNDAY = 6
+MONDAY = 0
+TUESDAY = 1
 THURSDAY = 3
+FRIDAY = 4
 
 
 def add_a_month(date: date) -> tuple[int, int]:
@@ -124,13 +127,19 @@ class RoutineCycle(Enum):
     """
 
     DAILY = "毎日"
+    WEEKLY_SUN = "毎週日"
+    WEEKLY_MON = "毎週月"
+    WEEKLY_TUE = "毎週火"
     WEEKLY_TUE_FRI = "毎週火・金"
     WEEKLY_WED = "毎週水"
+    WEEKLY_THU = "毎週木"
+    WEEKLY_FRI = "毎週金"
     WEEKLY_SAT = "毎週土"
     AFTER_3_DAYS = "3日後"
     AFTER_7_DAYS = "7日後"
     NEXT_WEEK = "翌週"
     MONTHLY_1ST = "毎月1日"
+    MONTHLY_2ND = "毎月2日"
     MONTH_END = "月末"
     AFTER_20_DAYS = "20日後"
     MONTHLY_25TH = "毎月25日"
@@ -159,6 +168,21 @@ class RoutineCycle(Enum):
         match self:
             case RoutineCycle.DAILY:
                 return basis_date + timedelta(days=1)
+            case RoutineCycle.WEEKLY_SUN:
+                days_until_sun = (SUNDAY - weekday) % 7
+                if days_until_sun == 0:  # 日曜日の場合は次の日曜日へ
+                    return basis_date + timedelta(days=7)
+                return basis_date + timedelta(days=days_until_sun)
+            case RoutineCycle.WEEKLY_MON:
+                days_until_mon = (MONDAY - weekday) % 7
+                if days_until_mon == 0:  # 月曜日の場合は次の月曜日へ
+                    return basis_date + timedelta(days=7)
+                return basis_date + timedelta(days=days_until_mon)
+            case RoutineCycle.WEEKLY_TUE:
+                days_until_tue = (TUESDAY - weekday) % 7
+                if days_until_tue == 0:  # 火曜日の場合は次の火曜日へ
+                    return basis_date + timedelta(days=7)
+                return basis_date + timedelta(days=days_until_tue)
             case RoutineCycle.WEEKLY_TUE_FRI:
                 if weekday == 1:  # 火曜日の場合は金曜日へ
                     return basis_date + timedelta(days=3)
@@ -173,6 +197,16 @@ class RoutineCycle(Enum):
                 if days_until_wed == 0:  # 水曜日の場合は次の水曜日へ
                     return basis_date + timedelta(days=7)
                 return basis_date + timedelta(days=days_until_wed)
+            case RoutineCycle.WEEKLY_THU:
+                days_until_thu = (THURSDAY - weekday) % 7
+                if days_until_thu == 0:  # 木曜日の場合は次の木曜日へ
+                    return basis_date + timedelta(days=7)
+                return basis_date + timedelta(days=days_until_thu)
+            case RoutineCycle.WEEKLY_FRI:
+                days_until_fri = (FRIDAY - weekday) % 7
+                if days_until_fri == 0:  # 金曜日の場合は次の金曜日へ
+                    return basis_date + timedelta(days=7)
+                return basis_date + timedelta(days=days_until_fri)
             case RoutineCycle.WEEKLY_SAT:
                 days_until_sat = (5 - weekday) % 7
                 if days_until_sat == 0:  # 土曜日の場合は次の土曜日へ
@@ -187,6 +221,12 @@ class RoutineCycle(Enum):
             case RoutineCycle.MONTHLY_1ST:
                 year, month = add_a_month(basis_date)
                 return date(year=year, month=month, day=1)
+            case RoutineCycle.MONTHLY_2ND:
+                date_ = basis_date.replace(day=2)
+                if basis_date < date_:
+                    return date_
+                year, month = add_a_month(basis_date)
+                return date(year=year, month=month, day=2)
             case RoutineCycle.MONTH_END:
                 month = basis_date.month + 1
                 if month == MONTHLY_OVERFLOW:
