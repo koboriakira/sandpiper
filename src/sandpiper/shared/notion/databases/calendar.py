@@ -14,13 +14,8 @@ class CalendarEventCategory(Select):  # type: ignore[misc]
     ...
 
 
-@notion_prop("開始日時")
-class CalendarEventStartDate(Date):  # type: ignore[misc]
-    ...
-
-
-@notion_prop("終了日時")
-class CalendarEventEndDate(Date):  # type: ignore[misc]
+@notion_prop("期間")
+class CalendarEventDateRange(Date):  # type: ignore[misc]
     ...
 
 
@@ -33,5 +28,4 @@ class CalendarEventPage(BasePage):  # type: ignore[misc]
 
     name: CalendarEventName
     category: CalendarEventCategory
-    start_date: CalendarEventStartDate
-    end_date: CalendarEventEndDate
+    date_range: CalendarEventDateRange

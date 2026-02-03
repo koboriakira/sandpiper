@@ -6,9 +6,9 @@ from sandpiper.calendar.domain.calendar_event import CalendarEvent, EventCategor
 from sandpiper.calendar.domain.calendar_repository import CalendarRepository
 from sandpiper.shared.notion.databases.calendar import (
     CalendarEventCategory,
+    CalendarEventDateRange,
     CalendarEventName,
     CalendarEventPage,
-    CalendarEventStartDate,
 )
 
 
@@ -17,7 +17,7 @@ def _generate_calendar_event_page(event: CalendarEvent) -> CalendarEventPage:
     properties = [
         CalendarEventName.from_plain_text(event.name),
         CalendarEventCategory.from_name(event.category.value),
-        CalendarEventStartDate.from_range(start=event.start_datetime, end=event.end_datetime),
+        CalendarEventDateRange.from_range(start=event.start_datetime, end=event.end_datetime),
     ]
     return CalendarEventPage.create(properties=properties)  # type: ignore[no-any-return]
 
@@ -25,14 +25,16 @@ def _generate_calendar_event_page(event: CalendarEvent) -> CalendarEventPage:
 def _calendar_event_page_to_domain(page: CalendarEventPage) -> CalendarEvent:
     """CalendarEventPageからCalendarEventに変換する"""
     category_prop = page.get_select("カテゴリ")
-    start_date_prop = page.get_date("開始日時")
-    end_date_prop = page.get_date("終了日時")
+    date_range_prop = page.get_date("期間")
+
+    start_datetime = datetime.fromisoformat(date_range_prop.start) if date_range_prop.start else datetime.now()
+    end_datetime = datetime.fromisoformat(date_range_prop.end) if date_range_prop.end else start_datetime
 
     return CalendarEvent(
         name=page.get_title_text(),
         category=EventCategory(category_prop.selected_name) if category_prop.selected_name else EventCategory.PRIVATE,
-        start_datetime=start_date_prop.start if start_date_prop.start else datetime.now(),
-        end_datetime=end_date_prop.start if end_date_prop.start else datetime.now(),
+        start_datetime=start_datetime,
+        end_datetime=end_datetime,
     )
 
 
@@ -66,7 +68,7 @@ class NotionCalendarRepository(CalendarRepository):
 
         # 該当する日付のイベントを削除
         for page in pages:
-            event_start_date = datetime.fromisoformat(page.start_date.start) if page.start_date.start else None
+            event_start_date = datetime.fromisoformat(page.date_range.start) if page.date_range.start else None
             if event_start_date and event_start_date.date() == target_date:
                 self.client.remove_page(page.id)
                 deleted_count += 1
