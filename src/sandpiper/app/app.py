@@ -10,6 +10,7 @@ from sandpiper.perform.application.complete_todo import CompleteTodo
 from sandpiper.perform.application.handle_todo_created import HandleTodoCreated
 from sandpiper.perform.application.handle_todo_started import HandleTodoStarted
 from sandpiper.perform.application.override_section_by_schedule import OverrideSectionBySchedule
+from sandpiper.perform.application.schedule_task_end_notification import ScheduleTaskEndNotification
 from sandpiper.perform.application.start_todo import StartTodo
 from sandpiper.perform.infrastructure.notion_todo_repository import NotionTodoRepository as PerformNotionTodoRepository
 from sandpiper.perform.query.incidental_task_query import NotionIncidentalTaskQuery
@@ -138,6 +139,10 @@ def bootstrap() -> SandPiperApp:
         slack_messanger=default_notice_messanger,
     )
     event_bus.subscribe(TodoStarted, handle_todo_started)
+    schedule_task_end_notification = ScheduleTaskEndNotification(
+        slack_messanger=default_notice_messanger,
+    )
+    event_bus.subscribe(TodoStarted, schedule_task_end_notification)
     handle_todo_completed = HandleCompletedTask(plan_notion_todo_repository, default_notice_messanger, commentator)
     event_bus.subscribe(TodoCompleted, handle_todo_completed)
 

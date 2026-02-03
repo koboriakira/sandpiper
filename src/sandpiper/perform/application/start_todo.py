@@ -29,15 +29,15 @@ class StartTodo:
         if todo.project_task_page_id:
             self._start_project_task_if_not_in_progress(todo.project_task_page_id)
 
-        if todo.contexts:
-            context = todo.contexts[0]
-            self._dispatcher.publish(
-                TodoStarted(
-                    name=todo.title,
-                    context=context,
-                    execution_time=jst_now(),
-                )
+        context = todo.contexts[0] if todo.contexts else None
+        self._dispatcher.publish(
+            TodoStarted(
+                name=todo.title,
+                execution_time=jst_now(),
+                context=context,
+                scheduled_duration=todo.scheduled_duration,
             )
+        )
 
     def _start_project_task_if_not_in_progress(self, project_task_page_id: str) -> None:
         """プロジェクトタスクがInProgressでなければInProgressに更新する"""

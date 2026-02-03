@@ -1,3 +1,4 @@
+from datetime import timedelta
 from unittest.mock import Mock
 
 import pytest
@@ -38,6 +39,8 @@ class TestStartTodo:
         mock_todo = Mock()
         mock_todo.project_task_page_id = None
         mock_todo.contexts = []
+        mock_todo.title = "テストタスク"
+        mock_todo.scheduled_duration = None
         self.mock_repository.find.return_value = mock_todo
 
         # Act
@@ -49,8 +52,12 @@ class TestStartTodo:
         self.mock_repository.save.assert_called_once_with(mock_todo)
         self.mock_project_task_repository.find.assert_not_called()
         self.mock_project_task_repository.update_status.assert_not_called()
-        # コンテキストがない場合はイベントが発行されない
-        self.mock_dispatcher.publish.assert_not_called()
+        # コンテキストがなくてもイベントは発行される（context=Noneで）
+        self.mock_dispatcher.publish.assert_called_once()
+        published_event = self.mock_dispatcher.publish.call_args[0][0]
+        assert isinstance(published_event, TodoStarted)
+        assert published_event.context is None
+        assert published_event.scheduled_duration is None
 
     def test_execute_start_todo_success_with_context(self):
         """コンテキストありのToDo開始でイベントが発行されることをテスト"""
@@ -60,6 +67,7 @@ class TestStartTodo:
         mock_todo.project_task_page_id = None
         mock_todo.title = "外出タスク"
         mock_todo.contexts = [Context.OUTING]
+        mock_todo.scheduled_duration = timedelta(minutes=30)
         self.mock_repository.find.return_value = mock_todo
 
         # Act
@@ -75,6 +83,7 @@ class TestStartTodo:
         assert isinstance(published_event, TodoStarted)
         assert published_event.name == "外出タスク"
         assert published_event.context == Context.OUTING
+        assert published_event.scheduled_duration == timedelta(minutes=30)
 
     def test_execute_start_todo_success_with_project_task(self):
         """プロジェクトタスクありのToDo開始の正常なexecuteをテスト"""
@@ -84,6 +93,8 @@ class TestStartTodo:
         mock_todo = Mock()
         mock_todo.project_task_page_id = project_task_page_id
         mock_todo.contexts = []
+        mock_todo.title = "テストタスク"
+        mock_todo.scheduled_duration = None
         self.mock_repository.find.return_value = mock_todo
         mock_project_task = InsertedProjectTask(
             id=project_task_page_id,
@@ -104,8 +115,10 @@ class TestStartTodo:
         self.mock_project_task_repository.update_status.assert_called_once_with(
             project_task_page_id, ToDoStatusEnum.IN_PROGRESS
         )
-        # コンテキストがない場合はイベントが発行されない
-        self.mock_dispatcher.publish.assert_not_called()
+        # コンテキストがなくてもイベントは発行される
+        self.mock_dispatcher.publish.assert_called_once()
+        published_event = self.mock_dispatcher.publish.call_args[0][0]
+        assert published_event.context is None
 
     def test_execute_start_todo_with_project_task_already_in_progress(self):
         """プロジェクトタスクがすでにInProgressの場合のテスト"""
@@ -115,6 +128,8 @@ class TestStartTodo:
         mock_todo = Mock()
         mock_todo.project_task_page_id = project_task_page_id
         mock_todo.contexts = []
+        mock_todo.title = "テストタスク"
+        mock_todo.scheduled_duration = None
         self.mock_repository.find.return_value = mock_todo
         mock_project_task = InsertedProjectTask(
             id=project_task_page_id,
@@ -133,8 +148,8 @@ class TestStartTodo:
         self.mock_repository.save.assert_called_once_with(mock_todo)
         self.mock_project_task_repository.find.assert_called_once_with(project_task_page_id)
         self.mock_project_task_repository.update_status.assert_not_called()
-        # コンテキストがない場合はイベントが発行されない
-        self.mock_dispatcher.publish.assert_not_called()
+        # コンテキストがなくてもイベントは発行される
+        self.mock_dispatcher.publish.assert_called_once()
 
     def test_execute_repository_find_raises_exception(self):
         """repository.find()で例外が発生した場合のテスト"""
@@ -208,9 +223,13 @@ class TestStartTodo:
         mock_todo1 = Mock()
         mock_todo1.project_task_page_id = None
         mock_todo1.contexts = []
+        mock_todo1.title = "テストタスク1"
+        mock_todo1.scheduled_duration = None
         mock_todo2 = Mock()
         mock_todo2.project_task_page_id = None
         mock_todo2.contexts = []
+        mock_todo2.title = "テストタスク2"
+        mock_todo2.scheduled_duration = None
 
         # 異なるページIDで異なるtoDoが返されるようにモック設定
         self.mock_repository.find.side_effect = lambda pid: mock_todo1 if pid == page_id1 else mock_todo2
@@ -232,8 +251,8 @@ class TestStartTodo:
         self.mock_repository.save.assert_any_call(mock_todo2)
         self.mock_project_task_repository.find.assert_not_called()
         self.mock_project_task_repository.update_status.assert_not_called()
-        # コンテキストがない場合はイベントが発行されない
-        self.mock_dispatcher.publish.assert_not_called()
+        # コンテキストがなくてもイベントは発行される
+        assert self.mock_dispatcher.publish.call_count == 2
 
     def test_execute_multiple_times_same_todo_no_context(self):
         """同一toDoに対して複数回実行をテスト(コンテキストなし)"""
@@ -242,6 +261,8 @@ class TestStartTodo:
         mock_todo = Mock()
         mock_todo.project_task_page_id = None
         mock_todo.contexts = []
+        mock_todo.title = "テストタスク"
+        mock_todo.scheduled_duration = None
         self.mock_repository.find.return_value = mock_todo
 
         # Act
@@ -260,8 +281,8 @@ class TestStartTodo:
             assert call[0][0] == mock_todo
         self.mock_project_task_repository.find.assert_not_called()
         self.mock_project_task_repository.update_status.assert_not_called()
-        # コンテキストがない場合はイベントが発行されない
-        self.mock_dispatcher.publish.assert_not_called()
+        # コンテキストがなくてもイベントは発行される
+        assert self.mock_dispatcher.publish.call_count == 2
 
     def test_execute_with_multiple_contexts_uses_first(self):
         """複数コンテキストがある場合、最初のコンテキストが使用されることをテスト"""
@@ -271,6 +292,7 @@ class TestStartTodo:
         mock_todo.project_task_page_id = None
         mock_todo.title = "複数コンテキストタスク"
         mock_todo.contexts = [Context.OUTING, Context.WORK]
+        mock_todo.scheduled_duration = None
         self.mock_repository.find.return_value = mock_todo
 
         # Act
@@ -281,3 +303,23 @@ class TestStartTodo:
         published_event = self.mock_dispatcher.publish.call_args[0][0]
         assert isinstance(published_event, TodoStarted)
         assert published_event.context == Context.OUTING  # 最初のコンテキストが使用される
+
+    def test_execute_with_scheduled_duration(self):
+        """予定時間（所要時間）がイベントに含まれることをテスト"""
+        # Arrange
+        page_id = "test-page-id"
+        mock_todo = Mock()
+        mock_todo.project_task_page_id = None
+        mock_todo.title = "所要時間ありタスク"
+        mock_todo.contexts = []
+        mock_todo.scheduled_duration = timedelta(hours=1, minutes=30)
+        self.mock_repository.find.return_value = mock_todo
+
+        # Act
+        self.start_todo.execute(page_id)
+
+        # Assert
+        self.mock_dispatcher.publish.assert_called_once()
+        published_event = self.mock_dispatcher.publish.call_args[0][0]
+        assert isinstance(published_event, TodoStarted)
+        assert published_event.scheduled_duration == timedelta(hours=1, minutes=30)
