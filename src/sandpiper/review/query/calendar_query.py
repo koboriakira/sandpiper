@@ -21,8 +21,8 @@ class NotionCalendarQuery:
         result = []
 
         for page in pages:
-            start_date_str = page.start_date.start if page.start_date.start else None
-            end_date_str = page.end_date.start if page.end_date.start else None
+            start_date_str = page.date_range.start if page.date_range.start else None
+            end_date_str = page.date_range.end if page.date_range.end else None
 
             if not start_date_str:
                 continue

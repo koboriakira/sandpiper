@@ -17,9 +17,8 @@ from sandpiper.shared.notion.databases import (
 )
 from sandpiper.shared.notion.databases.calendar import (
     CalendarEventCategory,
-    CalendarEventEndDate,
+    CalendarEventDateRange,
     CalendarEventName,
-    CalendarEventStartDate,
 )
 from sandpiper.shared.notion.databases.clips import (
     ClipsAutoFetchTitle,
@@ -93,9 +92,8 @@ class DatabaseId:
 
 __all__ = [
     "CalendarEventCategory",
-    "CalendarEventEndDate",
+    "CalendarEventDateRange",
     "CalendarEventName",
-    "CalendarEventStartDate",
     "ClipsAutoFetchTitle",
     "ClipsName",
     "ClipsTypeProp",
