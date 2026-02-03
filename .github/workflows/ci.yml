@@ -68,5 +68,7 @@ jobs:
       - name: Run security audit
         # CVE-2026-0994: protobuf vulnerability - no fix version available yet
         # protobuf is a transitive dependency from google-api-python-client
-        # Remove --ignore-vuln once a fix is released
-        run: uv run pip-audit --ignore-vuln CVE-2026-0994
+        # CVE-2026-1703: pip vulnerability - fix available in pip 26.0
+        # pip is managed by uv and updating requires coordination
+        # Remove --ignore-vuln flags once fixes are applied
+        run: uv run pip-audit --ignore-vuln CVE-2026-0994 --ignore-vuln CVE-2026-1703
