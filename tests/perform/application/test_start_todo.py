@@ -52,7 +52,7 @@ class TestStartTodo:
         self.mock_repository.save.assert_called_once_with(mock_todo)
         self.mock_project_task_repository.find.assert_not_called()
         self.mock_project_task_repository.update_status.assert_not_called()
-        # コンテキストがなくてもイベントは発行される（context=Noneで）
+        # コンテキストがなくてもイベントは発行される(context=Noneで)
         self.mock_dispatcher.publish.assert_called_once()
         published_event = self.mock_dispatcher.publish.call_args[0][0]
         assert isinstance(published_event, TodoStarted)
@@ -305,7 +305,7 @@ class TestStartTodo:
         assert published_event.context == Context.OUTING  # 最初のコンテキストが使用される
 
     def test_execute_with_scheduled_duration(self):
-        """予定時間（所要時間）がイベントに含まれることをテスト"""
+        """予定時間(所要時間)がイベントに含まれることをテスト"""
         # Arrange
         page_id = "test-page-id"
         mock_todo = Mock()
