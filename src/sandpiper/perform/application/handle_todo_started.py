@@ -14,7 +14,7 @@ class HandleTodoStarted:
         self._slack_messanger = slack_messanger
 
     def __call__(self, event: TodoStarted) -> None:
-        if event.context != Context.OUTING:
+        if event.context is None or event.context != Context.OUTING:
             return
 
         titles = self._incidental_task_query.fetch_by_context(Context.OUTING)

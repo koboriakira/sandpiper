@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from sandpiper.shared.utils.date_utils import jst_now
 from sandpiper.shared.valueobject.context import Context
@@ -18,6 +18,7 @@ class ToDo:
     project_task_page_id: str | None = None
     contexts: list[Context] = field(default_factory=list)
     scheduled_start_datetime: datetime | None = None
+    scheduled_end_datetime: datetime | None = None
 
     def start(self) -> None:
         self.status = ToDoStatusEnum.IN_PROGRESS
@@ -28,3 +29,10 @@ class ToDo:
     def complete(self) -> None:
         self.status = ToDoStatusEnum.DONE
         self.log_end_datetime = jst_now()
+
+    @property
+    def scheduled_duration(self) -> timedelta | None:
+        """予定の開始時刻と終了時刻から所要時間を計算する"""
+        if self.scheduled_start_datetime and self.scheduled_end_datetime:
+            return self.scheduled_end_datetime - self.scheduled_start_datetime
+        return None

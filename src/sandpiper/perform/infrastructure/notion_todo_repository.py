@@ -34,6 +34,7 @@ class TodoPage(BasePage):  # type: ignore[misc]
         context_prop = self.get_multi_select("コンテクスト")
         contexts = self._parse_contexts(context_prop)
         scheduled_start_datetime = self.get_date("予定").start_datetime
+        scheduled_end_datetime = self.get_date("予定").end_datetime
         return ToDo(
             id=self.id,
             title=self.get_title_text(),
@@ -44,6 +45,7 @@ class TodoPage(BasePage):  # type: ignore[misc]
             project_task_page_id=project_task[0] if project_task else None,
             contexts=contexts,
             scheduled_start_datetime=scheduled_start_datetime,
+            scheduled_end_datetime=scheduled_end_datetime,
         )
 
     def _parse_contexts(self, context_prop) -> list[Context]:  # type: ignore[no-untyped-def]

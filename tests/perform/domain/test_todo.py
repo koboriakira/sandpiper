@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from unittest.mock import patch
 
 from sandpiper.perform.domain.todo import ToDo
@@ -115,6 +115,7 @@ class TestToDo:
             "project_task_page_id",
             "contexts",
             "scheduled_start_datetime",
+            "scheduled_end_datetime",
         }
         actual_fields = set(todo.__dataclass_fields__.keys())
         assert actual_fields == expected_fields
@@ -204,3 +205,69 @@ class TestToDo:
         assert original_todo.status == ToDoStatusEnum.IN_PROGRESS
         assert original_todo.section == mock_section
         assert original_todo.log_start_datetime == mock_time
+
+    def test_scheduled_duration_with_both_datetimes(self):
+        """予定開始時刻と終了時刻がある場合、所要時間が計算される"""
+        # Arrange
+        todo = ToDo(
+            id="duration-test",
+            title="所要時間テスト",
+            status=ToDoStatusEnum.TODO,
+            scheduled_start_datetime=datetime(2024, 1, 15, 10, 0),
+            scheduled_end_datetime=datetime(2024, 1, 15, 11, 30),
+        )
+
+        # Act
+        duration = todo.scheduled_duration
+
+        # Assert
+        assert duration == timedelta(hours=1, minutes=30)
+
+    def test_scheduled_duration_without_start_datetime(self):
+        """予定開始時刻がない場合、Noneを返す"""
+        # Arrange
+        todo = ToDo(
+            id="duration-test",
+            title="所要時間テスト",
+            status=ToDoStatusEnum.TODO,
+            scheduled_start_datetime=None,
+            scheduled_end_datetime=datetime(2024, 1, 15, 11, 30),
+        )
+
+        # Act
+        duration = todo.scheduled_duration
+
+        # Assert
+        assert duration is None
+
+    def test_scheduled_duration_without_end_datetime(self):
+        """予定終了時刻がない場合、Noneを返す"""
+        # Arrange
+        todo = ToDo(
+            id="duration-test",
+            title="所要時間テスト",
+            status=ToDoStatusEnum.TODO,
+            scheduled_start_datetime=datetime(2024, 1, 15, 10, 0),
+            scheduled_end_datetime=None,
+        )
+
+        # Act
+        duration = todo.scheduled_duration
+
+        # Assert
+        assert duration is None
+
+    def test_scheduled_duration_without_both_datetimes(self):
+        """予定開始時刻と終了時刻の両方がない場合、Noneを返す"""
+        # Arrange
+        todo = ToDo(
+            id="duration-test",
+            title="所要時間テスト",
+            status=ToDoStatusEnum.TODO,
+        )
+
+        # Act
+        duration = todo.scheduled_duration
+
+        # Assert
+        assert duration is None
