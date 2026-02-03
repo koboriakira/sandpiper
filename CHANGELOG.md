@@ -5,6 +5,27 @@
 このプロジェクトは[セマンティックバージョニング](https://semver.org/spec/v2.0.0.html)に従い、
 [Conventional Commits](https://conventionalcommits.org/)を使用して自動的にリリースを生成します。
 
+## [0.19.0](https://github.com/koboriakira/sandpiper/compare/sandpiper-v0.18.0...sandpiper-v0.19.0) (2026-02-03)
+
+
+### Features
+
+* Add individual weekly and monthly routine cycles ([#108](https://github.com/koboriakira/sandpiper/issues/108)) ([fad83f1](https://github.com/koboriakira/sandpiper/commit/fad83f177745928693b64370accc9539fc634a8d))
+* Add Notion embed component for in-progress TODO display ([87f58ef](https://github.com/koboriakira/sandpiper/commit/87f58ef7841ba94a732d4bd1abab429e4f40a4c4))
+* Notion埋め込み用TODO表示API を追加 ([#109](https://github.com/koboriakira/sandpiper/issues/109)) ([87f58ef](https://github.com/koboriakira/sandpiper/commit/87f58ef7841ba94a732d4bd1abab429e4f40a4c4))
+* RoutineCycleに新しい周期プロパティを追加 ([fad83f1](https://github.com/koboriakira/sandpiper/commit/fad83f177745928693b64370accc9539fc634a8d))
+* カレンダーイベントの予定終了時刻をTODOに追加 ([#110](https://github.com/koboriakira/sandpiper/issues/110)) ([d6d2b70](https://github.com/koboriakira/sandpiper/commit/d6d2b705419de35019c348a670bab994d00a52f9))
+* カレンダーからTODO作成時に予定時刻をコピー ([d6d2b70](https://github.com/koboriakira/sandpiper/commit/d6d2b705419de35019c348a670bab994d00a52f9))
+* タスク終了時刻の予定通知機能を追加 ([#112](https://github.com/koboriakira/sandpiper/issues/112)) ([2260082](https://github.com/koboriakira/sandpiper/commit/22600826d97cf135e0a230e1e8827d1134f5666e))
+* タスク開始時に所要時間経過後のSlack通知をスケジュール ([2260082](https://github.com/koboriakira/sandpiper/commit/22600826d97cf135e0a230e1e8827d1134f5666e))
+
+
+### Code Refactoring
+
+* Consolidate calendar date properties into single date range ([#111](https://github.com/koboriakira/sandpiper/issues/111)) ([b0569e8](https://github.com/koboriakira/sandpiper/commit/b0569e8182cd0a75a45c1665c7b64347e39343f3))
+* Remove is_work field from Project domain ([#106](https://github.com/koboriakira/sandpiper/issues/106)) ([dd19526](https://github.com/koboriakira/sandpiper/commit/dd19526c5f2b11b068355b3f1fd2cff293c8e3a5))
+* カレンダーデータベースの日時プロパティを統合 ([b0569e8](https://github.com/koboriakira/sandpiper/commit/b0569e8182cd0a75a45c1665c7b64347e39343f3))
+
 ## [0.18.0](https://github.com/koboriakira/sandpiper/compare/sandpiper-v0.17.0...sandpiper-v0.18.0) (2026-02-01)
 
 
