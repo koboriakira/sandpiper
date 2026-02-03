@@ -123,7 +123,7 @@ class CreateTomorrowTodoListHandler(SpecialTodoHandler):
             self._create_repeat_task.execute(basis_date=basis_date)
 
             # サムデイリストからTODOを作成
-            someday_result = self._create_tasks_by_someday_list.execute()
+            someday_result = self._create_tasks_by_someday_list.execute(basis_date=basis_date)
 
             # カレンダーイベントからスケジュールタスクを作成
             schedule_result = self._create_schedule_tasks.execute(target_date=basis_date)
