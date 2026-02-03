@@ -1,3 +1,4 @@
+from datetime import date
 from unittest.mock import Mock, call
 
 from sandpiper.plan.application.create_tasks_by_someday_list import (
@@ -122,6 +123,45 @@ class TestCreateTasksBySomedayList:
         # Assert
         saved_todo = self.mock_todo_repository.save.call_args[0][0]
         assert saved_todo.kind == ToDoKind.SINGLE
+
+    def test_execute_with_basis_date_sets_scheduled_start_datetime(self):
+        """basis_dateを指定した場合、TODOの予定に設定される"""
+        # Arrange
+        someday_item = SomedayItem(
+            id="someday-1",
+            title="明日やるタスク",
+            timing=SomedayTiming.TOMORROW,
+            do_tomorrow=True,
+        )
+        self.mock_someday_repository.fetch_tomorrow_items.return_value = [someday_item]
+        basis_date = date(2024, 3, 20)
+
+        # Act
+        result = self.service.execute(basis_date=basis_date)
+
+        # Assert
+        assert result.created_count == 1
+        saved_todo = self.mock_todo_repository.save.call_args[0][0]
+        assert saved_todo.scheduled_start_datetime == date(2024, 3, 20)
+
+    def test_execute_without_basis_date_no_scheduled_datetime(self):
+        """basis_dateを指定しない場合、TODOの予定は設定されない"""
+        # Arrange
+        someday_item = SomedayItem(
+            id="someday-1",
+            title="明日やるタスク",
+            timing=SomedayTiming.TOMORROW,
+            do_tomorrow=True,
+        )
+        self.mock_someday_repository.fetch_tomorrow_items.return_value = [someday_item]
+
+        # Act
+        result = self.service.execute()
+
+        # Assert
+        assert result.created_count == 1
+        saved_todo = self.mock_todo_repository.save.call_args[0][0]
+        assert saved_todo.scheduled_start_datetime is None
 
 
 class TestCreateTasksBySomedayListResult:
