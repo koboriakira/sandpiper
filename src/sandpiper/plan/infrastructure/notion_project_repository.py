@@ -127,4 +127,11 @@ class NotionProjectRepository:
         pages: list[ProjectPage] = self.client.retrieve_database(
             database_id=project_db.DATABASE_ID, filter_param=filter_param, cls=ProjectPage
         )
-        return [page.to_inserted() for page in pages]
+        results: list[InsertedProject] = []
+        for page in pages:
+            try:
+                results.append(page.to_inserted())
+            except ValueError:
+                # start_dateが未設定のプロジェクトはスキップ
+                continue
+        return results
