@@ -46,9 +46,8 @@ class NotionRoutineRepository(RoutineRepository):
         return routines
 
     def update(self, routine: Routine) -> None:
-        page = self.client.retrieve_page(routine.id)
-        page.set_prop(RoutineNextDate.from_start_date(routine.date))
-        self.client.update(page)
+        # Use update_page directly to avoid redundant retrieve_page API call
+        self.client.update_page(routine.id, [RoutineNextDate.from_start_date(routine.date)])
 
 
 if __name__ == "__main__":

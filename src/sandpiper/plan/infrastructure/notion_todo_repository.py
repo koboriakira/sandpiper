@@ -93,7 +93,8 @@ class NotionTodoRepository:
 
     def save(self, todo: ToDo, options: dict[str, Any] | None = None) -> InsertedToDo:
         options = options or {}
-        blocks = self._get_blocks_from_other_pages(todo)
+        # Use pre-fetched block_children from options if available, avoiding redundant API call
+        blocks = options.get("block_children") or self._get_blocks_from_other_pages(todo)
         notion_todo = TodoPage.generate(todo, options=options, blocks=blocks)
         page = self.client.create_page(notion_todo)
         return InsertedToDo(
