@@ -67,11 +67,14 @@ class SyncJiraToProject:
         existing_jira_urls = {p.jira_url for p in notion_projects if p.jira_url}
 
         # Notion側にのみ存在するプロジェクトを特定
-        # (対象JIRAプロジェクトのURLパターンでフィルタリング)
+        # (対象JIRAプロジェクトのURLパターンでフィルタリング、Doneステータスは除外)
         notion_only_projects = [
             p
             for p in notion_projects
-            if p.jira_url and f"/browse/{jira_project}-" in p.jira_url and p.jira_url not in jira_ticket_urls
+            if p.jira_url
+            and f"/browse/{jira_project}-" in p.jira_url
+            and p.jira_url not in jira_ticket_urls
+            and p.status != ToDoStatusEnum.DONE
         ]
 
         created_projects: list[InsertedProject] = []

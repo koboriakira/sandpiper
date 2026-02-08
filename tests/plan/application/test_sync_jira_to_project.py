@@ -364,6 +364,57 @@ class TestSyncJiraToProject:
         assert result.notion_only_projects[0].id == "su-project-id"
         assert result.notion_only_projects[0].jira_url == "https://jira.example.com/browse/SU-888"
 
+    def test_execute_excludes_done_projects_from_notion_only(
+        self,
+        sync_jira_to_project,
+        mock_jira_ticket_query,
+        mock_project_repository,
+        mock_project_task_repository,  # noqa: ARG002
+    ):
+        """Doneステータスのプロジェクトはnotion_only_projectsに含めない"""
+        # Arrange
+        mock_jira_ticket_query.search_tickets.return_value = []  # JIRAにはチケットなし
+
+        # Notionには3つのプロジェクトが存在:
+        # - SU-111: IN_PROGRESS → notion_only_projectsに含まれるべき
+        # - SU-222: Done → notion_only_projectsに含めない
+        # - SU-333: ステータスなし → notion_only_projectsに含まれるべき
+        in_progress_project = InsertedProject(
+            id="in-progress-project-id",
+            name="In progress feature",
+            start_date=date.today(),
+            jira_url="https://jira.example.com/browse/SU-111",
+            status=ToDoStatusEnum.IN_PROGRESS,
+        )
+        done_project = InsertedProject(
+            id="done-project-id",
+            name="Done feature",
+            start_date=date.today(),
+            jira_url="https://jira.example.com/browse/SU-222",
+            status=ToDoStatusEnum.DONE,
+        )
+        no_status_project = InsertedProject(
+            id="no-status-project-id",
+            name="No status feature",
+            start_date=date.today(),
+            jira_url="https://jira.example.com/browse/SU-333",
+        )
+        mock_project_repository.fetch_projects_with_jira_url.return_value = [
+            in_progress_project,
+            done_project,
+            no_status_project,
+        ]
+
+        # Act
+        result = sync_jira_to_project.execute(jira_project="SU")
+
+        # Assert
+        assert len(result.notion_only_projects) == 2
+        notion_only_ids = {p.id for p in result.notion_only_projects}
+        assert "in-progress-project-id" in notion_only_ids
+        assert "no-status-project-id" in notion_only_ids
+        assert "done-project-id" not in notion_only_ids
+
     def test_execute_no_notion_only_when_all_match(
         self,
         sync_jira_to_project,
