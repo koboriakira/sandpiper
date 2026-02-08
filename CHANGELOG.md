@@ -5,6 +5,26 @@
 このプロジェクトは[セマンティックバージョニング](https://semver.org/spec/v2.0.0.html)に従い、
 [Conventional Commits](https://conventionalcommits.org/)を使用して自動的にリリースを生成します。
 
+## [0.20.0](https://github.com/koboriakira/sandpiper/compare/sandpiper-v0.19.0...sandpiper-v0.20.0) (2026-02-08)
+
+
+### Features
+
+* Add scheduled_start_datetime to ToDo in next_todo_rule ([#116](https://github.com/koboriakira/sandpiper/issues/116)) ([db38607](https://github.com/koboriakira/sandpiper/commit/db3860775b97d83e87fd59750ddac91c1fcfb69c))
+
+
+### Bug Fixes
+
+* Handle missing start_date in Notion projects gracefully ([#120](https://github.com/koboriakira/sandpiper/issues/120)) ([098527e](https://github.com/koboriakira/sandpiper/commit/098527e64059bc699c63f912e7d902e833012fa1))
+* Notionのみに存在するプロジェクトからDoneステータスを除外 ([6eda8f4](https://github.com/koboriakira/sandpiper/commit/6eda8f47c6412eb06935e4ffd85563d477695d40))
+* Skip projects without start_date in JIRA sync ([098527e](https://github.com/koboriakira/sandpiper/commit/098527e64059bc699c63f912e7d902e833012fa1))
+
+
+### Performance Improvements
+
+* Reduce redundant API calls in Notion repositories ([#119](https://github.com/koboriakira/sandpiper/issues/119)) ([41c516c](https://github.com/koboriakira/sandpiper/commit/41c516cf613f9628f4e6225367890da26fbddaab))
+* Reduce redundant Notion API calls in create-repeat-tasks ([41c516c](https://github.com/koboriakira/sandpiper/commit/41c516cf613f9628f4e6225367890da26fbddaab))
+
 ## [0.19.0](https://github.com/koboriakira/sandpiper/compare/sandpiper-v0.18.0...sandpiper-v0.19.0) (2026-02-03)
 
 
