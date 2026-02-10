@@ -3,6 +3,7 @@
 from dataclasses import dataclass
 from datetime import timedelta
 
+from sandpiper.perform.domain.todo import ToDo
 from sandpiper.perform.domain.todo_repository import TodoRepository
 from sandpiper.shared.valueobject.task_chute_section import TaskChuteSection
 from sandpiper.shared.valueobject.todo_status_enum import ToDoStatusEnum
@@ -54,7 +55,21 @@ class OverrideSectionBySchedule:
             ValueError: 予定開始日時が設定されていない場合
         """
         todo = self._todo_repository.find(page_id)
+        return self._execute_from_todo(todo)
 
+    def _execute_from_todo(self, todo: ToDo) -> OverrideSectionResult:
+        """
+        TODOオブジェクトから直接セクションを計算し、上書きする(内部メソッド)
+
+        Args:
+            todo: TODOオブジェクト
+
+        Returns:
+            OverrideSectionResult: 上書き結果
+
+        Raises:
+            ValueError: 予定開始日時が設定されていない場合
+        """
         if todo.scheduled_start_datetime is None:
             msg = f"予定開始日時が設定されていません: {todo.title}"
             raise ValueError(msg)
@@ -69,10 +84,10 @@ class OverrideSectionBySchedule:
         new_section = TaskChuteSection.new(scheduled_jst)
 
         # セクションを上書き
-        self._todo_repository.update_section(page_id, new_section)
+        self._todo_repository.update_section(todo.id, new_section)
 
         return OverrideSectionResult(
-            page_id=page_id,
+            page_id=todo.id,
             title=todo.title,
             old_section=todo.section,
             new_section=new_section,
@@ -95,7 +110,8 @@ class OverrideSectionBySchedule:
                 skipped_count += 1
                 continue
 
-            result = self.execute(todo.id)
+            # 取得済みのTODOオブジェクトを直接渡すことで、再取得を回避
+            result = self._execute_from_todo(todo)
             results.append(result)
 
         return OverrideSectionBulkResult(
