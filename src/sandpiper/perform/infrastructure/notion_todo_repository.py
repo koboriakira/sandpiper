@@ -5,6 +5,7 @@ from lotion import BasePage, Lotion, notion_database
 from sandpiper.perform.domain.todo import ToDo
 from sandpiper.shared.notion.databases import todo as todo_db
 from sandpiper.shared.notion.databases.todo import (
+    TodoClaudeUrl,
     TodoLogDate,
     TodoName,
     TodoProjectTaskProp,
@@ -25,6 +26,7 @@ class TodoPage(BasePage):  # type: ignore[misc]
     log_date: TodoLogDate | None = None
     project_task_relation: TodoProjectTaskProp | None = None
     scheduled_date: TodoScheduledDate | None = None
+    claude_url: TodoClaudeUrl | None = None
 
     def to_domain(self) -> ToDo:
         section_name = self.get_select("セクション").selected_name
@@ -35,6 +37,7 @@ class TodoPage(BasePage):  # type: ignore[misc]
         contexts = self._parse_contexts(context_prop)
         scheduled_start_datetime = self.get_date("予定").start_datetime
         scheduled_end_datetime = self.get_date("予定").end_datetime
+        claude_url_prop = self.get_url("Claude")
         return ToDo(
             id=self.id,
             title=self.get_title_text(),
@@ -46,6 +49,7 @@ class TodoPage(BasePage):  # type: ignore[misc]
             contexts=contexts,
             scheduled_start_datetime=scheduled_start_datetime,
             scheduled_end_datetime=scheduled_end_datetime,
+            claude_url=claude_url_prop.url if claude_url_prop else None,
         )
 
     def _parse_contexts(self, context_prop) -> list[Context]:  # type: ignore[no-untyped-def]

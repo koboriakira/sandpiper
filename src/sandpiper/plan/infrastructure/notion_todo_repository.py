@@ -7,6 +7,7 @@ from lotion.block.rich_text.rich_text_builder import RichTextBuilder
 from sandpiper.plan.domain.todo import InsertedToDo, ToDo, ToDoKind, ToDoStatus
 from sandpiper.shared.notion.databases import todo as todo_db
 from sandpiper.shared.notion.databases.todo import (
+    TodoClaudeUrl,
     TodoContext,
     TodoExecutionTime,
     TodoKindProp,
@@ -30,6 +31,7 @@ class TodoPage(BasePage):  # type: ignore[misc]
     section: TodoSection | None = None
     project_relation: TodoProjectProp | None = None
     project_task_relation: TodoProjectTaskProp | None = None
+    claude_url: TodoClaudeUrl | None = None
 
     @staticmethod
     def generate(todo: ToDo, options: dict[str, Any], blocks: list[Block] | None = None) -> "TodoPage":
@@ -62,6 +64,8 @@ class TodoPage(BasePage):  # type: ignore[misc]
                     end=todo.scheduled_end_datetime,
                 )
             )
+        if todo.claude_url:
+            properties.append(TodoClaudeUrl.from_url(todo.claude_url))
 
         return TodoPage.create(properties=properties, blocks=blocks)  # type: ignore[no-any-return]
 
@@ -74,6 +78,7 @@ class TodoPage(BasePage):  # type: ignore[misc]
         context_prop = self.get_multi_select("コンテクスト")
         context = [v.name for v in context_prop.values] if context_prop else []
         scheduled_prop = self.get_date("予定")
+        claude_url_prop = self.get_url("Claude")
         return ToDo(
             title=self.get_title_text(),
             kind=ToDoKind(kind.selected_name) if kind.selected_name else None,
@@ -84,6 +89,7 @@ class TodoPage(BasePage):  # type: ignore[misc]
             context=context if context else None,
             scheduled_start_datetime=scheduled_prop.start_datetime,
             scheduled_end_datetime=scheduled_prop.end_datetime,
+            claude_url=claude_url_prop.url if claude_url_prop else None,
         )
 
 
@@ -106,6 +112,7 @@ class NotionTodoRepository:
             context=todo.context,
             scheduled_start_datetime=todo.scheduled_start_datetime,
             scheduled_end_datetime=todo.scheduled_end_datetime,
+            claude_url=todo.claude_url,
         )
 
     def fetch(self) -> list[ToDo]:

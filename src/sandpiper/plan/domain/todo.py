@@ -27,6 +27,7 @@ class ToDo:
     sort_order: str | None = None
     scheduled_start_datetime: datetime | date | None = None
     scheduled_end_datetime: datetime | date | None = None
+    claude_url: str | None = None
 
 
 @dataclass
@@ -40,3 +41,4 @@ class InsertedToDo:
     sort_order: str | None = None
     scheduled_start_datetime: datetime | date | None = None
     scheduled_end_datetime: datetime | date | None = None
+    claude_url: str | None = None

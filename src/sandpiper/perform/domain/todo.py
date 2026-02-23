@@ -19,6 +19,7 @@ class ToDo:
     contexts: list[Context] = field(default_factory=list)
     scheduled_start_datetime: datetime | None = None
     scheduled_end_datetime: datetime | None = None
+    claude_url: str | None = None
 
     def start(self) -> None:
         self.status = ToDoStatusEnum.IN_PROGRESS

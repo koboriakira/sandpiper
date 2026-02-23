@@ -9,6 +9,7 @@ from lotion.properties import (
     Status,
     Text,
     Title,
+    Url,
 )
 
 DATABASE_ID = "c776567a3bbf8334b2e3810812854fb3"
@@ -71,4 +72,9 @@ class TodoArchiveContext(MultiSelect):  # type: ignore[misc]
 
 @notion_prop("並び順")
 class TodoArchiveSortOrder(Text):  # type: ignore[misc]
+    ...
+
+
+@notion_prop("Claude")
+class TodoArchiveClaudeUrl(Url):  # type: ignore[misc]
     ...

@@ -116,6 +116,7 @@ class TestToDo:
             "contexts",
             "scheduled_start_datetime",
             "scheduled_end_datetime",
+            "claude_url",
         }
         actual_fields = set(todo.__dataclass_fields__.keys())
         assert actual_fields == expected_fields

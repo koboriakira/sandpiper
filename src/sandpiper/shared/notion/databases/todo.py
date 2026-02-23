@@ -9,6 +9,7 @@ from lotion.properties import (
     Status,
     Text,
     Title,
+    Url,
 )
 
 DATABASE_ID = "2db6567a3bbf805ba379f942cdf0e264"
@@ -76,4 +77,9 @@ class TodoSortOrder(Text):  # type: ignore[misc]
 
 @notion_prop("予定")
 class TodoScheduledDate(Date):  # type: ignore[misc]
+    ...
+
+
+@notion_prop("Claude")
+class TodoClaudeUrl(Url):  # type: ignore[misc]
     ...
