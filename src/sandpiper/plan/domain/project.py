@@ -12,6 +12,7 @@ class Project:
     start_date: date
     end_date: date | None = None
     jira_url: str | None = None
+    claude_url: str | None = None
     status: ToDoStatusEnum | None = None
 
 
@@ -24,4 +25,5 @@ class InsertedProject:
     start_date: date
     end_date: date | None = None
     jira_url: str | None = None
+    claude_url: str | None = None
     status: ToDoStatusEnum | None = None

@@ -4,6 +4,7 @@ from lotion.filter import Builder, Cond
 from sandpiper.plan.domain.project import InsertedProject, Project
 from sandpiper.shared.notion.databases import project as project_db
 from sandpiper.shared.notion.databases.project import (
+    ProjectClaudeUrl,
     ProjectEndDate,
     ProjectJiraUrl,
     ProjectName,
@@ -19,11 +20,14 @@ class ProjectPage(BasePage):  # type: ignore[misc]
     start_date: ProjectStartDate
     end_date: ProjectEndDate | None = None
     jira_url: ProjectJiraUrl | None = None
+    claude_url: ProjectClaudeUrl | None = None
     status: ProjectStatus | None = None
 
     @staticmethod
     def generate(project: Project) -> "ProjectPage":
-        properties: list[ProjectName | ProjectStartDate | ProjectEndDate | ProjectJiraUrl | ProjectStatus] = [
+        properties: list[
+            ProjectName | ProjectStartDate | ProjectEndDate | ProjectJiraUrl | ProjectClaudeUrl | ProjectStatus
+        ] = [
             ProjectName.from_plain_text(project.name),
             ProjectStartDate.from_start_date(project.start_date),
         ]
@@ -31,6 +35,8 @@ class ProjectPage(BasePage):  # type: ignore[misc]
             properties.append(ProjectEndDate.from_start_date(project.end_date))
         if project.jira_url:
             properties.append(ProjectJiraUrl.from_url(project.jira_url))
+        if project.claude_url:
+            properties.append(ProjectClaudeUrl.from_url(project.claude_url))
         if project.status:
             properties.append(ProjectStatus.from_status_name(project.status.value))
         return ProjectPage.create(properties=properties)  # type: ignore[no-any-return]
@@ -39,6 +45,7 @@ class ProjectPage(BasePage):  # type: ignore[misc]
         start_date_prop = self.get_date("開始日")
         end_date_prop = self.get_date("完了日")
         jira_url_prop = self.get_url("Jira")
+        claude_url_prop = self.get_url("Claude")
         status_prop = self.get_status("ステータス")
 
         # start_dateは必須なのでNoneチェック
@@ -53,6 +60,7 @@ class ProjectPage(BasePage):  # type: ignore[misc]
             start_date=start_date_prop.start_date,
             end_date=end_date_prop.start_date if end_date_prop.start_date else None,
             jira_url=jira_url_prop.url if jira_url_prop else None,
+            claude_url=claude_url_prop.url if claude_url_prop else None,
             status=status,
         )
 
@@ -60,6 +68,7 @@ class ProjectPage(BasePage):  # type: ignore[misc]
         start_date_prop = self.get_date("開始日")
         end_date_prop = self.get_date("完了日")
         jira_url_prop = self.get_url("Jira")
+        claude_url_prop = self.get_url("Claude")
         status_prop = self.get_status("ステータス")
 
         if start_date_prop.start_date is None:
@@ -74,6 +83,7 @@ class ProjectPage(BasePage):  # type: ignore[misc]
             start_date=start_date_prop.start_date,
             end_date=end_date_prop.start_date if end_date_prop.start_date else None,
             jira_url=jira_url_prop.url if jira_url_prop else None,
+            claude_url=claude_url_prop.url if claude_url_prop else None,
             status=status,
         )
 
@@ -91,6 +101,7 @@ class NotionProjectRepository:
             start_date=project.start_date,
             end_date=project.end_date,
             jira_url=project.jira_url,
+            claude_url=project.claude_url,
             status=project.status,
         )
 

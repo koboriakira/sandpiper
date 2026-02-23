@@ -24,6 +24,11 @@ class ProjectJiraUrl(Url):  # type: ignore[misc]
     ...
 
 
+@notion_prop("Claude")
+class ProjectClaudeUrl(Url):  # type: ignore[misc]
+    ...
+
+
 @notion_prop("ステータス")
 class ProjectStatus(Status):  # type: ignore[misc]
     ...
