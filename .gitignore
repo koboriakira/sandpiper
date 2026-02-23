@@ -80,6 +80,9 @@ dmypy.json
 # Logs
 *.log
 
+# Claude Code
+.claude/worktrees/
+
 # Temporary files
 temp/
 tmp/
