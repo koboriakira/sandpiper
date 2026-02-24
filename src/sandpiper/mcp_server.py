@@ -23,7 +23,7 @@ from sandpiper.plan.query.project_task_query import NotionProjectTaskQuery
 from sandpiper.review.query.todo_query import NotionTodoQuery
 from sandpiper.shared.infrastructure.event_bus import EventBus
 from sandpiper.shared.model.someday_item import SomedayItem
-from sandpiper.shared.utils.date_utils import jst_today
+from sandpiper.shared.utils.date_utils import jst_now, jst_today
 from sandpiper.shared.valueobject.todo_status_enum import ToDoStatusEnum
 
 mcp = FastMCP("sandpiper")
@@ -167,6 +167,32 @@ def create_todo(title: str, section: str | None = None, start: bool = False) -> 
     use_case.execute(request, enableStart=start)
 
     return {"status": "created", "title": title, "started": start}
+
+
+@mcp.tool()
+def create_next_todo(title: str) -> dict[str, str | bool]:
+    """差し込みタスクを作成して即座に開始する。現在時刻からセクションと並び順を自動決定する。"""
+    from sandpiper.shared.valueobject.task_chute_section import TaskChuteSection
+    from sandpiper.shared.valueobject.todo_kind import ToDoKind
+
+    now = jst_now()
+    current_section = TaskChuteSection.new(now)
+    sort_order = now.strftime("%H:%M")
+
+    event_bus = EventBus()
+    dispatcher = MessageDispatcher(event_bus)
+    repo = NotionPlanTodoRepository()
+    use_case = CreateToDo(dispatcher=dispatcher, todo_repository=repo)
+
+    request = CreateNewToDoRequest(
+        title=title,
+        kind=ToDoKind.INTERRUPTION,
+        section=current_section,
+        sort_order=sort_order,
+    )
+    use_case.execute(request, enableStart=True)
+
+    return {"status": "created", "title": title, "started": True}
 
 
 @mcp.tool()

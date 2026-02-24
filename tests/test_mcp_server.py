@@ -366,6 +366,59 @@ class TestGetTomorrowSomedayItems:
         assert result[0]["do_tomorrow"] is True
 
 
+class TestCreateNextTodo:
+    """create_next_todoツール関数のテスト"""
+
+    @patch("sandpiper.mcp_server.jst_now")
+    @patch("sandpiper.mcp_server.NotionPlanTodoRepository")
+    @patch("sandpiper.mcp_server.MessageDispatcher")
+    @patch("sandpiper.mcp_server.EventBus")
+    def test_creates_next_todo(
+        self,
+        _mock_bus_cls: MagicMock,
+        _mock_dispatcher_cls: MagicMock,
+        _mock_repo_cls: MagicMock,
+        mock_jst_now: MagicMock,
+    ) -> None:
+        from sandpiper.mcp_server import create_next_todo
+
+        mock_jst_now.return_value = datetime(2026, 2, 24, 14, 30, tzinfo=JST)
+
+        result = create_next_todo(title="差し込みタスク")
+
+        assert result["status"] == "created"
+        assert result["title"] == "差し込みタスク"
+        assert result["started"] is True
+
+    @patch("sandpiper.mcp_server.jst_now")
+    @patch("sandpiper.mcp_server.NotionPlanTodoRepository")
+    @patch("sandpiper.mcp_server.MessageDispatcher")
+    @patch("sandpiper.mcp_server.EventBus")
+    def test_calls_use_case_with_interruption_kind(
+        self,
+        _mock_bus_cls: MagicMock,
+        _mock_dispatcher_cls: MagicMock,
+        _mock_repo_cls: MagicMock,
+        mock_jst_now: MagicMock,
+    ) -> None:
+        from sandpiper.mcp_server import create_next_todo
+        from sandpiper.shared.valueobject.todo_kind import ToDoKind
+
+        mock_jst_now.return_value = datetime(2026, 2, 24, 14, 30, tzinfo=JST)
+
+        with patch("sandpiper.mcp_server.CreateToDo") as mock_use_case_cls:
+            mock_use_case = mock_use_case_cls.return_value
+            create_next_todo(title="差し込みタスク")
+
+            mock_use_case.execute.assert_called_once()
+            call_args = mock_use_case.execute.call_args
+            request = call_args[0][0]
+            assert request.kind == ToDoKind.INTERRUPTION
+            assert request.section == TaskChuteSection.C_13_17
+            assert request.sort_order == "14:30"
+            assert call_args[1]["enableStart"] is True
+
+
 class TestCreateSomedayItem:
     """create_someday_itemツール関数のテスト"""
 
