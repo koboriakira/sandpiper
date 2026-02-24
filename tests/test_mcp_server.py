@@ -186,70 +186,111 @@ class TestGetTodo:
         assert result["title"] == "テストタスク"
 
 
-class TestCreateTodo:
-    """create_todoツール関数のテスト"""
+class TestScheduleTask:
+    """schedule_taskツール関数のテスト"""
 
     @patch("sandpiper.mcp_server.NotionPlanTodoRepository")
     @patch("sandpiper.mcp_server.MessageDispatcher")
     @patch("sandpiper.mcp_server.EventBus")
-    def test_creates_todo(
+    def test_schedules_task(
         self, _mock_bus_cls: MagicMock, _mock_dispatcher_cls: MagicMock, _mock_repo_cls: MagicMock
     ) -> None:
-        from sandpiper.mcp_server import create_todo
+        from sandpiper.mcp_server import schedule_task
 
-        result = create_todo(title="新しいタスク")
+        result = schedule_task(title="新しいタスク")
 
         assert result["status"] == "created"
         assert result["title"] == "新しいタスク"
+        assert "started" not in result
 
+
+class TestInterruptWithTask:
+    """interrupt_with_taskツール関数のテスト"""
+
+    @patch("sandpiper.mcp_server.jst_now")
     @patch("sandpiper.mcp_server.NotionPlanTodoRepository")
     @patch("sandpiper.mcp_server.MessageDispatcher")
     @patch("sandpiper.mcp_server.EventBus")
-    def test_creates_todo_with_start(
-        self, _mock_bus_cls: MagicMock, _mock_dispatcher_cls: MagicMock, _mock_repo_cls: MagicMock
+    def test_creates_and_starts_task(
+        self,
+        _mock_bus_cls: MagicMock,
+        _mock_dispatcher_cls: MagicMock,
+        _mock_repo_cls: MagicMock,
+        mock_jst_now: MagicMock,
     ) -> None:
-        from sandpiper.mcp_server import create_todo
+        from sandpiper.mcp_server import interrupt_with_task
 
-        result = create_todo(title="開始するタスク", start=True)
+        mock_jst_now.return_value = datetime(2026, 2, 24, 14, 30, tzinfo=JST)
+
+        result = interrupt_with_task(title="差し込みタスク")
 
         assert result["status"] == "created"
+        assert result["title"] == "差し込みタスク"
         assert result["started"] is True
 
+    @patch("sandpiper.mcp_server.jst_now")
+    @patch("sandpiper.mcp_server.NotionPlanTodoRepository")
+    @patch("sandpiper.mcp_server.MessageDispatcher")
+    @patch("sandpiper.mcp_server.EventBus")
+    def test_calls_use_case_with_interruption_kind(
+        self,
+        _mock_bus_cls: MagicMock,
+        _mock_dispatcher_cls: MagicMock,
+        _mock_repo_cls: MagicMock,
+        mock_jst_now: MagicMock,
+    ) -> None:
+        from sandpiper.mcp_server import interrupt_with_task
+        from sandpiper.shared.valueobject.todo_kind import ToDoKind
 
-class TestStartTodo:
-    """start_todoツール関数のテスト"""
+        mock_jst_now.return_value = datetime(2026, 2, 24, 14, 30, tzinfo=JST)
+
+        with patch("sandpiper.mcp_server.CreateToDo") as mock_use_case_cls:
+            mock_use_case = mock_use_case_cls.return_value
+            interrupt_with_task(title="差し込みタスク")
+
+            mock_use_case.execute.assert_called_once()
+            call_args = mock_use_case.execute.call_args
+            request = call_args[0][0]
+            assert request.kind == ToDoKind.INTERRUPTION
+            assert request.section == TaskChuteSection.C_13_17
+            assert request.sort_order == "14:30"
+            assert call_args[1]["enableStart"] is True
+
+
+class TestBeginTask:
+    """begin_taskツール関数のテスト"""
 
     @patch("sandpiper.mcp_server.NotionSharedProjectTaskRepository")
     @patch("sandpiper.mcp_server.NotionTodoRepository")
     @patch("sandpiper.mcp_server.MessageDispatcher")
     @patch("sandpiper.mcp_server.EventBus")
-    def test_starts_todo(
+    def test_begins_task(
         self,
         _mock_bus_cls: MagicMock,
         _mock_dispatcher_cls: MagicMock,
         _mock_repo_cls: MagicMock,
         _mock_pt_repo_cls: MagicMock,
     ) -> None:
-        from sandpiper.mcp_server import start_todo
+        from sandpiper.mcp_server import begin_task
 
-        result = start_todo(page_id="page-id-1")
+        result = begin_task(page_id="page-id-1")
 
         assert result["status"] == "started"
         assert result["page_id"] == "page-id-1"
 
 
-class TestCompleteTodo:
-    """complete_todoツール関数のテスト"""
+class TestFinishTask:
+    """finish_taskツール関数のテスト"""
 
     @patch("sandpiper.mcp_server.NotionTodoRepository")
     @patch("sandpiper.mcp_server.MessageDispatcher")
     @patch("sandpiper.mcp_server.EventBus")
-    def test_completes_todo(
+    def test_finishes_task(
         self, _mock_bus_cls: MagicMock, _mock_dispatcher_cls: MagicMock, _mock_repo_cls: MagicMock
     ) -> None:
-        from sandpiper.mcp_server import complete_todo
+        from sandpiper.mcp_server import finish_task
 
-        result = complete_todo(page_id="page-id-1")
+        result = finish_task(page_id="page-id-1")
 
         assert result["status"] == "completed"
         assert result["page_id"] == "page-id-1"
@@ -303,14 +344,14 @@ class TestCreateProject:
         assert result["status"] == "created"
 
 
-class TestCreateProjectTask:
-    """create_project_taskツール関数のテスト"""
+class TestAddTaskToProject:
+    """add_task_to_projectツール関数のテスト"""
 
     @patch("sandpiper.mcp_server.NotionSharedProjectTaskRepository")
-    def test_creates_project_task(self, _mock_repo_cls: MagicMock) -> None:
-        from sandpiper.mcp_server import create_project_task
+    def test_adds_task_to_project(self, _mock_repo_cls: MagicMock) -> None:
+        from sandpiper.mcp_server import add_task_to_project
 
-        result = create_project_task(title="新タスク", project_id="proj-id-1")
+        result = add_task_to_project(title="新タスク", project_id="proj-id-1")
 
         assert result["status"] == "created"
         assert result["title"] == "新タスク"
@@ -366,65 +407,12 @@ class TestGetTomorrowSomedayItems:
         assert result[0]["do_tomorrow"] is True
 
 
-class TestCreateNextTodo:
-    """create_next_todoツール関数のテスト"""
-
-    @patch("sandpiper.mcp_server.jst_now")
-    @patch("sandpiper.mcp_server.NotionPlanTodoRepository")
-    @patch("sandpiper.mcp_server.MessageDispatcher")
-    @patch("sandpiper.mcp_server.EventBus")
-    def test_creates_next_todo(
-        self,
-        _mock_bus_cls: MagicMock,
-        _mock_dispatcher_cls: MagicMock,
-        _mock_repo_cls: MagicMock,
-        mock_jst_now: MagicMock,
-    ) -> None:
-        from sandpiper.mcp_server import create_next_todo
-
-        mock_jst_now.return_value = datetime(2026, 2, 24, 14, 30, tzinfo=JST)
-
-        result = create_next_todo(title="差し込みタスク")
-
-        assert result["status"] == "created"
-        assert result["title"] == "差し込みタスク"
-        assert result["started"] is True
-
-    @patch("sandpiper.mcp_server.jst_now")
-    @patch("sandpiper.mcp_server.NotionPlanTodoRepository")
-    @patch("sandpiper.mcp_server.MessageDispatcher")
-    @patch("sandpiper.mcp_server.EventBus")
-    def test_calls_use_case_with_interruption_kind(
-        self,
-        _mock_bus_cls: MagicMock,
-        _mock_dispatcher_cls: MagicMock,
-        _mock_repo_cls: MagicMock,
-        mock_jst_now: MagicMock,
-    ) -> None:
-        from sandpiper.mcp_server import create_next_todo
-        from sandpiper.shared.valueobject.todo_kind import ToDoKind
-
-        mock_jst_now.return_value = datetime(2026, 2, 24, 14, 30, tzinfo=JST)
-
-        with patch("sandpiper.mcp_server.CreateToDo") as mock_use_case_cls:
-            mock_use_case = mock_use_case_cls.return_value
-            create_next_todo(title="差し込みタスク")
-
-            mock_use_case.execute.assert_called_once()
-            call_args = mock_use_case.execute.call_args
-            request = call_args[0][0]
-            assert request.kind == ToDoKind.INTERRUPTION
-            assert request.section == TaskChuteSection.C_13_17
-            assert request.sort_order == "14:30"
-            assert call_args[1]["enableStart"] is True
-
-
-class TestCreateSomedayItem:
-    """create_someday_itemツール関数のテスト"""
+class TestDeferToSomeday:
+    """defer_to_somedayツール関数のテスト"""
 
     @patch("sandpiper.mcp_server.NotionSomedayRepository")
-    def test_creates_someday_item(self, mock_repo_cls: MagicMock) -> None:
-        from sandpiper.mcp_server import create_someday_item
+    def test_defers_to_someday(self, mock_repo_cls: MagicMock) -> None:
+        from sandpiper.mcp_server import defer_to_someday
         from sandpiper.shared.model.someday_item import SomedayItem
         from sandpiper.shared.valueobject.someday_timing import SomedayTiming
 
@@ -436,7 +424,7 @@ class TestCreateSomedayItem:
         )
         mock_repo_cls.return_value.save.return_value = saved_item
 
-        result = create_someday_item(title="新しいサムデイ")
+        result = defer_to_someday(title="新しいサムデイ")
 
         assert result["status"] == "created"
         assert result["id"] == "sd-new-1"

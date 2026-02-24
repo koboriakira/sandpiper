@@ -59,7 +59,7 @@ def _serialize_someday_item(item: SomedayItem) -> dict[str, str | bool | list[st
 
 @mcp.tool()
 def get_in_progress_todos() -> list[dict[str, str | None]]:
-    """現在進行中(IN_PROGRESS)のToDoリストを取得する"""
+    """現在取りかかっている作業の一覧を取得する。IN_PROGRESSステータスのタスクを返す。"""
     repo = NotionTodoRepository()
     todos = repo.find_by_status(ToDoStatusEnum.IN_PROGRESS)
     return [_serialize_todo(todo) for todo in todos]
@@ -67,7 +67,7 @@ def get_in_progress_todos() -> list[dict[str, str | None]]:
 
 @mcp.tool()
 def get_pending_todos() -> list[dict[str, str | None]]:
-    """未実施(TODO)のToDoリストを取得する"""
+    """まだ着手していないタスクの一覧を取得する。TODOステータスのタスクを返す。"""
     repo = NotionTodoRepository()
     todos = repo.find_by_status(ToDoStatusEnum.TODO)
     return [_serialize_todo(todo) for todo in todos]
@@ -75,7 +75,7 @@ def get_pending_todos() -> list[dict[str, str | None]]:
 
 @mcp.tool()
 def get_done_todos(target_date: str | None = None) -> list[dict[str, str | int | None]]:
-    """指定日の完了ToDo一覧を取得する
+    """指定日に完了したタスクの実績を取得する。日報作成や振り返りに使う。
 
     Args:
         target_date: 対象日(YYYY-MM-DD形式)。省略時は今日。
@@ -98,10 +98,10 @@ def get_done_todos(target_date: str | None = None) -> list[dict[str, str | int |
 
 @mcp.tool()
 def get_todo(page_id: str) -> dict[str, str | None]:
-    """単一ToDoの詳細を取得する
+    """特定タスクの詳細情報を取得する。
 
     Args:
-        page_id: NotionページID
+        page_id: タスクのNotionページID
     """
     repo = NotionTodoRepository()
     todo = repo.find(page_id)
@@ -110,7 +110,7 @@ def get_todo(page_id: str) -> dict[str, str | None]:
 
 @mcp.tool()
 def get_undone_project_tasks() -> list[dict[str, str | bool | list[str] | None]]:
-    """未完了プロジェクトタスク一覧を取得する"""
+    """プロジェクトの未完了タスク一覧を取得する。"""
     query = NotionProjectTaskQuery()
     dtos = query.fetch_undone_project_tasks()
     return [
@@ -129,7 +129,7 @@ def get_undone_project_tasks() -> list[dict[str, str | bool | list[str] | None]]
 
 @mcp.tool()
 def get_someday_items() -> list[dict[str, str | bool | list[str] | None]]:
-    """サムデイリスト一覧を取得する"""
+    """サムデイリスト全体を取得する。いつかやりたいことの一覧。"""
     repo = NotionSomedayRepository()
     items = repo.fetch_all()
     return [_serialize_someday_item(item) for item in items]
@@ -137,7 +137,7 @@ def get_someday_items() -> list[dict[str, str | bool | list[str] | None]]:
 
 @mcp.tool()
 def get_tomorrow_someday_items() -> list[dict[str, str | bool | list[str] | None]]:
-    """明日やるサムデイアイテムを取得する"""
+    """明日やる候補としてマークされたサムデイアイテムを取得する。"""
     repo = NotionSomedayRepository()
     items = repo.fetch_tomorrow_items()
     return [_serialize_someday_item(item) for item in items]
@@ -147,13 +147,15 @@ def get_tomorrow_someday_items() -> list[dict[str, str | bool | list[str] | None
 
 
 @mcp.tool()
-def create_todo(title: str, section: str | None = None, start: bool = False) -> dict[str, str | bool]:
-    """新しいToDoを作成する
+def schedule_task(title: str, section: str | None = None) -> dict[str, str]:
+    """今日のタスクリストに新しいタスクを追加する。まだ開始しない。
+
+    予定として配置するためのツール。タスクを開始するには別途 begin_task を使う。
+    いますぐ取りかかる割り込み作業には interrupt_with_task を使うこと。
 
     Args:
         title: タスクのタイトル
-        section: セクション(A_07_10, B_10_13, C_13_17, D_17_19, E_19_22, F_22_24, G_24_07)
-        start: 作成と同時に開始するか
+        section: 時間帯セクション(A_07_10, B_10_13, C_13_17, D_17_19, E_19_22, F_22_24, G_24_07)。省略時は未指定。
     """
     from sandpiper.shared.valueobject.task_chute_section import TaskChuteSection
 
@@ -164,14 +166,22 @@ def create_todo(title: str, section: str | None = None, start: bool = False) -> 
 
     section_val = TaskChuteSection(section) if section else None
     request = CreateNewToDoRequest(title=title, section=section_val)
-    use_case.execute(request, enableStart=start)
+    use_case.execute(request)
 
-    return {"status": "created", "title": title, "started": start}
+    return {"status": "created", "title": title}
 
 
 @mcp.tool()
-def create_next_todo(title: str) -> dict[str, str | bool]:
-    """差し込みタスクを作成して即座に開始する。現在時刻からセクションと並び順を自動決定する。"""
+def interrupt_with_task(title: str) -> dict[str, str | bool]:
+    """割り込みタスクを作成し即座に開始する。
+
+    今の作業を中断して別のことに取りかかる場面で使う。
+    セクションと並び順は現在時刻から自動決定される。
+    計画的にタスクを追加したい場合は schedule_task を使うこと。
+
+    Args:
+        title: タスクのタイトル
+    """
     from sandpiper.shared.valueobject.task_chute_section import TaskChuteSection
     from sandpiper.shared.valueobject.todo_kind import ToDoKind
 
@@ -196,11 +206,14 @@ def create_next_todo(title: str) -> dict[str, str | bool]:
 
 
 @mcp.tool()
-def start_todo(page_id: str) -> dict[str, str]:
-    """ToDoを開始(IN_PROGRESS)にする
+def begin_task(page_id: str) -> dict[str, str]:
+    """作成済みのタスクを開始する。ステータスをIN_PROGRESSに変更する。
+
+    schedule_task で追加したタスクに着手するときに使う。
+    新しいタスクの作成はできない。作成には schedule_task を使うこと。
 
     Args:
-        page_id: NotionページID
+        page_id: 開始するタスクのNotionページID
     """
     event_bus = EventBus()
     dispatcher = MessageDispatcher(event_bus)
@@ -216,11 +229,13 @@ def start_todo(page_id: str) -> dict[str, str]:
 
 
 @mcp.tool()
-def complete_todo(page_id: str) -> dict[str, str]:
-    """ToDoを完了(DONE)にする
+def finish_task(page_id: str) -> dict[str, str]:
+    """実行中のタスクを完了にする。ステータスをDONEに変更する。
+
+    完了時にSlack通知が自動送信される。
 
     Args:
-        page_id: NotionページID
+        page_id: 完了するタスクのNotionページID
     """
     event_bus = EventBus()
     dispatcher = MessageDispatcher(event_bus)
@@ -232,7 +247,9 @@ def complete_todo(page_id: str) -> dict[str, str]:
 
 @mcp.tool()
 def create_project(name: str, start_date: str, end_date: str | None = None) -> dict[str, str]:
-    """新規プロジェクトを作成する
+    """新しいプロジェクトを作成する。
+
+    複数タスクをまとめる上位概念。プロジェクト配下の個別タスク追加には add_task_to_project を使う。
 
     Args:
         name: プロジェクト名
@@ -251,8 +268,10 @@ def create_project(name: str, start_date: str, end_date: str | None = None) -> d
 
 
 @mcp.tool()
-def create_project_task(title: str, project_id: str) -> dict[str, str]:
-    """プロジェクトタスクを作成する
+def add_task_to_project(title: str, project_id: str) -> dict[str, str]:
+    """既存プロジェクトにタスクを追加する。
+
+    プロジェクトIDが必須。プロジェクトに紐づかない日常タスクには schedule_task を使うこと。
 
     Args:
         title: タスクのタイトル
@@ -266,13 +285,16 @@ def create_project_task(title: str, project_id: str) -> dict[str, str]:
 
 
 @mcp.tool()
-def create_someday_item(
+def defer_to_someday(
     title: str,
     timing: str = "明日",
     do_tomorrow: bool = False,
     context: list[str] | None = None,
 ) -> dict[str, str | bool | list[str]]:
-    """サムデイアイテムを作成する
+    """いつかやりたいことをサムデイリストに保存する。
+
+    今日すぐやらないが忘れたくないことに使う。
+    今日のタスクとして追加したい場合は schedule_task を使うこと。
 
     Args:
         title: アイテムのタイトル
