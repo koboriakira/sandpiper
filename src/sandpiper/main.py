@@ -231,6 +231,29 @@ def create_project_task(
 
 
 @app.command()
+def prepare_tomorrow_todos() -> None:
+    """明日(または今日)のTODOリストを一括作成します
+
+    ルーチンタスク、プロジェクトタスク、サムデイリスト、カレンダーイベントから
+    TODOを自動生成します。
+
+    日本時間18:00〜23:59は「明日」、00:00〜17:59は「今日」として扱います。
+    cronから定期実行する用途を想定しています。
+    """
+    from sandpiper.plan.application.prepare_tomorrow_todos import PrepareTomorrowTodos
+
+    now = jst_now()
+    is_tomorrow, basis_date = PrepareTomorrowTodos.resolve_params_from_now(now_hour=now.hour, today=now.date())
+
+    target_label = "明日" if is_tomorrow else "今日"
+    console.print(f"[bold]{target_label}のTODOリストを作成中...[/bold] (基準日: {basis_date})")
+
+    result = sandpiper_app.prepare_tomorrow_todos.execute(is_tomorrow=is_tomorrow, basis_date=basis_date)
+
+    console.print(f"[green][bold]{result.summary}[/bold][/green]")
+
+
+@app.command()
 def create_repeat_project_tasks(
     tomorrow: bool = typer.Option(False, help="明日のタスクとして作成するかどうか"),
 ) -> None:

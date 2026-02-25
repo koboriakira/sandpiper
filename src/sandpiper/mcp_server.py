@@ -322,6 +322,66 @@ def defer_to_someday(
     }
 
 
+@mcp.tool()
+def prepare_tomorrow_todos() -> dict[str, str]:
+    """明日(または今日)のTODOリストを一括作成する。
+
+    ルーチンタスク、プロジェクトタスク、サムデイリスト、カレンダーイベントから
+    TODOを自動生成する。18:00以降は「明日」、それ以前は「今日」として扱う。
+    夜の作業終わりや朝の準備に使う。
+    """
+    from datetime import datetime
+    from zoneinfo import ZoneInfo
+
+    from sandpiper.plan.application.create_repeat_project_task import CreateRepeatProjectTask
+    from sandpiper.plan.application.create_repeat_task import CreateRepeatTask
+    from sandpiper.plan.application.create_schedule_tasks import CreateScheduleTasks
+    from sandpiper.plan.application.create_tasks_by_someday_list import CreateTasksBySomedayList
+    from sandpiper.plan.application.prepare_tomorrow_todos import PrepareTomorrowTodos
+    from sandpiper.plan.infrastructure.notion_routine_repository import NotionRoutineRepository
+    from sandpiper.plan.infrastructure.notion_someday_repository import NotionSomedayRepository
+    from sandpiper.plan.query.calendar_event_query import NotionCalendarEventQuery
+    from sandpiper.plan.query.project_task_query import NotionProjectTaskQuery
+    from sandpiper.plan.query.todo_query import NotionTodoQuery as PlanNotionTodoQuery
+    from sandpiper.shared.infrastructure.archive_deleted_pages import ArchiveDeletedPages
+
+    jst = ZoneInfo("Asia/Tokyo")
+    now_jst = datetime.now(jst)
+
+    is_tomorrow, basis_date = PrepareTomorrowTodos.resolve_params_from_now(now_hour=now_jst.hour, today=now_jst.date())
+
+    plan_todo_repo = NotionPlanTodoRepository()
+    plan_todo_query = PlanNotionTodoQuery()
+    use_case = PrepareTomorrowTodos(
+        create_repeat_project_task=CreateRepeatProjectTask(
+            project_task_query=NotionProjectTaskQuery(),
+            todo_repository=plan_todo_repo,
+        ),
+        create_repeat_task=CreateRepeatTask(
+            routine_repository=NotionRoutineRepository(),
+            todo_repository=plan_todo_repo,
+            todo_query=plan_todo_query,
+        ),
+        create_tasks_by_someday_list=CreateTasksBySomedayList(
+            someday_repository=NotionSomedayRepository(),
+            todo_repository=plan_todo_repo,
+        ),
+        create_schedule_tasks=CreateScheduleTasks(
+            calendar_event_query=NotionCalendarEventQuery(),
+            todo_repository=plan_todo_repo,
+            todo_query=plan_todo_query,
+        ),
+        archive_deleted_pages=ArchiveDeletedPages(),
+    )
+
+    result = use_case.execute(is_tomorrow=is_tomorrow, basis_date=basis_date)
+    return {
+        "status": "completed",
+        "summary": result.summary,
+        "basis_date": result.basis_date.isoformat(),
+    }
+
+
 def main() -> None:
     mcp.run()
 

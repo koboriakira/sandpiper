@@ -7,56 +7,23 @@
 00:00〜17:59に実行された場合は「今日」のTODOとして作成します。
 """
 
-from datetime import date, datetime
+from datetime import datetime
 from zoneinfo import ZoneInfo
 
 from sandpiper.app.handlers.special_todo_handler import (
     HandleSpecialTodoResult,
     SpecialTodoHandler,
 )
-from sandpiper.plan.application.create_repeat_project_task import CreateRepeatProjectTask
-from sandpiper.plan.application.create_repeat_task import CreateRepeatTask
-from sandpiper.plan.application.create_schedule_tasks import CreateScheduleTasks
-from sandpiper.plan.application.create_tasks_by_someday_list import CreateTasksBySomedayList
-from sandpiper.shared.infrastructure.archive_deleted_pages import ArchiveDeletedPages
+from sandpiper.plan.application.prepare_tomorrow_todos import PrepareTomorrowTodos
 
 JST = ZoneInfo("Asia/Tokyo")
-
-
-def _should_create_for_tomorrow() -> bool:
-    """日本時間の現在時刻から、明日のTODOを作成すべきかを判定する
-
-    18:00〜23:59の場合は明日のTODO、それ以外は今日のTODOを作成する
-
-    Returns:
-        bool: 明日のTODOを作成すべき場合True
-    """
-    now_jst = datetime.now(JST)
-    return 18 <= now_jst.hour <= 23
-
-
-def _get_basis_date() -> date:
-    """CreateRepeatTask用の基準日を取得する
-
-    18:00〜23:59の場合は明日の日付、それ以外は今日の日付を返す
-
-    Returns:
-        date: 基準日
-    """
-    now_jst = datetime.now(JST)
-    if 18 <= now_jst.hour <= 23:
-        # 明日の日付を返す
-        from datetime import timedelta
-
-        return (now_jst + timedelta(days=1)).date()
-    return now_jst.date()
 
 
 class CreateTomorrowTodoListHandler(SpecialTodoHandler):
     """明日のTODOリストを作成するハンドラー
 
     「明日のTODOリストを作成」というタイトルのTODOが処理されると、
-    CreateRepeatProjectTaskとCreateRepeatTaskユースケースを実行して、
+    PrepareTomorrowTodosユースケースを実行して、
     プロジェクトタスクとルーチンタスクからTODOを自動生成します。
 
     日本時間18:00〜23:59は明日のTODO、00:00〜17:59は今日のTODOとして作成します。
@@ -66,26 +33,9 @@ class CreateTomorrowTodoListHandler(SpecialTodoHandler):
 
     def __init__(
         self,
-        create_repeat_project_task: CreateRepeatProjectTask,
-        create_repeat_task: CreateRepeatTask,
-        create_tasks_by_someday_list: CreateTasksBySomedayList,
-        create_schedule_tasks: CreateScheduleTasks,
-        archive_deleted_pages: ArchiveDeletedPages,
+        prepare_tomorrow_todos: PrepareTomorrowTodos,
     ) -> None:
-        """初期化
-
-        Args:
-            create_repeat_project_task: プロジェクトタスクからTODOを作成するユースケース
-            create_repeat_task: ルーチンタスクからTODOを作成するユースケース
-            create_tasks_by_someday_list: サムデイリストからTODOを作成するユースケース
-            create_schedule_tasks: カレンダーイベントからスケジュールタスクを作成するユースケース
-            archive_deleted_pages: 論理削除されたページをアーカイブするサービス
-        """
-        self._create_repeat_project_task = create_repeat_project_task
-        self._create_repeat_task = create_repeat_task
-        self._create_tasks_by_someday_list = create_tasks_by_someday_list
-        self._create_schedule_tasks = create_schedule_tasks
-        self._archive_deleted_pages = archive_deleted_pages
+        self._prepare_tomorrow_todos = prepare_tomorrow_todos
 
     @property
     def handler_name(self) -> str:
@@ -109,38 +59,17 @@ class CreateTomorrowTodoListHandler(SpecialTodoHandler):
             HandleSpecialTodoResult: 処理結果
         """
         try:
-            # 論理削除されたページをアーカイブ
-            self._archive_deleted_pages.execute()
+            now_jst = datetime.now(JST)
+            is_tomorrow, basis_date = PrepareTomorrowTodos.resolve_params_from_now(
+                now_hour=now_jst.hour, today=now_jst.date()
+            )
 
-            is_tomorrow = _should_create_for_tomorrow()
-            basis_date = _get_basis_date()
-            target_day = "明日" if is_tomorrow else "今日"
-
-            # プロジェクトタスクからTODOを作成
-            self._create_repeat_project_task.execute(is_tomorrow=is_tomorrow)
-
-            # ルーチンタスクからTODOを作成
-            self._create_repeat_task.execute(basis_date=basis_date)
-
-            # サムデイリストからTODOを作成
-            someday_result = self._create_tasks_by_someday_list.execute(basis_date=basis_date)
-
-            # カレンダーイベントからスケジュールタスクを作成
-            schedule_result = self._create_schedule_tasks.execute(target_date=basis_date)
-
-            message = f"{target_day}のTODOリストを作成しました"
-            details: list[str] = []
-            if someday_result.created_count > 0:
-                details.append(f"サムデイリストから{someday_result.created_count}件")
-            if schedule_result.created_count > 0:
-                details.append(f"スケジュールから{schedule_result.created_count}件")
-            if details:
-                message += f"({', '.join(details)})"
+            result = self._prepare_tomorrow_todos.execute(is_tomorrow=is_tomorrow, basis_date=basis_date)
 
             return self._success_result(
                 page_id=page_id,
                 title=title,
-                message=message,
+                message=result.summary,
             )
         except Exception as e:
             return self._failure_result(

@@ -24,6 +24,7 @@ from sandpiper.plan.application.create_someday_item import CreateSomedayItem
 from sandpiper.plan.application.create_tasks_by_someday_list import CreateTasksBySomedayList
 from sandpiper.plan.application.create_todo import CreateToDo
 from sandpiper.plan.application.handle_completed_task import HandleCompletedTask
+from sandpiper.plan.application.prepare_tomorrow_todos import PrepareTomorrowTodos
 from sandpiper.plan.application.sync_jira_to_project import SyncJiraToProject
 from sandpiper.plan.infrastructure.notion_project_repository import NotionProjectRepository
 from sandpiper.plan.infrastructure.notion_project_task_repository import NotionProjectTaskRepository
@@ -78,6 +79,7 @@ class SandPiperApp:
         create_someday_item: CreateSomedayItem,
         create_tasks_by_someday_list: CreateTasksBySomedayList,
         override_section_by_schedule: OverrideSectionBySchedule,
+        prepare_tomorrow_todos: PrepareTomorrowTodos,
     ) -> None:
         self.create_todo = create_todo
         self.create_project = create_project
@@ -101,6 +103,7 @@ class SandPiperApp:
         self.create_someday_item = create_someday_item
         self.create_tasks_by_someday_list = create_tasks_by_someday_list
         self.override_section_by_schedule = override_section_by_schedule
+        self.prepare_tomorrow_todos = prepare_tomorrow_todos
 
 
 def bootstrap() -> SandPiperApp:
@@ -177,17 +180,22 @@ def bootstrap() -> SandPiperApp:
     # Archive service for logical deletion cleanup
     archive_deleted_pages = ArchiveDeletedPages()
 
+    # Create prepare_tomorrow_todos use case
+    prepare_tomorrow_todos = PrepareTomorrowTodos(
+        create_repeat_project_task=create_repeat_project_task,
+        create_repeat_task=create_repeat_task,
+        create_tasks_by_someday_list=create_tasks_by_someday_list,
+        create_schedule_tasks=create_schedule_tasks,
+        archive_deleted_pages=archive_deleted_pages,
+    )
+
     # Create special todo handler and register handlers
     handle_special_todo = HandleSpecialTodo(
         todo_repository=perform_notion_todo_repository,
     )
     handle_special_todo.register_handler(
         CreateTomorrowTodoListHandler(
-            create_repeat_project_task=create_repeat_project_task,
-            create_repeat_task=create_repeat_task,
-            create_tasks_by_someday_list=create_tasks_by_someday_list,
-            create_schedule_tasks=create_schedule_tasks,
-            archive_deleted_pages=archive_deleted_pages,
+            prepare_tomorrow_todos=prepare_tomorrow_todos,
         )
     )
 
@@ -254,4 +262,5 @@ def bootstrap() -> SandPiperApp:
         override_section_by_schedule=OverrideSectionBySchedule(
             todo_repository=perform_notion_todo_repository,
         ),
+        prepare_tomorrow_todos=prepare_tomorrow_todos,
     )
