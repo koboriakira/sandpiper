@@ -13,6 +13,8 @@ from sandpiper.plan.application.create_someday_item import CreateSomedayItemRequ
 from sandpiper.plan.application.create_todo import CreateNewToDoRequest
 from sandpiper.plan.domain.someday_item import SomedayTiming
 from sandpiper.recipe.application.create_recipe import CreateRecipeRequest, IngredientRequest
+from sandpiper.shared.infrastructure.cron_notifier import CronNotifier
+from sandpiper.shared.infrastructure.slack_notice_messanger import SlackNoticeMessanger
 from sandpiper.shared.utils.date_utils import jst_now
 from sandpiper.shared.valueobject.task_chute_section import TaskChuteSection
 from sandpiper.shared.valueobject.todo_kind import ToDoKind
@@ -22,6 +24,16 @@ from . import __version__
 
 # .envファイルから環境変数を読み込み
 load_dotenv()
+
+# デフォルトSlackチャンネルID
+_DEFAULT_SLACK_CHANNEL_ID = "C04Q3AV4TA5"
+
+
+def _create_notifier() -> CronNotifier:
+    """cron通知用のCronNotifierインスタンスを生成する"""
+    messanger = SlackNoticeMessanger(channel_id=_DEFAULT_SLACK_CHANNEL_ID)
+    return CronNotifier(messanger=messanger)
+
 
 app = typer.Typer(
     name="sandpiper",
@@ -746,6 +758,7 @@ def create_notion_pages(
 @app.command()
 def sync_jira_to_project(
     jira_project: str = typer.Option("SU", "--project", "-p", help="JIRAプロジェクトキー"),
+    notify: bool = typer.Option(False, "--notify", help="実行結果をSlackに通知する (cron実行用)"),
 ) -> None:
     """JIRAチケットをNotionプロジェクトに同期します
 
@@ -757,6 +770,8 @@ def sync_jira_to_project(
     - プロジェクト作成時に同名のプロジェクトタスクも作成
     """
     console.print(f"[bold]JIRAチケットをNotionプロジェクトに同期中...[/bold] (プロジェクト: {jira_project})")
+
+    notifier = _create_notifier() if notify else None
 
     try:
         result = sandpiper_app.sync_jira_to_project.execute(jira_project=jira_project)
@@ -785,18 +800,26 @@ def sync_jira_to_project(
                     console.print(f"    [blue]{project.jira_url}[/blue]")
 
         # サマリー
-        console.print(
-            f"\n[bold]同期完了: {len(result.created_projects)}件作成, "
+        summary = (
+            f"{len(result.created_projects)}件作成, "
             f"{len(result.skipped_tickets)}件スキップ, "
-            f"{len(result.notion_only_projects)}件Notionのみ[/bold]"
+            f"{len(result.notion_only_projects)}件Notionのみ"
         )
+        console.print(f"\n[bold]同期完了: {summary}[/bold]")
+
+        if notifier:
+            notifier.notify_success(command="sync-jira-to-project", summary=summary)
 
     except ValueError as e:
         console.print(f"[red]設定エラー: {e}[/red]")
         console.print("[yellow]BUSINESS_JIRA_USERNAME と BUSINESS_JIRA_API_TOKEN の環境変数を設定してください[/yellow]")
+        if notifier:
+            notifier.notify_failure(command="sync-jira-to-project", error=str(e))
         raise typer.Exit(code=1)
     except Exception as e:
         console.print(f"[red]エラー: {e}[/red]")
+        if notifier:
+            notifier.notify_failure(command="sync-jira-to-project", error=str(e))
         raise typer.Exit(code=1)
 
 
@@ -831,6 +854,7 @@ def create_tasks_from_someday(
 def archive_old_todos(
     days: int = typer.Option(7, help="完了してからの経過日数 (デフォルト: 7日)"),
     dry_run: bool = typer.Option(False, "--dry-run", help="実際にアーカイブせず対象のみ表示"),
+    notify: bool = typer.Option(False, "--notify", help="実行結果をSlackに通知する (cron実行用)"),
 ) -> None:
     """完了して指定日数経過したTODOをアーカイブします
 
@@ -852,16 +876,29 @@ def archive_old_todos(
         console.print("[dim](ドライランのため実際のアーカイブは行われていません)[/dim]")
         return
 
-    console.print(f"[bold]完了して{days}日以上経過したTODOをアーカイブ中...[/bold]")
-    archive_service = ArchiveOldTodos(archive_days=days)
-    result = archive_service.execute()
+    notifier = _create_notifier() if notify else None
 
-    if result.archived_count == 0:
-        console.print("[yellow]アーカイブ対象のTODOはありませんでした[/yellow]")
-    else:
-        console.print(f"[green][bold]アーカイブ完了: {result.archived_count}件[/bold][/green]")
-        for title in result.archived_titles:
-            console.print(f"  - {title}")
+    try:
+        console.print(f"[bold]完了して{days}日以上経過したTODOをアーカイブ中...[/bold]")
+        archive_service = ArchiveOldTodos(archive_days=days)
+        result = archive_service.execute()
+
+        summary = f"{result.archived_count}件アーカイブ"
+        if result.archived_count == 0:
+            console.print("[yellow]アーカイブ対象のTODOはありませんでした[/yellow]")
+        else:
+            console.print(f"[green][bold]アーカイブ完了: {result.archived_count}件[/bold][/green]")
+            for title in result.archived_titles:
+                console.print(f"  - {title}")
+
+        if notifier:
+            notifier.notify_success(command="archive-old-todos", summary=summary)
+
+    except Exception as e:
+        console.print(f"[red]エラー: {e}[/red]")
+        if notifier:
+            notifier.notify_failure(command="archive-old-todos", error=str(e))
+        raise typer.Exit(code=1)
 
 
 @app.command()

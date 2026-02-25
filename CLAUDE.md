@@ -292,6 +292,35 @@ def handle_new_event(event: NewDomainEvent):
 event_bus.subscribe(NewDomainEvent, handle_new_event)
 ```
 
+## cron定期実行
+
+### 概要
+`scripts/cron-runner.sh` を使って、CLIコマンドをcronから安全に実行する。
+ラッパースクリプトが `.env` の読み込み、ログ出力(`/tmp/sandpiper-cron.log`)を担当する。
+
+### 対象タスクとスケジュール
+
+| タスク | コマンド | cron式 | 説明 |
+|--------|---------|--------|------|
+| JIRA→Notion同期 | `sync-jira-to-project --notify` | `0 */2 * * 1-5` | 平日2時間おき |
+| TODOアーカイブ | `archive-old-todos --notify` | `0 3 * * 0` | 毎週日曜3:00 |
+
+### crontab設定例
+```crontab
+# Sandpiper定期タスク
+0 */2 * * 1-5 /Users/koboriakira/git/sandpiper/scripts/cron-runner.sh sync-jira-to-project --notify
+0 3 * * 0 /Users/koboriakira/git/sandpiper/scripts/cron-runner.sh archive-old-todos --notify
+```
+
+### --notify オプション
+`--notify` を付けると実行結果(成功/失敗/件数)がSlackに通知される。
+手動実行時は `--notify` なしで通常のコンソール出力のみ。
+
+### ログ確認
+```bash
+tail -f /tmp/sandpiper-cron.log
+```
+
 ## 注意事項
 
 - uvコマンドは必ず`uv run`プレフィックス使用(仮想環境自動活用)
