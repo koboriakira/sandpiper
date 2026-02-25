@@ -6,6 +6,7 @@ from sandpiper.perform.domain.todo import ToDo
 from sandpiper.shared.notion.databases import todo as todo_db
 from sandpiper.shared.notion.databases.todo import (
     TodoClaudeUrl,
+    TodoIsTodayProp,
     TodoLogDate,
     TodoName,
     TodoProjectTaskProp,
@@ -102,3 +103,9 @@ class NotionTodoRepository:
                 todo_page = self.client.retrieve_page(page.id, TodoPage)
                 result.append(todo_page.to_domain())
         return result
+
+    def mark_as_today(self, page_id: str) -> None:
+        """「今日中にやる」フラグを有効化する"""
+        page = self.client.retrieve_page(page_id, TodoPage)
+        page.set_prop(TodoIsTodayProp.true())
+        self.client.update(page)

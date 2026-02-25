@@ -333,6 +333,10 @@ def prepare_tomorrow_todos() -> dict[str, str]:
     from datetime import datetime
     from zoneinfo import ZoneInfo
 
+    from sandpiper.perform.application.mark_remaining_todos_as_today import MarkRemainingTodosAsToday
+    from sandpiper.perform.infrastructure.notion_todo_repository import (
+        NotionTodoRepository as PerformNotionTodoRepository,
+    )
     from sandpiper.plan.application.create_repeat_project_task import CreateRepeatProjectTask
     from sandpiper.plan.application.create_repeat_task import CreateRepeatTask
     from sandpiper.plan.application.create_schedule_tasks import CreateScheduleTasks
@@ -352,7 +356,11 @@ def prepare_tomorrow_todos() -> dict[str, str]:
 
     plan_todo_repo = NotionPlanTodoRepository()
     plan_todo_query = PlanNotionTodoQuery()
+    perform_todo_repo = PerformNotionTodoRepository()
     use_case = PrepareTomorrowTodos(
+        mark_remaining_todos_as_today=MarkRemainingTodosAsToday(
+            todo_repository=perform_todo_repo,
+        ),
         create_repeat_project_task=CreateRepeatProjectTask(
             project_task_query=NotionProjectTaskQuery(),
             todo_repository=plan_todo_repo,

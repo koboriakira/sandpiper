@@ -9,6 +9,7 @@ from sandpiper.clips.infrastructure.notion_clips_repository import NotionClipsRe
 from sandpiper.perform.application.complete_todo import CompleteTodo
 from sandpiper.perform.application.handle_todo_created import HandleTodoCreated
 from sandpiper.perform.application.handle_todo_started import HandleTodoStarted
+from sandpiper.perform.application.mark_remaining_todos_as_today import MarkRemainingTodosAsToday
 from sandpiper.perform.application.override_section_by_schedule import OverrideSectionBySchedule
 from sandpiper.perform.application.schedule_task_end_notification import ScheduleTaskEndNotification
 from sandpiper.perform.application.start_todo import StartTodo
@@ -181,7 +182,11 @@ def bootstrap() -> SandPiperApp:
     archive_deleted_pages = ArchiveDeletedPages()
 
     # Create prepare_tomorrow_todos use case
+    mark_remaining_todos_as_today = MarkRemainingTodosAsToday(
+        todo_repository=perform_notion_todo_repository,
+    )
     prepare_tomorrow_todos = PrepareTomorrowTodos(
+        mark_remaining_todos_as_today=mark_remaining_todos_as_today,
         create_repeat_project_task=create_repeat_project_task,
         create_repeat_task=create_repeat_task,
         create_tasks_by_someday_list=create_tasks_by_someday_list,
