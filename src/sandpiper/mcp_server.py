@@ -324,11 +324,12 @@ def defer_to_someday(
 
 @mcp.tool()
 def prepare_tomorrow_todos() -> dict[str, str]:
-    """明日(または今日)のTODOリストを一括作成する。
+    """明日のTODOリストを一括作成する。
 
+    「明日のTODOを作成して」「TODOリストを準備して」などの指示で呼び出す。
     ルーチンタスク、プロジェクトタスク、サムデイリスト、カレンダーイベントから
-    TODOを自動生成する。18:00以降は「明日」、それ以前は「今日」として扱う。
-    夜の作業終わりや朝の準備に使う。
+    TODOを自動生成する。対象日の判定(明日か今日か)はシステムが現在時刻から
+    自動で行うため、ユーザーの指示に関わらず常にこのツールを呼び出せばよい。
     """
     from datetime import datetime
     from zoneinfo import ZoneInfo
