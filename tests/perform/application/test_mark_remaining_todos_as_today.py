@@ -45,14 +45,8 @@ class TestMarkRemainingTodosAsToday:
 
     def test_multiple_tasks_per_status(self, use_case: MarkRemainingTodosAsToday, repo: MagicMock) -> None:
         """各ステータスに複数タスクがある場合すべてにフラグが付く"""
-        ip_tasks = [
-            ToDo(id=f"ip-{i}", title=f"進行中{i}", status=ToDoStatusEnum.IN_PROGRESS)
-            for i in range(3)
-        ]
-        todo_tasks = [
-            ToDo(id=f"todo-{i}", title=f"未着手{i}", status=ToDoStatusEnum.TODO)
-            for i in range(2)
-        ]
+        ip_tasks = [ToDo(id=f"ip-{i}", title=f"進行中{i}", status=ToDoStatusEnum.IN_PROGRESS) for i in range(3)]
+        todo_tasks = [ToDo(id=f"todo-{i}", title=f"未着手{i}", status=ToDoStatusEnum.TODO) for i in range(2)]
 
         repo.find_by_status.side_effect = lambda status: {
             ToDoStatusEnum.IN_PROGRESS: ip_tasks,

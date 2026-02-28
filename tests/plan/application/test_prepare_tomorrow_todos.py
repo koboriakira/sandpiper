@@ -75,9 +75,7 @@ class TestPrepareTomorrowTodos:
         mocks["create_repeat_project_task"].execute.assert_called_once_with(is_tomorrow=False)
         assert result.target_label == "今日"
 
-    def test_marked_as_today_count_in_result(
-        self, use_case: PrepareTomorrowTodos, mocks: dict[str, MagicMock]
-    ) -> None:
+    def test_marked_as_today_count_in_result(self, use_case: PrepareTomorrowTodos, mocks: dict[str, MagicMock]) -> None:
         """フラグ設定件数が結果に含まれる"""
         mocks["mark_remaining_todos_as_today"].execute.return_value = MarkRemainingTodosAsTodayResult(marked_count=5)
 
