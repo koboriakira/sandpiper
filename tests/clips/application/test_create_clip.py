@@ -94,6 +94,7 @@ class MockClipsRepository(ClipsRepository):
             url=clip.url,
             inbox_type=clip.inbox_type,
             auto_fetch_title=clip.auto_fetch_title,
+            unprocessed=clip.unprocessed,
         )
 
 
@@ -117,6 +118,7 @@ class TestCreateClip:
         assert result.url == "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
         assert result.inbox_type == InboxType.VIDEO
         assert result.auto_fetch_title is False  # タイトル指定済みなのでFalse
+        assert result.unprocessed is True  # 作成時は常にTrue
 
     def test_create_clip_youtube_url_api_success(self):
         """YouTube URLでAPI取得成功の場合"""

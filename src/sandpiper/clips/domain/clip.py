@@ -11,6 +11,7 @@ class Clip:
     url: str
     inbox_type: InboxType
     auto_fetch_title: bool = False
+    unprocessed: bool = True
 
 
 @dataclass(frozen=True)
@@ -22,3 +23,4 @@ class InsertedClip:
     url: str
     inbox_type: InboxType
     auto_fetch_title: bool = False
+    unprocessed: bool = True

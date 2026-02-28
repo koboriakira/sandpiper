@@ -22,3 +22,8 @@ class ClipsTypeProp(Select):  # type: ignore[misc]
 @notion_prop("タイトル自動取得")
 class ClipsAutoFetchTitle(Checkbox):  # type: ignore[misc]
     ...
+
+
+@notion_prop("未処理")
+class ClipsUnprocessed(Checkbox):  # type: ignore[misc]
+    ...
