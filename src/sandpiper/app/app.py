@@ -5,7 +5,9 @@ from sandpiper.calendar.application.create_calendar_event import CreateCalendarE
 from sandpiper.calendar.application.delete_calendar_events import DeleteCalendarEvents
 from sandpiper.calendar.infrastructure.notion_calendar_repository import NotionCalendarRepository
 from sandpiper.clips.application.create_clip import CreateClip
+from sandpiper.clips.application.list_unprocessed_clips import ListUnprocessedClips
 from sandpiper.clips.infrastructure.notion_clips_repository import NotionClipsRepository
+from sandpiper.clips.query.clips_query import NotionClipsQuery
 from sandpiper.perform.application.complete_todo import CompleteTodo
 from sandpiper.perform.application.handle_todo_created import HandleTodoCreated
 from sandpiper.perform.application.handle_todo_started import HandleTodoStarted
@@ -77,6 +79,7 @@ class SandPiperApp:
         archive_deleted_pages: ArchiveDeletedPages,
         archive_old_todos: ArchiveOldTodos,
         create_clip: CreateClip,
+        list_unprocessed_clips: ListUnprocessedClips,
         create_someday_item: CreateSomedayItem,
         create_tasks_by_someday_list: CreateTasksBySomedayList,
         override_section_by_schedule: OverrideSectionBySchedule,
@@ -101,6 +104,7 @@ class SandPiperApp:
         self.archive_deleted_pages = archive_deleted_pages
         self.archive_old_todos = archive_old_todos
         self.create_clip = create_clip
+        self.list_unprocessed_clips = list_unprocessed_clips
         self.create_someday_item = create_someday_item
         self.create_tasks_by_someday_list = create_tasks_by_someday_list
         self.override_section_by_schedule = override_section_by_schedule
@@ -259,6 +263,9 @@ def bootstrap() -> SandPiperApp:
         archive_old_todos=ArchiveOldTodos(),
         create_clip=CreateClip(
             clips_repository=NotionClipsRepository(),
+        ),
+        list_unprocessed_clips=ListUnprocessedClips(
+            clips_query=NotionClipsQuery(),
         ),
         create_someday_item=CreateSomedayItem(
             someday_repository=someday_repository,
