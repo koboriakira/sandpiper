@@ -8,6 +8,7 @@ from rich.console import Console
 from rich.panel import Panel
 
 from sandpiper.app.app import bootstrap
+from sandpiper.clips.application.create_clip import CreateClipRequest
 from sandpiper.plan.application.create_project_task import CreateProjectTaskRequest
 from sandpiper.plan.application.create_someday_item import CreateSomedayItemRequest
 from sandpiper.plan.application.create_todo import CreateNewToDoRequest
@@ -898,6 +899,28 @@ def archive_old_todos(
         console.print(f"[red]エラー: {e}[/red]")
         if notifier:
             notifier.notify_failure(command="archive-old-todos", error=str(e))
+        raise typer.Exit(code=1)
+
+
+@app.command()
+def create_clip(
+    url: str = typer.Argument(..., help="クリップするURLを指定"),
+    title: str = typer.Option(None, "--title", "-t", help="タイトルを指定 (省略時はURLから自動取得)"),
+) -> None:
+    """URLからWebクリップを作成してNotionに保存します
+
+    URLを指定してClipsデータベースにWebクリップを作成します。
+    タイトルを省略した場合、ページのタイトルを自動取得します。
+    YouTube URLの場合はYouTube APIからタイトルを取得します。
+    """
+    try:
+        request = CreateClipRequest(url=url, title=title)
+        result = sandpiper_app.create_clip.execute(request)
+        console.print(f"[green]Clipを作成しました: {result.title}[/green]")
+        console.print(f"  URL: {result.url}")
+        console.print(f"  タイプ: {result.inbox_type.value}")
+    except Exception as e:
+        console.print(f"[red]エラー: {e}[/red]")
         raise typer.Exit(code=1)
 
 
