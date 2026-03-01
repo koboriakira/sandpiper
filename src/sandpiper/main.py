@@ -941,5 +941,25 @@ def override_section_by_schedule(
         raise typer.Exit(code=1)
 
 
+@app.command()
+def list_unprocessed_clips() -> None:
+    """未処理のWebクリップ一覧を表示します
+
+    Notionに保存された未処理(unprocessed=True)のClipsを取得し、
+    タイトルとURLを一覧で表示します。
+    未読の記事やWebクリップを確認する用途を想定しています。
+    """
+    clips = sandpiper_app.list_unprocessed_clips.execute()
+
+    if not clips:
+        console.print("[yellow]未処理のClipはありません[/yellow]")
+        return
+
+    console.print(f"[bold]未処理のClip: {len(clips)}件[/bold]\n")
+    for clip in clips:
+        console.print(f"  [cyan]{clip.title}[/cyan]")
+        console.print(f"    {clip.url}")
+
+
 if __name__ == "__main__":
     app()
