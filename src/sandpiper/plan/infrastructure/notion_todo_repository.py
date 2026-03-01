@@ -24,7 +24,7 @@ from sandpiper.shared.valueobject.task_chute_section import TaskChuteSection
 
 
 @notion_database(todo_db.DATABASE_ID)
-class TodoPage(BasePage):  # type: ignore[misc]
+class TodoPage(BasePage):
     name: TodoName
     status: TodoStatus
     kind: TodoKindProp | None = None

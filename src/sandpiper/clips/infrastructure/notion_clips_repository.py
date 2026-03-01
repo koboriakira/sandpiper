@@ -13,7 +13,7 @@ from sandpiper.shared.notion.databases.clips import (
 
 
 @notion_database(clips_db.DATABASE_ID)
-class ClipsPage(BasePage):  # type: ignore[misc]
+class ClipsPage(BasePage):
     name: ClipsName
     url: ClipsUrl | None = None
     inbox_type: ClipsTypeProp | None = None

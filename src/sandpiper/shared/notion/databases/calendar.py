@@ -5,22 +5,19 @@ DATABASE_ID = "2dd6567a3bbf80219a93f941334bd556"
 
 
 @notion_prop("名前")
-class CalendarEventName(Title):  # type: ignore[misc]
-    ...
+class CalendarEventName(Title): ...
 
 
 @notion_prop("カテゴリ")
-class CalendarEventCategory(Select):  # type: ignore[misc]
-    ...
+class CalendarEventCategory(Select): ...
 
 
 @notion_prop("期間")
-class CalendarEventDateRange(Date):  # type: ignore[misc]
-    ...
+class CalendarEventDateRange(Date): ...
 
 
 @notion_database(DATABASE_ID)
-class CalendarEventPage(BasePage):  # type: ignore[misc]
+class CalendarEventPage(BasePage):
     """カレンダーイベントのNotionページ
 
     ドメイン変換ロジック(to_domain, generate)はcalendar.infrastructureで実装

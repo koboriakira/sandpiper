@@ -28,7 +28,7 @@ DEFAULT_ARCHIVE_DAYS = 7
 
 
 @notion_database(todo_archive_db.DATABASE_ID)
-class TodoArchivePage(BasePage):  # type: ignore[misc]
+class TodoArchivePage(BasePage):
     name: TodoArchiveName
     status: TodoArchiveStatus
 

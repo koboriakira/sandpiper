@@ -10,32 +10,27 @@ DATABASE_ID = "2db6567a3bbf80a8b3f3e3560cfe380f"
 
 
 @notion_prop("名前")
-class SomedayName(Title):  # type: ignore[misc]
-    ...
+class SomedayName(Title): ...
 
 
 @notion_prop("タイミング")
-class SomedayTiming(Select):  # type: ignore[misc]
-    ...
+class SomedayTiming(Select): ...
 
 
 @notion_prop("明日やる")
-class SomedayDoTomorrow(Checkbox):  # type: ignore[misc]
-    ...
+class SomedayDoTomorrow(Checkbox): ...
 
 
 @notion_prop("論理削除")
-class SomedayIsDeleted(Checkbox):  # type: ignore[misc]
-    ...
+class SomedayIsDeleted(Checkbox): ...
 
 
 @notion_prop("コンテクスト")
-class SomedayContext(MultiSelect):  # type: ignore[misc]
-    ...
+class SomedayContext(MultiSelect): ...
 
 
 @notion_database(DATABASE_ID)
-class SomedayPage(BasePage):  # type: ignore[misc]
+class SomedayPage(BasePage):
     name: SomedayName
     timing: SomedayTiming
     do_tomorrow: SomedayDoTomorrow
