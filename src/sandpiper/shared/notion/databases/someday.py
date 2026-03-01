@@ -47,7 +47,7 @@ class SomedayPage(BasePage):
         ]
         if item.context:
             properties.append(SomedayContext.from_name(item.context))
-        return SomedayPage.create(properties=properties)  # type: ignore[no-any-return]
+        return SomedayPage.create(properties=properties)
 
     def to_domain(self) -> "SomedayItem":
         from sandpiper.shared.model.someday_item import SomedayItem
@@ -71,4 +71,4 @@ class SomedayPage(BasePage):
     @staticmethod
     def fetch_all(client: Lotion | None = None) -> list["SomedayPage"]:
         lotion = client or Lotion.get_instance()
-        return lotion.retrieve_database(DATABASE_ID, cls=SomedayPage)  # type: ignore[no-any-return]
+        return lotion.retrieve_database(DATABASE_ID, cls=SomedayPage)

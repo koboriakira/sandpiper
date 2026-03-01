@@ -251,8 +251,8 @@ class TestInterruptWithTask:
             mock_use_case.execute.assert_called_once()
             call_args = mock_use_case.execute.call_args
             request = call_args[0][0]
-            assert request.kind == ToDoKind.INTERRUPTION
-            assert request.section == TaskChuteSection.C_13_17
+            assert request.kind.value == ToDoKind.INTERRUPTION.value
+            assert request.section.value == TaskChuteSection.C_13_17.value
             assert request.sort_order == "14:30"
             assert call_args[1]["enableStart"] is True
 

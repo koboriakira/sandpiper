@@ -67,7 +67,7 @@ class TodoPage(BasePage):
         if todo.claude_url:
             properties.append(TodoClaudeUrl.from_url(todo.claude_url))
 
-        return TodoPage.create(properties=properties, blocks=blocks)  # type: ignore[no-any-return]
+        return TodoPage.create(properties=properties, blocks=blocks)
 
     def to_domain(self) -> ToDo:
         section = self.get_select("セクション")
@@ -123,7 +123,7 @@ class NotionTodoRepository:
 
     def find(self, page_id: str) -> ToDo:
         notion_page = self.client.retrieve_page(page_id, cls=TodoPage)
-        return notion_page.to_domain()  # type: ignore[no-any-return]
+        return notion_page.to_domain()
 
     def _get_blocks_from_other_pages(self, todo: ToDo) -> list[Block]:
         page_id = todo.routine_page_id or todo.project_task_page_id

@@ -75,6 +75,11 @@ Issues = "https://github.com/username/sandpiper/issues"
 sandpiper = "sandpiper.main:app"
 sandpiper-mcp = "sandpiper.mcp_server:main"
 
+[tool.uv]
+constraint-dependencies = [
+    "notion-client<3",  # lotion との互換性のため v2 系に固定
+]
+
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"

@@ -29,7 +29,7 @@ class ClipsPage(BasePage):
             ClipsAutoFetchTitle.true() if clip.auto_fetch_title else ClipsAutoFetchTitle.false(),
             ClipsUnprocessed.true() if clip.unprocessed else ClipsUnprocessed.false(),
         ]
-        return ClipsPage.create(properties=properties)  # type: ignore[no-any-return]
+        return ClipsPage.create(properties=properties)
 
 
 class NotionClipsRepository(ClipsRepository):
