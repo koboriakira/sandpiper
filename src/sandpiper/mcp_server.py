@@ -13,6 +13,7 @@ from sandpiper.plan.application.create_project import CreateProject, CreateProje
 from sandpiper.plan.application.create_project_task import CreateProjectTask, CreateProjectTaskRequest
 from sandpiper.plan.application.create_someday_item import CreateSomedayItem, CreateSomedayItemRequest
 from sandpiper.plan.application.create_todo import CreateNewToDoRequest, CreateToDo
+from sandpiper.plan.domain.project import InsertedProject
 from sandpiper.plan.infrastructure.notion_project_repository import NotionProjectRepository
 from sandpiper.plan.infrastructure.notion_project_task_repository import (
     NotionProjectTaskRepository as NotionSharedProjectTaskRepository,
@@ -40,6 +41,19 @@ def _serialize_todo(todo: ToDo) -> dict[str, str | None]:
         "status": todo.status.value,
         "section": todo.section.value if todo.section else None,
         "log_start_datetime": todo.log_start_datetime.isoformat() if todo.log_start_datetime else None,
+    }
+
+
+def _serialize_project(project: InsertedProject) -> dict[str, str | None]:
+    """InsertedProjectをdict変換する"""
+    return {
+        "id": project.id,
+        "name": project.name,
+        "start_date": project.start_date.isoformat(),
+        "end_date": project.end_date.isoformat() if project.end_date else None,
+        "status": project.status.value if project.status else None,
+        "jira_url": project.jira_url,
+        "claude_url": project.claude_url,
     }
 
 
@@ -125,6 +139,23 @@ def get_undone_project_tasks() -> list[dict[str, str | bool | list[str] | None]]
         }
         for dto in dtos
     ]
+
+
+@mcp.tool()
+def get_projects(status: str | None = None) -> list[dict[str, str | None]]:
+    """プロジェクト一覧を取得する。タスク追加時のプロジェクトID確認に使う。
+
+    Args:
+        status: ステータスでフィルタ(ToDo, InProgress, Done等)。省略時はDone以外を返す。
+    """
+    repo = NotionProjectRepository()
+    projects = repo.fetch_all()
+    if status is not None:
+        target = ToDoStatusEnum(status)
+        projects = [p for p in projects if p.status == target]
+    else:
+        projects = [p for p in projects if p.status != ToDoStatusEnum.DONE]
+    return [_serialize_project(p) for p in projects]
 
 
 @mcp.tool()

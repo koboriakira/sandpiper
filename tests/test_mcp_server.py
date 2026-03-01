@@ -429,3 +429,122 @@ class TestDeferToSomeday:
         assert result["status"] == "created"
         assert result["id"] == "sd-new-1"
         assert result["title"] == "新しいサムデイ"
+
+
+def _make_project(
+    id: str = "proj-id-1",
+    name: str = "テストプロジェクト",
+    start_date: date = date(2026, 3, 1),
+    end_date: date | None = None,
+    status: ToDoStatusEnum | None = ToDoStatusEnum.IN_PROGRESS,
+    jira_url: str | None = None,
+    claude_url: str | None = None,
+) -> object:
+    from sandpiper.plan.domain.project import InsertedProject
+
+    return InsertedProject(
+        id=id,
+        name=name,
+        start_date=start_date,
+        end_date=end_date,
+        status=status,
+        jira_url=jira_url,
+        claude_url=claude_url,
+    )
+
+
+class TestSerializeProject:
+    """_serialize_projectヘルパー関数のテスト"""
+
+    def test_serializes_all_fields(self) -> None:
+        from sandpiper.mcp_server import _serialize_project
+
+        project = _make_project(
+            end_date=date(2026, 3, 31),
+            jira_url="https://jira.example.com/PROJ-1",
+            claude_url="https://claude.ai/chat/xxx",
+        )
+        result = _serialize_project(project)
+
+        assert result["id"] == "proj-id-1"
+        assert result["name"] == "テストプロジェクト"
+        assert result["start_date"] == "2026-03-01"
+        assert result["end_date"] == "2026-03-31"
+        assert result["status"] == "InProgress"
+        assert result["jira_url"] == "https://jira.example.com/PROJ-1"
+        assert result["claude_url"] == "https://claude.ai/chat/xxx"
+
+    def test_serializes_none_fields(self) -> None:
+        from sandpiper.mcp_server import _serialize_project
+
+        project = _make_project(end_date=None, status=None, jira_url=None, claude_url=None)
+        result = _serialize_project(project)
+
+        assert result["end_date"] is None
+        assert result["status"] is None
+        assert result["jira_url"] is None
+        assert result["claude_url"] is None
+
+
+class TestGetProjects:
+    """get_projectsツール関数のテスト"""
+
+    @patch("sandpiper.mcp_server.NotionProjectRepository")
+    def test_default_excludes_done(self, mock_repo_cls: MagicMock) -> None:
+        """デフォルトではDone以外のプロジェクトを返す"""
+        from sandpiper.mcp_server import get_projects
+
+        projects = [
+            _make_project(id="p1", name="進行中", status=ToDoStatusEnum.IN_PROGRESS),
+            _make_project(id="p2", name="完了済み", status=ToDoStatusEnum.DONE),
+            _make_project(id="p3", name="予定", status=ToDoStatusEnum.TODO),
+        ]
+        mock_repo_cls.return_value.fetch_all.return_value = projects
+
+        result = get_projects()
+
+        assert len(result) == 2
+        assert result[0]["name"] == "進行中"
+        assert result[1]["name"] == "予定"
+
+    @patch("sandpiper.mcp_server.NotionProjectRepository")
+    def test_filter_by_status(self, mock_repo_cls: MagicMock) -> None:
+        """ステータス指定でフィルタする"""
+        from sandpiper.mcp_server import get_projects
+
+        projects = [
+            _make_project(id="p1", status=ToDoStatusEnum.IN_PROGRESS),
+            _make_project(id="p2", status=ToDoStatusEnum.DONE),
+        ]
+        mock_repo_cls.return_value.fetch_all.return_value = projects
+
+        result = get_projects(status="Done")
+
+        assert len(result) == 1
+        assert result[0]["status"] == "Done"
+
+    @patch("sandpiper.mcp_server.NotionProjectRepository")
+    def test_returns_empty_list(self, mock_repo_cls: MagicMock) -> None:
+        """空リストのケース"""
+        from sandpiper.mcp_server import get_projects
+
+        mock_repo_cls.return_value.fetch_all.return_value = []
+
+        result = get_projects()
+
+        assert result == []
+
+    @patch("sandpiper.mcp_server.NotionProjectRepository")
+    def test_project_with_none_status_excluded_by_default(self, mock_repo_cls: MagicMock) -> None:
+        """statusがNoneのプロジェクトはデフォルトフィルタで含まれる"""
+        from sandpiper.mcp_server import get_projects
+
+        projects = [
+            _make_project(id="p1", name="ステータスなし", status=None),
+        ]
+        mock_repo_cls.return_value.fetch_all.return_value = projects
+
+        result = get_projects()
+
+        assert len(result) == 1
+        assert result[0]["name"] == "ステータスなし"
