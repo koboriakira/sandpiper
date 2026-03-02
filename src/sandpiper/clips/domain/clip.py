@@ -10,7 +10,6 @@ class Clip:
     title: str
     url: str
     inbox_type: InboxType
-    auto_fetch_title: bool = False
     unprocessed: bool = True
 
 
@@ -22,5 +21,4 @@ class InsertedClip:
     title: str
     url: str
     inbox_type: InboxType
-    auto_fetch_title: bool = False
     unprocessed: bool = True

@@ -21,9 +21,9 @@ from sandpiper.shared.notion.databases.calendar import (
     CalendarEventName,
 )
 from sandpiper.shared.notion.databases.clips import (
-    ClipsAutoFetchTitle,
     ClipsName,
     ClipsTypeProp,
+    ClipsUnprocessed,
     ClipsUrl,
 )
 from sandpiper.shared.notion.databases.inbox import (
@@ -94,9 +94,9 @@ __all__ = [
     "CalendarEventCategory",
     "CalendarEventDateRange",
     "CalendarEventName",
-    "ClipsAutoFetchTitle",
     "ClipsName",
     "ClipsTypeProp",
+    "ClipsUnprocessed",
     "ClipsUrl",
     "DatabaseId",
     "InboxName",

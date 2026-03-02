@@ -93,7 +93,6 @@ class MockClipsRepository(ClipsRepository):
             title=clip.title,
             url=clip.url,
             inbox_type=clip.inbox_type,
-            auto_fetch_title=clip.auto_fetch_title,
             unprocessed=clip.unprocessed,
         )
 
@@ -117,7 +116,6 @@ class TestCreateClip:
         assert result.title == "My Custom Title"
         assert result.url == "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
         assert result.inbox_type == InboxType.VIDEO
-        assert result.auto_fetch_title is False  # タイトル指定済みなのでFalse
         assert result.unprocessed is True  # 作成時は常にTrue
 
     def test_create_clip_youtube_url_api_success(self):
@@ -134,7 +132,6 @@ class TestCreateClip:
 
         assert result.title == "YouTube Video Title"
         assert result.inbox_type == InboxType.VIDEO
-        assert result.auto_fetch_title is False  # タイトル取得成功なのでFalse
 
     def test_create_clip_youtube_url_api_failure(self):
         """YouTube URLでAPI取得失敗の場合"""
@@ -147,7 +144,6 @@ class TestCreateClip:
 
         assert result.title == DEFAULT_TITLE
         assert result.inbox_type == InboxType.VIDEO
-        assert result.auto_fetch_title is True  # タイトル取得失敗なのでTrue
 
     def test_create_clip_non_youtube_url(self):
         """非YouTube URLの場合はHTMLタイトル取得"""
@@ -160,7 +156,6 @@ class TestCreateClip:
 
         assert result.title == "Web Page Title"
         assert result.inbox_type == InboxType.WEB
-        assert result.auto_fetch_title is False
 
     def test_create_clip_non_youtube_url_fetch_failure(self):
         """非YouTube URLでタイトル取得失敗の場合"""
@@ -173,4 +168,3 @@ class TestCreateClip:
 
         assert result.title == DEFAULT_TITLE
         assert result.inbox_type == InboxType.WEB
-        assert result.auto_fetch_title is True

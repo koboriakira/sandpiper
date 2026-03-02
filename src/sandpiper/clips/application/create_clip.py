@@ -93,10 +93,7 @@ class CreateClip:
             if title is None:
                 title = DEFAULT_TITLE
 
-        # タイトルが取得できなかった場合のみ、自動取得フラグを立てる
-        auto_fetch_title = title == DEFAULT_TITLE
-
-        clip = Clip(title=title, url=request.url, inbox_type=inbox_type, auto_fetch_title=auto_fetch_title)
+        clip = Clip(title=title, url=request.url, inbox_type=inbox_type)
         inserted_clip = self._clips_repository.save(clip)
         print(f"Created Clip: {inserted_clip}")
         return inserted_clip
