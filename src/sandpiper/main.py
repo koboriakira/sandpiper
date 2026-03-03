@@ -984,5 +984,35 @@ def list_unprocessed_clips() -> None:
         console.print(f"    {clip.url}")
 
 
+@app.command()
+def check_dakoku(
+    notify: bool = typer.Option(False, "--notify", help="未完了時にSlackに通知する (cron実行用)"),
+) -> None:
+    """「打刻」TODOが未完了かチェックします
+
+    ステータスがTODOまたはIN_PROGRESSのタスクの中に
+    タイトルに「打刻」を含むものがあればSlack通知します。
+    平日朝のcronで定期実行する用途を想定しています。
+    """
+    from sandpiper.perform.infrastructure.notion_todo_repository import NotionTodoRepository
+
+    repo = NotionTodoRepository()
+    incomplete_todos: list[str] = []
+    for status in [ToDoStatusEnum.TODO, ToDoStatusEnum.IN_PROGRESS]:
+        todos = repo.find_by_status(status)
+        incomplete_todos.extend(todo.title for todo in todos if "打刻" in todo.title)
+
+    if not incomplete_todos:
+        console.print("[green]打刻は完了済みです[/green]")
+        return
+
+    message = f"打刻が未完了です: {', '.join(incomplete_todos)}"
+    console.print(f"[red][bold]{message}[/bold][/red]")
+
+    if notify:
+        notifier = _create_notifier()
+        notifier.notify_success(command="check-dakoku", summary=message)
+
+
 if __name__ == "__main__":
     app()
