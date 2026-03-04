@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from sandpiper.plan.domain.project import InsertedProject, Project
 from sandpiper.plan.domain.project_repository import ProjectRepository
@@ -17,6 +17,9 @@ class SyncJiraToProjectResult:
     created_projects: list[InsertedProject]
     skipped_tickets: list[JiraTicketDto]
     notion_only_projects: list[InsertedProject]  # Notion側にのみ存在(JIRA側で完了済み等)
+    completed_projects: list[InsertedProject] = field(
+        default_factory=list
+    )  # Jira完了によりDoneに更新されたプロジェクト
 
 
 class SyncJiraToProject:
@@ -68,7 +71,7 @@ class SyncJiraToProject:
 
         # Notion側にのみ存在するプロジェクトを特定
         # (対象JIRAプロジェクトのURLパターンでフィルタリング、Doneステータスは除外)
-        notion_only_projects = [
+        notion_only_candidates = [
             p
             for p in notion_projects
             if p.jira_url
@@ -76,6 +79,20 @@ class SyncJiraToProject:
             and p.jira_url not in jira_ticket_urls
             and p.status != ToDoStatusEnum.DONE
         ]
+
+        # Jira側のステータスを確認し、完了済みならNotionもDoneに更新
+        completed_projects: list[InsertedProject] = []
+        notion_only_projects: list[InsertedProject] = []
+
+        for project in notion_only_candidates:
+            assert project.jira_url is not None
+            issue_key = project.jira_url.split("/browse/")[-1]
+            ticket = self._jira_ticket_query.get_ticket(issue_key)
+            if ticket is None or ticket.status == "Done":
+                self._project_repository.update_status(project.id, ToDoStatusEnum.DONE)
+                completed_projects.append(project)
+            else:
+                notion_only_projects.append(project)
 
         created_projects: list[InsertedProject] = []
         skipped_tickets: list[JiraTicketDto] = []
@@ -93,13 +110,13 @@ class SyncJiraToProject:
 
             # プロジェクト名はJIRAチケットのsummary
             # JIRAの"In Progress"ステータスのチケットなのでプロジェクトもIN_PROGRESSで作成
-            project = Project(
+            new_project = Project(
                 name=ticket.summary,
                 start_date=jst_today(),
                 jira_url=ticket.url,
                 status=ToDoStatusEnum.IN_PROGRESS,
             )
-            inserted_project = self._project_repository.save(project)
+            inserted_project = self._project_repository.save(new_project)
             created_projects.append(inserted_project)
 
             # 新規作成したURLを追加(同一実行内での重複防止)
@@ -117,4 +134,5 @@ class SyncJiraToProject:
             created_projects=created_projects,
             skipped_tickets=skipped_tickets,
             notion_only_projects=notion_only_projects,
+            completed_projects=completed_projects,
         )

@@ -448,3 +448,169 @@ class TestSyncJiraToProject:
         assert len(result.created_projects) == 0
         assert len(result.skipped_tickets) == 1
         assert len(result.notion_only_projects) == 0
+
+    def test_execute_completes_notion_project_when_jira_done(
+        self,
+        sync_jira_to_project,
+        mock_jira_ticket_query,
+        mock_project_repository,
+        mock_project_task_repository,  # noqa: ARG002
+    ):
+        """Jira側でDoneのチケットに対応するNotionプロジェクトをDoneに更新する"""
+        # Arrange
+        mock_jira_ticket_query.search_tickets.return_value = []
+
+        notion_project = InsertedProject(
+            id="project-to-complete",
+            name="Done in Jira",
+            start_date=date.today(),
+            jira_url="https://jira.example.com/browse/SU-700",
+            status=ToDoStatusEnum.IN_PROGRESS,
+        )
+        mock_project_repository.fetch_projects_with_jira_url.return_value = [notion_project]
+
+        # Jira側でDone
+        done_ticket = JiraTicketDto(
+            issue_key="SU-700",
+            summary="Done in Jira",
+            issue_type="Task",
+            status="Done",
+            url="https://jira.example.com/browse/SU-700",
+        )
+        mock_jira_ticket_query.get_ticket.return_value = done_ticket
+
+        # Act
+        result = sync_jira_to_project.execute(jira_project="SU")
+
+        # Assert
+        assert len(result.completed_projects) == 1
+        assert result.completed_projects[0].id == "project-to-complete"
+        assert len(result.notion_only_projects) == 0
+        mock_project_repository.update_status.assert_called_once_with("project-to-complete", ToDoStatusEnum.DONE)
+
+    def test_execute_keeps_notion_project_when_jira_not_done(
+        self,
+        sync_jira_to_project,
+        mock_jira_ticket_query,
+        mock_project_repository,
+        mock_project_task_repository,  # noqa: ARG002
+    ):
+        """Jira側で未完了のチケットに対応するNotionプロジェクトはnotion_only_projectsに残る"""
+        # Arrange
+        mock_jira_ticket_query.search_tickets.return_value = []
+
+        notion_project = InsertedProject(
+            id="project-still-active",
+            name="Still active in Jira",
+            start_date=date.today(),
+            jira_url="https://jira.example.com/browse/SU-800",
+            status=ToDoStatusEnum.IN_PROGRESS,
+        )
+        mock_project_repository.fetch_projects_with_jira_url.return_value = [notion_project]
+
+        # Jira側でTo Do(未完了)
+        active_ticket = JiraTicketDto(
+            issue_key="SU-800",
+            summary="Still active in Jira",
+            issue_type="Task",
+            status="To Do",
+            url="https://jira.example.com/browse/SU-800",
+        )
+        mock_jira_ticket_query.get_ticket.return_value = active_ticket
+
+        # Act
+        result = sync_jira_to_project.execute(jira_project="SU")
+
+        # Assert
+        assert len(result.completed_projects) == 0
+        assert len(result.notion_only_projects) == 1
+        assert result.notion_only_projects[0].id == "project-still-active"
+        mock_project_repository.update_status.assert_not_called()
+
+    def test_execute_completes_notion_project_when_jira_404(
+        self,
+        sync_jira_to_project,
+        mock_jira_ticket_query,
+        mock_project_repository,
+        mock_project_task_repository,  # noqa: ARG002
+    ):
+        """Jira側で404(チケット不存在)の場合もNotionプロジェクトをDoneに更新する"""
+        # Arrange
+        mock_jira_ticket_query.search_tickets.return_value = []
+
+        notion_project = InsertedProject(
+            id="project-jira-deleted",
+            name="Deleted in Jira",
+            start_date=date.today(),
+            jira_url="https://jira.example.com/browse/SU-900",
+            status=ToDoStatusEnum.IN_PROGRESS,
+        )
+        mock_project_repository.fetch_projects_with_jira_url.return_value = [notion_project]
+
+        # Jira側で404
+        mock_jira_ticket_query.get_ticket.return_value = None
+
+        # Act
+        result = sync_jira_to_project.execute(jira_project="SU")
+
+        # Assert
+        assert len(result.completed_projects) == 1
+        assert result.completed_projects[0].id == "project-jira-deleted"
+        assert len(result.notion_only_projects) == 0
+        mock_project_repository.update_status.assert_called_once_with("project-jira-deleted", ToDoStatusEnum.DONE)
+
+    def test_execute_mixed_completion_and_remaining(
+        self,
+        sync_jira_to_project,
+        mock_jira_ticket_query,
+        mock_project_repository,
+        mock_project_task_repository,  # noqa: ARG002
+    ):
+        """Jira完了と未完了が混在するケース"""
+        # Arrange
+        mock_jira_ticket_query.search_tickets.return_value = []
+
+        done_project = InsertedProject(
+            id="done-project",
+            name="Done feature",
+            start_date=date.today(),
+            jira_url="https://jira.example.com/browse/SU-1000",
+            status=ToDoStatusEnum.IN_PROGRESS,
+        )
+        active_project = InsertedProject(
+            id="active-project",
+            name="Active feature",
+            start_date=date.today(),
+            jira_url="https://jira.example.com/browse/SU-1001",
+            status=ToDoStatusEnum.IN_PROGRESS,
+        )
+        mock_project_repository.fetch_projects_with_jira_url.return_value = [done_project, active_project]
+
+        def get_ticket_side_effect(issue_key: str) -> JiraTicketDto | None:
+            if issue_key == "SU-1000":
+                return JiraTicketDto(
+                    issue_key="SU-1000",
+                    summary="Done feature",
+                    issue_type="Task",
+                    status="Done",
+                    url="https://jira.example.com/browse/SU-1000",
+                )
+            return JiraTicketDto(
+                issue_key="SU-1001",
+                summary="Active feature",
+                issue_type="Task",
+                status="In Progress",
+                url="https://jira.example.com/browse/SU-1001",
+            )
+
+        mock_jira_ticket_query.get_ticket.side_effect = get_ticket_side_effect
+
+        # Act
+        result = sync_jira_to_project.execute(jira_project="SU")
+
+        # Assert
+        assert len(result.completed_projects) == 1
+        assert result.completed_projects[0].id == "done-project"
+        assert len(result.notion_only_projects) == 1
+        assert result.notion_only_projects[0].id == "active-project"
+        mock_project_repository.update_status.assert_called_once_with("done-project", ToDoStatusEnum.DONE)

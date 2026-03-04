@@ -785,16 +785,24 @@ def sync_jira_to_project(
                 if project.jira_url:
                     console.print(f"    [blue]{project.jira_url}[/blue]")
 
+        # Jira完了によりDoneに更新されたプロジェクト
+        if result.completed_projects:
+            console.print(f"\n[cyan][bold]完了に更新 ({len(result.completed_projects)}件):[/bold][/cyan]")
+            for project in result.completed_projects:
+                console.print(f"  - {project.name}")
+                if project.jira_url:
+                    console.print(f"    [blue]{project.jira_url}[/blue]")
+
         # スキップされたチケット
         if result.skipped_tickets:
             console.print(f"\n[yellow][bold]スキップされたチケット ({len(result.skipped_tickets)}件):[/bold][/yellow]")
             for ticket in result.skipped_tickets:
                 console.print(f"  - {ticket.issue_key}: {ticket.summary}")
 
-        # Notionにのみ存在するプロジェクト (JIRA側で完了済み等)
+        # Notionにのみ存在するプロジェクト (JIRA側でステータス変更等)
         if result.notion_only_projects:
             console.print(f"\n[magenta][bold]Notionのみに存在 ({len(result.notion_only_projects)}件):[/bold][/magenta]")
-            console.print("[dim]※JIRA側で完了済みまたはステータス変更の可能性があります[/dim]")
+            console.print("[dim]※JIRA側でステータス変更の可能性があります[/dim]")
             for project in result.notion_only_projects:
                 console.print(f"  - {project.name}")
                 if project.jira_url:
@@ -803,6 +811,7 @@ def sync_jira_to_project(
         # サマリー
         summary = (
             f"{len(result.created_projects)}件作成, "
+            f"{len(result.completed_projects)}件完了, "
             f"{len(result.skipped_tickets)}件スキップ, "
             f"{len(result.notion_only_projects)}件Notionのみ"
         )

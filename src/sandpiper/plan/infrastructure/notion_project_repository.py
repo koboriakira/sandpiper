@@ -158,3 +158,8 @@ class NotionProjectRepository:
                 # start_dateが未設定のプロジェクトはスキップ
                 continue
         return results
+
+    def update_status(self, page_id: str, status: ToDoStatusEnum) -> None:
+        page = self.client.retrieve_page(page_id, ProjectPage)
+        page.set_prop(ProjectStatus.from_status_name(status.value))
+        self.client.update(page)

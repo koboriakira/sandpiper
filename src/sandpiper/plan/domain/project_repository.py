@@ -1,6 +1,7 @@
 from typing import Protocol
 
 from sandpiper.plan.domain.project import InsertedProject, Project
+from sandpiper.shared.valueobject.todo_status_enum import ToDoStatusEnum
 
 
 class ProjectRepository(Protocol):
@@ -28,4 +29,8 @@ class ProjectRepository(Protocol):
 
     def fetch_projects_with_jira_url(self) -> list[InsertedProject]:
         """Jira URLを持つすべてのプロジェクトを取得する"""
+        ...
+
+    def update_status(self, page_id: str, status: ToDoStatusEnum) -> None:
+        """プロジェクトのステータスを更新する"""
         ...
