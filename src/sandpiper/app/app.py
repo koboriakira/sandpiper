@@ -17,6 +17,7 @@ from sandpiper.perform.application.schedule_task_end_notification import Schedul
 from sandpiper.perform.application.start_todo import StartTodo
 from sandpiper.perform.infrastructure.notion_todo_repository import NotionTodoRepository as PerformNotionTodoRepository
 from sandpiper.perform.query.incidental_task_query import NotionIncidentalTaskQuery
+from sandpiper.plan.application.cleanup_project_tasks import CleanupProjectTasks
 from sandpiper.plan.application.convert_to_project import ConvertToProject
 from sandpiper.plan.application.create_project import CreateProject
 from sandpiper.plan.application.create_project_task import CreateProjectTask
@@ -84,6 +85,7 @@ class SandPiperApp:
         create_tasks_by_someday_list: CreateTasksBySomedayList,
         override_section_by_schedule: OverrideSectionBySchedule,
         prepare_tomorrow_todos: PrepareTomorrowTodos,
+        cleanup_project_tasks: CleanupProjectTasks,
     ) -> None:
         self.create_todo = create_todo
         self.create_project = create_project
@@ -109,6 +111,7 @@ class SandPiperApp:
         self.create_tasks_by_someday_list = create_tasks_by_someday_list
         self.override_section_by_schedule = override_section_by_schedule
         self.prepare_tomorrow_todos = prepare_tomorrow_todos
+        self.cleanup_project_tasks = cleanup_project_tasks
 
 
 def bootstrap() -> SandPiperApp:
@@ -275,4 +278,8 @@ def bootstrap() -> SandPiperApp:
             todo_repository=perform_notion_todo_repository,
         ),
         prepare_tomorrow_todos=prepare_tomorrow_todos,
+        cleanup_project_tasks=CleanupProjectTasks(
+            project_task_repository=project_task_repository,
+            project_repository=project_repository,
+        ),
     )

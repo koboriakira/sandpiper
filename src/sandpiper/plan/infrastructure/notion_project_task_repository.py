@@ -1,4 +1,5 @@
 from lotion import BasePage, Lotion, notion_database
+from lotion.filter import Builder, Cond
 
 from sandpiper.plan.domain.project_task import InsertedProjectTask, ProjectTask
 from sandpiper.shared.notion.databases import project_task as project_task_db
@@ -64,3 +65,27 @@ class NotionProjectTaskRepository:
         page = self.client.retrieve_page(page_id, ProjectTaskPage)
         page.set_prop(ProjectTaskStatus.from_status_name(status.value))
         self.client.update(page)
+
+    def fetch_not_done(self) -> list[InsertedProjectTask]:
+        filter_param = (
+            Builder.create().add(ProjectTaskStatus.from_status_name(ToDoStatusEnum.DONE.value), Cond.NOT_EQUALS).build()
+        )
+        pages: list[ProjectTaskPage] = self.client.retrieve_database(
+            database_id=project_task_db.DATABASE_ID, filter_param=filter_param, cls=ProjectTaskPage
+        )
+        results: list[InsertedProjectTask] = []
+        for page in pages:
+            status = page.get_status("ステータス")
+            project = page.get_relation("プロジェクト").id_list
+            results.append(
+                InsertedProjectTask(
+                    id=page.id,
+                    title=page.get_title_text(),
+                    status=ToDoStatusEnum(status.status_name),
+                    project_id=project[0] if project else "",
+                )
+            )
+        return results
+
+    def delete(self, page_id: str) -> None:
+        self.client.remove_page(page_id)

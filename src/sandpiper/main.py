@@ -994,6 +994,46 @@ def list_unprocessed_clips() -> None:
 
 
 @app.command()
+def cleanup_project_tasks(
+    notify: bool = typer.Option(False, "--notify", help="実行結果をSlackに通知する (cron実行用)"),
+) -> None:
+    """親プロジェクトが完了・削除済みのプロジェクトタスクを整理します
+
+    Done以外のプロジェクトタスクを全取得し:
+    - 親プロジェクトがDone → タスクもDoneに更新
+    - 親プロジェクトが存在しない → タスクをアーカイブ(削除)
+    - それ以外 → スキップ
+    """
+    notifier = _create_notifier() if notify else None
+
+    try:
+        console.print("[bold]プロジェクトタスクを整理中...[/bold]")
+        result = sandpiper_app.cleanup_project_tasks.execute()
+
+        if result.completed_count > 0:
+            console.print(f"[green][bold]完了に更新: {result.completed_count}件[/bold][/green]")
+            for title in result.completed_titles:
+                console.print(f"  - {title}")
+
+        if result.deleted_count > 0:
+            console.print(f"[yellow][bold]削除: {result.deleted_count}件[/bold][/yellow]")
+            for title in result.deleted_titles:
+                console.print(f"  - {title}")
+
+        if result.completed_count == 0 and result.deleted_count == 0:
+            console.print("[dim]整理対象のプロジェクトタスクはありませんでした[/dim]")
+
+        if notifier:
+            notifier.notify_success(command="cleanup-project-tasks", summary=result.summary)
+
+    except Exception as e:
+        console.print(f"[red]エラー: {e}[/red]")
+        if notifier:
+            notifier.notify_failure(command="cleanup-project-tasks", error=str(e))
+        raise typer.Exit(code=1)
+
+
+@app.command()
 def check_dakoku(
     notify: bool = typer.Option(False, "--notify", help="未完了時にSlackに通知する (cron実行用)"),
 ) -> None:
