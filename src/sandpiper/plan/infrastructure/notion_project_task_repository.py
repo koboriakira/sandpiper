@@ -68,7 +68,7 @@ class NotionProjectTaskRepository:
 
     def fetch_not_done(self) -> list[InsertedProjectTask]:
         filter_param = (
-            Builder.create().add(ProjectTaskStatus.from_status_name(ToDoStatusEnum.DONE.value), Cond.NOT_EQUALS).build()
+            Builder.create().add(ProjectTaskStatus.from_status_name(ToDoStatusEnum.DONE.value), Cond.DOES_NOT_EQUAL).build()
         )
         pages: list[ProjectTaskPage] = self.client.retrieve_database(
             database_id=project_task_db.DATABASE_ID, filter_param=filter_param, cls=ProjectTaskPage
