@@ -1054,7 +1054,8 @@ def export_donelist(
         console.print("[red]エラー: 日付の形式が正しくありません。YYYY-MM-DD形式で指定してください。[/red]")
         raise typer.Exit(code=1)
 
-    notifier = _create_notifier() if notify else None
+    _DONELIST_SLACK_CHANNEL_ID = "C0AJQR86PK9"
+    notifier = CronNotifier(messanger=SlackNoticeMessanger(channel_id=_DONELIST_SLACK_CHANNEL_ID)) if notify else None
 
     try:
         result = sandpiper_app.get_todo_log.execute(target_date)
@@ -1079,6 +1080,10 @@ def export_donelist(
 
         summary = f"{len(lines)}件を {output_path} に出力"
         console.print(f"[green]{summary}[/green]")
+
+        # Slack通知
+        slack_messanger = SlackNoticeMessanger(channel_id=_DONELIST_SLACK_CHANNEL_ID)
+        slack_messanger.send(f"[export-donelist] {date_filter}: {len(lines)}件出力しました")
 
         if notifier:
             notifier.notify_success(command="export-donelist", summary=summary)
