@@ -1034,6 +1034,63 @@ def cleanup_project_tasks(
 
 
 @app.command()
+def export_donelist(
+    date_filter: str = typer.Option(..., "--date", help="対象日付 (YYYY-MM-DD形式)"),
+    notify: bool = typer.Option(False, "--notify", help="実行結果をSlackに通知する (cron実行用)"),
+) -> None:
+    """完了タスクとカレンダー予定をObsidian DailyNoteに書き出します
+
+    get-todo-logと同じデータを取得し、Obsidian Vaultの
+    dailynote/YYYY/MM/DD/donelist.md に上書き出力します。
+    """
+    from datetime import datetime as dt
+    from pathlib import Path
+
+    from sandpiper.review.query.activity_log_item import ActivityType
+
+    try:
+        target_date = dt.strptime(date_filter, "%Y-%m-%d").date()
+    except ValueError:
+        console.print("[red]エラー: 日付の形式が正しくありません。YYYY-MM-DD形式で指定してください。[/red]")
+        raise typer.Exit(code=1)
+
+    notifier = _create_notifier() if notify else None
+
+    try:
+        result = sandpiper_app.get_todo_log.execute(target_date)
+
+        # 通常テキスト形式で行を生成
+        lines: list[str] = []
+        for item in result:
+            if item.activity_type == ActivityType.TODO:
+                prefix = f"【TODO {item.kind}】" + (f"[{item.project_name}] " if item.project_name else "")
+            else:
+                prefix = f"【予定 {item.category}】" if item.category else "【予定】"
+            time_range = f" ({item.start_datetime.strftime('%H:%M')} - {item.end_datetime.strftime('%H:%M')})"
+            lines.append(f"- {prefix}{item.title}{time_range}")
+
+        content = "\n".join(lines) + "\n" if lines else ""
+
+        # Obsidian Vault に書き出し
+        vault_path = Path.home() / "Library/Mobile Documents/iCloud~md~obsidian/Documents/my-vault"
+        output_path = vault_path / "dailynote" / f"{target_date:%Y/%m/%d}" / "donelist.md"
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        output_path.write_text(content, encoding="utf-8")
+
+        summary = f"{len(lines)}件を {output_path} に出力"
+        console.print(f"[green]{summary}[/green]")
+
+        if notifier:
+            notifier.notify_success(command="export-donelist", summary=summary)
+
+    except Exception as e:
+        console.print(f"[red]エラー: {e}[/red]")
+        if notifier:
+            notifier.notify_failure(command="export-donelist", error=str(e))
+        raise typer.Exit(code=1)
+
+
+@app.command()
 def check_dakoku(
     notify: bool = typer.Option(False, "--notify", help="未完了時にSlackに通知する (cron実行用)"),
 ) -> None:
