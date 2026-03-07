@@ -1,4 +1,4 @@
-from datetime import date, datetime, timedelta
+from datetime import UTC, date, datetime, timedelta
 from unittest.mock import patch
 
 import pytest
@@ -15,6 +15,7 @@ from sandpiper.shared.utils.date_utils import (
     jst_today_datetime,
     jst_tommorow,
     jst_tomorrow,
+    to_jst,
 )
 
 
@@ -196,6 +197,42 @@ class TestConvertDatetime:
         result = _convert_datetime("2024-01-15T10:30:00", datetime)
         assert isinstance(result, datetime)
         assert result.hour == 10
+        assert result.minute == 30
+
+
+class TestToJst:
+    """to_jst()のテスト."""
+
+    def test_naive_datetime_gets_jst(self) -> None:
+        """naive datetimeにJSTが付与される."""
+        dt = datetime(2024, 1, 15, 10, 30, 0)
+        result = to_jst(dt)
+        assert result.tzinfo == JST
+        assert result.hour == 10
+        assert result.minute == 30
+
+    def test_utc_datetime_converts_to_jst(self) -> None:
+        """UTC aware datetimeがJSTに変換される(+9時間)."""
+        dt = datetime(2024, 1, 15, 2, 30, 0, tzinfo=UTC)
+        result = to_jst(dt)
+        assert result.tzinfo == JST
+        assert result.hour == 11
+        assert result.minute == 30
+
+    def test_jst_datetime_unchanged(self) -> None:
+        """既にJSTのdatetimeはそのまま返される."""
+        dt = datetime(2024, 1, 15, 10, 30, 0, tzinfo=JST)
+        result = to_jst(dt)
+        assert result.tzinfo == JST
+        assert result.hour == 10
+        assert result.minute == 30
+
+    def test_iso_string_with_utc_offset(self) -> None:
+        """Notion APIが返すUTCオフセット付き文字列の変換."""
+        dt = datetime.fromisoformat("2024-01-15T02:30:00+00:00")
+        result = to_jst(dt)
+        assert result.tzinfo == JST
+        assert result.hour == 11
         assert result.minute == 30
 
 

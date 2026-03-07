@@ -5,6 +5,7 @@ from lotion import Lotion
 
 from sandpiper.review.query.activity_log_item import ActivityLogItem, ActivityType
 from sandpiper.shared.notion.databases.calendar import CalendarEventPage
+from sandpiper.shared.utils.date_utils import to_jst
 
 
 class CalendarQuery(Protocol):
@@ -27,14 +28,14 @@ class NotionCalendarQuery:
             if not start_date_str:
                 continue
 
-            start_datetime = datetime.fromisoformat(start_date_str)
+            start_datetime = to_jst(datetime.fromisoformat(start_date_str))
 
             # 指定日付のイベントのみ抽出
             if start_datetime.date() != target_date:
                 continue
 
             # 終了日時がない場合は開始日時と同じにする
-            end_datetime = datetime.fromisoformat(end_date_str) if end_date_str else start_datetime
+            end_datetime = to_jst(datetime.fromisoformat(end_date_str)) if end_date_str else start_datetime
 
             # カテゴリ取得
             category_prop = page.get_select("カテゴリ")

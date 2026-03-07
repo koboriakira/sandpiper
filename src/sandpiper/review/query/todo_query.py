@@ -6,6 +6,7 @@ from lotion import BasePage, Lotion
 from sandpiper.review.query.activity_log_item import ActivityLogItem, ActivityType
 from sandpiper.shared.notion.databases import project as project_db
 from sandpiper.shared.notion.databases import todo as todo_db
+from sandpiper.shared.utils.date_utils import to_jst
 from sandpiper.shared.valueobject.todo_kind import ToDoKind
 from sandpiper.shared.valueobject.todo_status_enum import ToDoStatusEnum
 
@@ -36,8 +37,8 @@ class NotionTodoQuery:
             if perform_range.start is None or perform_range.end is None:
                 continue
 
-            start_datetime = datetime.fromisoformat(perform_range.start)
-            end_datetime = datetime.fromisoformat(perform_range.end)
+            start_datetime = to_jst(datetime.fromisoformat(perform_range.start))
+            end_datetime = to_jst(datetime.fromisoformat(perform_range.end))
 
             # 指定日付以降のタスクのみ抽出
             if start_datetime.date() < target_date:

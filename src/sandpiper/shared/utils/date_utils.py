@@ -102,6 +102,20 @@ def jst_tomorrow() -> datetime:
 jst_tommorow = jst_tomorrow
 
 
+def to_jst(dt: datetime) -> datetime:
+    """datetimeをJSTに変換する.
+
+    Args:
+        dt: 変換対象のdatetime(naive or aware)
+
+    Returns:
+        JSTタイムゾーン付きのdatetime
+    """
+    if dt.tzinfo is None:
+        return dt.replace(tzinfo=JST)
+    return dt.astimezone(JST)
+
+
 def convert_to_date_or_datetime(
     value: str | None, cls: type[date] | type[datetime] | None = None
 ) -> date | datetime | None:
