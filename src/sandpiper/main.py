@@ -1125,5 +1125,351 @@ def check_dakoku(
         notifier.notify_success(command="check-dakoku", summary=message)
 
 
+# ---------------------------------------------------------------------------
+# Sub-apps: project / project-task / todo
+# ---------------------------------------------------------------------------
+# これらのコマンドはAIエージェントがNotionのプロパティを取得・更新する用途を想定。
+# 出力はすべてJSON形式(stdout)とし、機械的に扱いやすくする。
+
+_project_app = typer.Typer(help="プロジェクトのプロパティを取得・更新します")
+_project_task_app = typer.Typer(help="プロジェクトタスクのプロパティを取得・更新します")
+_todo_app = typer.Typer(help="TODOのプロパティを取得・更新します")
+
+app.add_typer(_project_app, name="project")
+app.add_typer(_project_task_app, name="project-task")
+app.add_typer(_todo_app, name="todo")
+
+
+# --- project ---
+
+
+@_project_app.command("get")
+def project_get(
+    page_id: str = typer.Argument(..., help="プロジェクトのNotionページID"),
+) -> None:
+    """プロジェクトのプロパティをJSON形式で取得します"""
+    import json as _json
+
+    from sandpiper.plan.infrastructure.notion_project_repository import NotionProjectRepository
+
+    repo = NotionProjectRepository()
+    p = repo.find_as_inserted(page_id)
+    print(
+        _json.dumps(
+            {
+                "id": p.id,
+                "name": p.name,
+                "status": p.status.value if p.status else None,
+                "start_date": p.start_date.isoformat(),
+                "end_date": p.end_date.isoformat() if p.end_date else None,
+                "jira_url": p.jira_url,
+                "claude_url": p.claude_url,
+            },
+            ensure_ascii=False,
+            indent=2,
+        )
+    )
+
+
+@_project_app.command("list")
+def project_list(
+    status: str = typer.Option(None, "--status", help="ステータスフィルター (TODO/IN_PROGRESS/DONE)"),
+) -> None:
+    """プロジェクト一覧をJSON形式で取得します"""
+    import json as _json
+
+    from sandpiper.plan.infrastructure.notion_project_repository import NotionProjectRepository
+
+    repo = NotionProjectRepository()
+    projects = repo.fetch_all()
+
+    if status:
+        try:
+            status_enum = ToDoStatusEnum[status]
+        except KeyError:
+            console.print(f"[red]エラー: 無効なステータスです: {status}[/red]")
+            console.print("[yellow]有効な値: TODO, IN_PROGRESS, DONE[/yellow]")
+            raise typer.Exit(code=1)
+        projects = [p for p in projects if p.status is not None and p.status.value == status_enum.value]
+
+    print(
+        _json.dumps(
+            [
+                {
+                    "id": p.id,
+                    "name": p.name,
+                    "status": p.status.value if p.status else None,
+                    "start_date": p.start_date.isoformat(),
+                    "end_date": p.end_date.isoformat() if p.end_date else None,
+                    "jira_url": p.jira_url,
+                    "claude_url": p.claude_url,
+                }
+                for p in projects
+            ],
+            ensure_ascii=False,
+            indent=2,
+        )
+    )
+
+
+@_project_app.command("update")
+def project_update(
+    page_id: str = typer.Argument(..., help="プロジェクトのNotionページID"),
+    status: str = typer.Option(None, "--status", help="新しいステータス (TODO/IN_PROGRESS/DONE)"),
+    name: str = typer.Option(None, "--name", help="新しいプロジェクト名"),
+    end_date: str = typer.Option(None, "--end-date", help="新しい完了日 (YYYY-MM-DD形式)"),
+) -> None:
+    """プロジェクトのプロパティを更新します"""
+    from datetime import datetime
+
+    from sandpiper.plan.infrastructure.notion_project_repository import NotionProjectRepository
+
+    if not any([status, name, end_date]):
+        console.print("[red]エラー: 更新するプロパティを指定してください (--status / --name / --end-date)[/red]")
+        raise typer.Exit(code=1)
+
+    repo = NotionProjectRepository()
+
+    if status:
+        try:
+            status_enum = ToDoStatusEnum[status]
+        except KeyError:
+            console.print(f"[red]エラー: 無効なステータスです: {status}[/red]")
+            raise typer.Exit(code=1)
+        repo.update_status(page_id, status_enum)
+
+    if name:
+        repo.update_name(page_id, name)
+
+    if end_date:
+        try:
+            end_date_obj = datetime.strptime(end_date, "%Y-%m-%d").date()
+        except ValueError:
+            console.print("[red]エラー: 日付の形式が正しくありません。YYYY-MM-DD形式で指定してください。[/red]")
+            raise typer.Exit(code=1)
+        repo.update_end_date(page_id, end_date_obj)
+
+    console.print(f"[green]更新しました: {page_id}[/green]")
+
+
+# --- project-task ---
+
+
+@_project_task_app.command("get")
+def project_task_get(
+    page_id: str = typer.Argument(..., help="プロジェクトタスクのNotionページID"),
+) -> None:
+    """プロジェクトタスクのプロパティをJSON形式で取得します"""
+    import json as _json
+
+    from sandpiper.plan.infrastructure.notion_project_task_repository import NotionProjectTaskRepository
+
+    repo = NotionProjectTaskRepository()
+    t = repo.find(page_id)
+    print(
+        _json.dumps(
+            {
+                "id": t.id,
+                "title": t.title,
+                "status": t.status.value,
+                "project_id": t.project_id,
+            },
+            ensure_ascii=False,
+            indent=2,
+        )
+    )
+
+
+@_project_task_app.command("list")
+def project_task_list(
+    project_id: str = typer.Option(None, "--project-id", help="プロジェクトIDフィルター"),
+    status: str = typer.Option(None, "--status", help="ステータスフィルター (TODO/IN_PROGRESS/DONE)"),
+) -> None:
+    """プロジェクトタスク一覧をJSON形式で取得します"""
+    import json as _json
+
+    from sandpiper.plan.infrastructure.notion_project_task_repository import NotionProjectTaskRepository
+
+    repo = NotionProjectTaskRepository()
+    tasks = repo.fetch_all()
+
+    if project_id:
+        tasks = [t for t in tasks if t.project_id == project_id]
+
+    if status:
+        try:
+            status_enum = ToDoStatusEnum[status]
+        except KeyError:
+            console.print(f"[red]エラー: 無効なステータスです: {status}[/red]")
+            console.print("[yellow]有効な値: TODO, IN_PROGRESS, DONE[/yellow]")
+            raise typer.Exit(code=1)
+        tasks = [t for t in tasks if t.status.value == status_enum.value]
+
+    print(
+        _json.dumps(
+            [
+                {
+                    "id": t.id,
+                    "title": t.title,
+                    "status": t.status.value,
+                    "project_id": t.project_id,
+                }
+                for t in tasks
+            ],
+            ensure_ascii=False,
+            indent=2,
+        )
+    )
+
+
+@_project_task_app.command("update")
+def project_task_update(
+    page_id: str = typer.Argument(..., help="プロジェクトタスクのNotionページID"),
+    status: str = typer.Option(None, "--status", help="新しいステータス (TODO/IN_PROGRESS/DONE)"),
+    title: str = typer.Option(None, "--title", help="新しいタイトル"),
+) -> None:
+    """プロジェクトタスクのプロパティを更新します"""
+    from sandpiper.plan.infrastructure.notion_project_task_repository import NotionProjectTaskRepository
+
+    if not any([status, title]):
+        console.print("[red]エラー: 更新するプロパティを指定してください (--status / --title)[/red]")
+        raise typer.Exit(code=1)
+
+    repo = NotionProjectTaskRepository()
+
+    if status:
+        try:
+            status_enum = ToDoStatusEnum[status]
+        except KeyError:
+            console.print(f"[red]エラー: 無効なステータスです: {status}[/red]")
+            raise typer.Exit(code=1)
+        repo.update_status(page_id, status_enum)
+
+    if title:
+        repo.update_title(page_id, title)
+
+    console.print(f"[green]更新しました: {page_id}[/green]")
+
+
+# --- todo ---
+
+
+@_todo_app.command("get")
+def todo_get(
+    page_id: str = typer.Argument(..., help="TODOのNotionページID"),
+) -> None:
+    """TODOのプロパティをJSON形式で取得します"""
+    import json as _json
+
+    from sandpiper.perform.infrastructure.notion_todo_repository import NotionTodoRepository as PerformRepo
+
+    repo = PerformRepo()
+    t = repo.find(page_id)
+    print(
+        _json.dumps(
+            {
+                "id": t.id,
+                "title": t.title,
+                "status": t.status.value,
+                "section": t.section.value if t.section else None,
+                "scheduled_start": t.scheduled_start_datetime.isoformat() if t.scheduled_start_datetime else None,
+                "scheduled_end": t.scheduled_end_datetime.isoformat() if t.scheduled_end_datetime else None,
+                "project_task_id": t.project_task_page_id,
+                "contexts": [c.value for c in t.contexts],
+            },
+            ensure_ascii=False,
+            indent=2,
+        )
+    )
+
+
+@_todo_app.command("list")
+def todo_list(
+    status: str = typer.Option(
+        None, "--status", help="ステータスフィルター (TODO/IN_PROGRESS/DONE/ALL, デフォルト: TODO)"
+    ),
+) -> None:
+    """TODO一覧をJSON形式で取得します (デフォルト: ステータスがTODOのもの)"""
+    import json as _json
+
+    from sandpiper.perform.infrastructure.notion_todo_repository import NotionTodoRepository as PerformRepo
+
+    repo = PerformRepo()
+
+    if status is None or status == "TODO":
+        todos = repo.find_by_status(ToDoStatusEnum.TODO)
+    elif status == "ALL":
+        todos = repo.fetch_all()
+    else:
+        try:
+            status_enum = ToDoStatusEnum[status]
+        except KeyError:
+            console.print(f"[red]エラー: 無効なステータスです: {status}[/red]")
+            console.print("[yellow]有効な値: TODO, IN_PROGRESS, DONE, ALL[/yellow]")
+            raise typer.Exit(code=1)
+        todos = repo.find_by_status(status_enum)
+
+    print(
+        _json.dumps(
+            [
+                {
+                    "id": t.id,
+                    "title": t.title,
+                    "status": t.status.value,
+                    "section": t.section.value if t.section else None,
+                    "scheduled_start": t.scheduled_start_datetime.isoformat() if t.scheduled_start_datetime else None,
+                    "scheduled_end": t.scheduled_end_datetime.isoformat() if t.scheduled_end_datetime else None,
+                    "project_task_id": t.project_task_page_id,
+                    "contexts": [c.value for c in t.contexts],
+                }
+                for t in todos
+            ],
+            ensure_ascii=False,
+            indent=2,
+        )
+    )
+
+
+@_todo_app.command("update")
+def todo_update(
+    page_id: str = typer.Argument(..., help="TODOのNotionページID"),
+    status: str = typer.Option(None, "--status", help="新しいステータス (TODO/IN_PROGRESS/DONE)"),
+    section: str = typer.Option(
+        None, "--section", help="新しいセクション (A_07_10/B_10_13/C_13_17/D_17_19/E_19_22/F_22_24/G_24_07)"
+    ),
+    title: str = typer.Option(None, "--title", help="新しいタイトル"),
+) -> None:
+    """TODOのプロパティを更新します"""
+    from sandpiper.perform.infrastructure.notion_todo_repository import NotionTodoRepository as PerformRepo
+
+    if not any([status, section, title]):
+        console.print("[red]エラー: 更新するプロパティを指定してください (--status / --section / --title)[/red]")
+        raise typer.Exit(code=1)
+
+    repo = PerformRepo()
+
+    if status:
+        try:
+            status_enum = ToDoStatusEnum[status]
+        except KeyError:
+            console.print(f"[red]エラー: 無効なステータスです: {status}[/red]")
+            raise typer.Exit(code=1)
+        repo.update_status(page_id, status_enum)
+
+    if section:
+        try:
+            section_enum = TaskChuteSection[section]
+        except KeyError:
+            console.print(f"[red]エラー: 無効なセクションです: {section}[/red]")
+            console.print("[yellow]有効な値: A_07_10, B_10_13, C_13_17, D_17_19, E_19_22, F_22_24, G_24_07[/yellow]")
+            raise typer.Exit(code=1)
+        repo.update_section(page_id, section_enum)
+
+    if title:
+        repo.update_title(page_id, title)
+
+    console.print(f"[green]更新しました: {page_id}[/green]")
+
+
 if __name__ == "__main__":
     app()

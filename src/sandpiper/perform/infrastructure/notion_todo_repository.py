@@ -109,3 +109,17 @@ class NotionTodoRepository:
         page = self.client.retrieve_page(page_id, TodoPage)
         page.set_prop(TodoIsTodayProp.true())
         self.client.update(page)
+
+    def fetch_all(self) -> list[ToDo]:
+        pages: list[TodoPage] = self.client.retrieve_database(todo_db.DATABASE_ID, cls=TodoPage)
+        return [page.to_domain() for page in pages]  # type: ignore[return-value]
+
+    def update_status(self, page_id: str, status: ToDoStatusEnum) -> None:
+        page = self.client.retrieve_page(page_id, TodoPage)
+        page.set_prop(TodoStatus.from_status_name(status.value))
+        self.client.update(page)
+
+    def update_title(self, page_id: str, title: str) -> None:
+        page = self.client.retrieve_page(page_id, TodoPage)
+        page.set_prop(TodoName.from_plain_text(title))
+        self.client.update(page)

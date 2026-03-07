@@ -1,3 +1,5 @@
+from datetime import date
+
 from lotion import BasePage, Lotion, notion_database
 from lotion.filter import Builder, Cond
 
@@ -159,7 +161,21 @@ class NotionProjectRepository:
                 continue
         return results
 
+    def find_as_inserted(self, page_id: str) -> InsertedProject:
+        notion_page = self.client.retrieve_page(page_id, cls=ProjectPage)
+        return notion_page.to_inserted()  # type: ignore[no-any-return]
+
     def update_status(self, page_id: str, status: ToDoStatusEnum) -> None:
         page = self.client.retrieve_page(page_id, ProjectPage)
         page.set_prop(ProjectStatus.from_status_name(status.value))
+        self.client.update(page)
+
+    def update_name(self, page_id: str, name: str) -> None:
+        page = self.client.retrieve_page(page_id, ProjectPage)
+        page.set_prop(ProjectName.from_plain_text(name))
+        self.client.update(page)
+
+    def update_end_date(self, page_id: str, end_date: date) -> None:
+        page = self.client.retrieve_page(page_id, ProjectPage)
+        page.set_prop(ProjectEndDate.from_start_date(end_date))
         self.client.update(page)
