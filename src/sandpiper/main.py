@@ -1146,10 +1146,12 @@ def check_dakoku(
 _project_app = typer.Typer(help="プロジェクトのプロパティを取得・更新します")
 _project_task_app = typer.Typer(help="プロジェクトタスクのプロパティを取得・更新します")
 _todo_app = typer.Typer(help="TODOのプロパティを取得・更新します")
+_page_app = typer.Typer(help="Notionページの取得")
 
 app.add_typer(_project_app, name="project")
 app.add_typer(_project_task_app, name="project-task")
 app.add_typer(_todo_app, name="todo")
+app.add_typer(_page_app, name="page")
 
 
 # --- project ---
@@ -1519,6 +1521,58 @@ def obsidian(
             for line in note.body.splitlines():
                 console.print(f"  {line}")
         console.print()
+
+
+# --- page ---
+
+
+def _extract_page_id(id_or_url: str) -> str:
+    """NotionのページIDまたはURLからページIDを抽出する"""
+    import re
+    from urllib.parse import urlparse
+
+    # URLの場合はパスの末尾からIDを取得
+    parsed = urlparse(id_or_url)
+    if parsed.scheme in ("http", "https"):
+        path = parsed.path.rstrip("/")
+        # パスの最後のセグメントがページID (末尾の32桁16進数)
+        match = re.search(r"-([0-9a-f]{32})$", path)
+        if match:
+            return match.group(1)
+        # セグメント自体が32桁の場合
+        last_segment = path.split("/")[-1]
+        if re.fullmatch(r"[0-9a-f]{32}", last_segment):
+            return last_segment
+        msg = f"URLからページIDを抽出できませんでした: {id_or_url}"
+        raise typer.BadParameter(msg)
+    return id_or_url
+
+
+@_page_app.command("get")
+def page_get(
+    id_or_url: str = typer.Argument(..., help="NotionページID、またはNotionページのURL"),
+    raw: bool = typer.Option(False, "--raw", help="Slack形式テキストをそのまま出力する"),
+) -> None:
+    """Notionページの本文を取得して表示します"""
+    from lotion import Lotion
+
+    page_id = _extract_page_id(id_or_url)
+    client = Lotion.get_instance()
+    page = client.retrieve_page(page_id)
+
+    console.print(f"[cyan bold]{page.get_title_text()}[/cyan bold]")
+    console.print(f"[dim]ID: {page_id}[/dim]\n")
+
+    if not page.block_children:
+        console.print("[yellow]本文がありません[/yellow]")
+        return
+
+    for block in page.block_children:
+        text = block.to_slack_text()
+        if raw:
+            print(text)
+        else:
+            console.print(text)
 
 
 if __name__ == "__main__":
