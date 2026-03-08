@@ -1548,31 +1548,43 @@ def _extract_page_id(id_or_url: str) -> str:
     return id_or_url
 
 
+def _block_to_markdown(block: object) -> str:
+    """Lotionブロックをマークダウン文字列に変換する"""
+    cls = type(block).__name__
+    text = block.to_slack_text()  # type: ignore[attr-defined]
+    if cls == "Heading":
+        prefix = {"heading_1": "#", "heading_2": "##", "heading_3": "###"}.get(
+            block.heading_type,  # type: ignore[attr-defined]
+            "#",
+        )
+        return f"{prefix} {text}"
+    return text
+
+
 @_page_app.command("get")
 def page_get(
     id_or_url: str = typer.Argument(..., help="NotionページID、またはNotionページのURL"),
-    raw: bool = typer.Option(False, "--raw", help="Slack形式テキストをそのまま出力する"),
+    raw: bool = typer.Option(False, "--raw", help="プレーンテキストをそのまま出力する"),
 ) -> None:
     """Notionページの本文を取得して表示します"""
     from lotion import Lotion
+    from rich.markdown import Markdown
 
     page_id = _extract_page_id(id_or_url)
     client = Lotion.get_instance()
     page = client.retrieve_page(page_id)
 
-    console.print(f"[cyan bold]{page.get_title_text()}[/cyan bold]")
-    console.print(f"[dim]ID: {page_id}[/dim]\n")
-
     if not page.block_children:
         console.print("[yellow]本文がありません[/yellow]")
         return
 
-    for block in page.block_children:
-        text = block.to_slack_text()
-        if raw:
-            print(text)
-        else:
-            console.print(text)
+    lines = [_block_to_markdown(b) for b in page.block_children]
+    body = "\n".join(lines)
+
+    if raw:
+        print(body)
+    else:
+        console.print(Markdown(body))
 
 
 if __name__ == "__main__":
