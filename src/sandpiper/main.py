@@ -1,6 +1,7 @@
 """メインアプリケーション"""
 
 from datetime import UTC
+from pathlib import Path
 
 import typer
 from dotenv import load_dotenv
@@ -1519,6 +1520,74 @@ def obsidian_list(
             for line in note.body.splitlines():
                 console.print(f"  {line}")
         console.print()
+
+
+_OBSIDIAN_SLACK_CHANNEL_ID = "C0AK05ELVM1"
+_VAULT_PATH = Path.home() / "Library/Mobile Documents/iCloud~md~obsidian/Documents/my-vault"
+
+
+@_obsidian_app.command("migrate")
+def obsidian_migrate(
+    notify: bool = typer.Option(False, "--notify", help="移行結果をSlack通知する(1件以上のとき)"),
+) -> None:
+    """未移行のObsidian InboxノートをObsidian Vaultに移行します"""  # noqa: RUF002
+    import re
+
+    from lotion import Lotion
+
+    notes = sandpiper_app.list_obsidian_notes.execute(status="未移行", with_body=False)
+
+    if not notes:
+        console.print("[green]未移行のノートはありません[/green]")
+        return
+
+    client = Lotion.get_instance()
+    migrated: list[str] = []
+
+    for note in notes:
+        # ページ本文を取得
+        page = client.retrieve_page(note.page_id)
+        lines = [_block_to_markdown(b) for b in page.block_children]
+        content = "\n".join(lines) + "\n"
+
+        # 出力先ディレクトリを決定
+        if note.project_name:
+            # 例: "Claude/Project/ポーカー" → "Claude/Projects/ポーカー"
+            project_path = note.project_name.replace("Claude/Project/", "Claude/Projects/")
+            output_dir = _VAULT_PATH / project_path
+        else:
+            output_dir = _VAULT_PATH / "Claude/Chat"
+
+        # ファイル名を決定
+        title = note.title
+        if re.match(r"^\d{4}-\d{2}-\d{2}_", title):
+            filename = f"{title}.md"
+        elif note.created_date:
+            filename = f"{note.created_date}_{title}.md"
+        else:
+            filename = f"{title}.md"
+
+        # ファイル書き出し
+        output_dir.mkdir(parents=True, exist_ok=True)
+        output_path = output_dir / filename
+        output_path.write_text(content, encoding="utf-8")
+
+        # Notionのステータスを移行済に更新
+        client.client.pages.update(
+            page_id=note.page_id,
+            properties={"ステータス": {"select": {"name": "移行済"}}},
+        )
+
+        migrated.append(str(output_path))
+        console.print(f"[green]移行: {output_path}[/green]")
+
+    summary = f"Obsidian Inbox移行: {len(migrated)}件"
+    console.print(f"\n[bold]{summary}[/bold]")
+
+    if notify and migrated:
+        detail = "\n".join(f"- {Path(p).name}" for p in migrated)
+        slack_messanger = SlackNoticeMessanger(channel_id=_OBSIDIAN_SLACK_CHANNEL_ID)
+        slack_messanger.send(f"{summary}\n{detail}")
 
 
 @_obsidian_app.command("complete")
