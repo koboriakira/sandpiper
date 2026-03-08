@@ -1,6 +1,6 @@
 """完了して一定期間経過したTODOをアーカイブするサービス"""
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 
 from lotion import BasePage, Lotion, notion_database
@@ -21,10 +21,11 @@ from sandpiper.shared.notion.databases.todo_archive import (
     TodoArchiveSortOrder,
     TodoArchiveStatus,
 )
-from sandpiper.shared.utils.date_utils import jst_now
+from sandpiper.shared.utils.date_utils import jst_today_datetime
+from sandpiper.shared.valueobject.todo_kind import ToDoKind
 from sandpiper.shared.valueobject.todo_status_enum import ToDoStatusEnum
 
-DEFAULT_ARCHIVE_DAYS = 7
+DEFAULT_ARCHIVE_DAYS = 1
 
 
 @notion_database(todo_archive_db.DATABASE_ID)
@@ -39,13 +40,16 @@ class ArchiveOldTodosResult:
 
     archived_count: int
     archived_titles: list[str]
+    deleted_routine_count: int = 0
+    deleted_routine_titles: list[str] = field(default_factory=list)
 
 
 class ArchiveOldTodos:
     """完了して一定期間経過したTODOをアーカイブするサービス
 
-    DONEステータスのTODOで、完了日時(log_end_datetime)から
-    指定日数(デフォルト7日)経過したものをアーカイブデータベースに移動します。
+    DONEステータスのTODOで、完了日時が閾値より古いものを処理します。
+    - リピート(ルーティン)種別: アーカイブせず削除のみ
+    - それ以外: アーカイブデータベースに移動後、元DBから削除
     """
 
     def __init__(
@@ -56,42 +60,53 @@ class ArchiveOldTodos:
         self.archive_days = archive_days
 
     def execute(self, dry_run: bool = False) -> ArchiveOldTodosResult:
-        """完了して一定期間経過したTODOをアーカイブする
+        """完了して一定期間経過したTODOをアーカイブまたは削除する
 
         Args:
-            dry_run: Trueの場合、実際のアーカイブは行わず対象のみを返す
+            dry_run: Trueの場合、実際の処理は行わず対象のみを返す
 
         Returns:
-            ArchiveOldTodosResult: アーカイブされた(または対象となる)TODOの件数とタイトル一覧
+            ArchiveOldTodosResult: 処理されたTODOの件数とタイトル一覧
         """
-        now = jst_now()
-        threshold_date = now - timedelta(days=self.archive_days)
+        # 本日0時を基準に (archive_days - 1) 日前を閾値とする
+        # archive_days=1 → 本日0時 = 前日以前のものが対象
+        threshold_date = jst_today_datetime() - timedelta(days=self.archive_days - 1)
 
         pages = self.client.retrieve_database(todo_db.DATABASE_ID)
 
         archived_count = 0
         archived_titles: list[str] = []
+        deleted_routine_count = 0
+        deleted_routine_titles: list[str] = []
 
         for page in pages:
-            if not self._should_archive(page, threshold_date):
+            if not self._should_process(page, threshold_date):
                 continue
 
             title = page.get_title_text()
+            is_routine = self._is_routine(page)
 
             if not dry_run:
-                self._archive_page(page)
+                if not is_routine:
+                    self._archive_page(page)
                 self.client.remove_page(page.id)
 
-            archived_count += 1
-            archived_titles.append(title)
+            if is_routine:
+                deleted_routine_count += 1
+                deleted_routine_titles.append(title)
+            else:
+                archived_count += 1
+                archived_titles.append(title)
 
         return ArchiveOldTodosResult(
             archived_count=archived_count,
             archived_titles=archived_titles,
+            deleted_routine_count=deleted_routine_count,
+            deleted_routine_titles=deleted_routine_titles,
         )
 
-    def _should_archive(self, page: BasePage, threshold_date: datetime) -> bool:
-        """ページがアーカイブ対象かどうかを判定"""
+    def _should_process(self, page: BasePage, threshold_date: datetime) -> bool:
+        """ページが処理対象かどうかを判定"""
         status = ToDoStatusEnum(page.get_status("ステータス").status_name)
         if status != ToDoStatusEnum.DONE:
             return False
@@ -102,6 +117,11 @@ class ArchiveOldTodos:
 
         end_datetime = datetime.fromisoformat(perform_range.end)
         return end_datetime < threshold_date
+
+    def _is_routine(self, page: BasePage) -> bool:
+        """リピート(ルーティン)種別かどうかを判定"""
+        kind = page.get_select("タスク種別")
+        return kind.selected_name == ToDoKind.REPEAT.value
 
     def _archive_page(self, page: BasePage) -> None:
         """ページをアーカイブデータベースにコピー"""

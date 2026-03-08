@@ -9,6 +9,7 @@ from sandpiper.shared.infrastructure.archive_old_todos import (
     ArchiveOldTodosResult,
 )
 from sandpiper.shared.utils.date_utils import JST
+from sandpiper.shared.valueobject.todo_kind import ToDoKind
 
 
 class TestArchiveOldTodosResult:
@@ -29,6 +30,11 @@ class TestArchiveOldTodosResult:
         assert result.archived_count == 0
         assert len(result.archived_titles) == 0
 
+    def test_routine_fields_default_to_zero(self):
+        result = ArchiveOldTodosResult(archived_count=0, archived_titles=[])
+        assert result.deleted_routine_count == 0
+        assert result.deleted_routine_titles == []
+
 
 class TestArchiveOldTodos:
     @pytest.fixture
@@ -39,9 +45,10 @@ class TestArchiveOldTodos:
             yield mock_instance
 
     @pytest.fixture
-    def mock_jst_now(self):
-        with patch("sandpiper.shared.infrastructure.archive_old_todos.jst_now") as mock:
-            mock.return_value = datetime(2024, 3, 20, 12, 0, 0, tzinfo=JST)
+    def mock_jst_today_datetime(self):
+        # 2024-03-20 00:00:00 JST (本日0時)
+        with patch("sandpiper.shared.infrastructure.archive_old_todos.jst_today_datetime") as mock:
+            mock.return_value = datetime(2024, 3, 20, 0, 0, 0, tzinfo=JST)
             yield mock
 
     def _create_mock_page(
@@ -50,16 +57,16 @@ class TestArchiveOldTodos:
         title: str,
         status: str,
         end_datetime: datetime | None,
+        kind: str = "",
     ) -> MagicMock:
         """テスト用のモックページを作成"""
         page = MagicMock()
         page.id = page_id
         page.get_title_text.return_value = title
         page.get_status.return_value.status_name = status
-        # start も end と同じ値を設定(Lotion が start なしで end があるとエラーになるため)
         page.get_date.return_value.start = end_datetime.isoformat() if end_datetime else None
         page.get_date.return_value.end = end_datetime.isoformat() if end_datetime else None
-        page.get_select.return_value.selected_name = ""
+        page.get_select.return_value.selected_name = kind
         page.get_checkbox.return_value.checked = False
         page.get_relation.return_value.id_list = []
         page.get_number.return_value.number = None
@@ -67,8 +74,8 @@ class TestArchiveOldTodos:
         page.get_text.return_value.text = ""
         return page
 
-    def test_execute_archives_old_done_todos(self, mock_lotion, mock_jst_now):  # noqa: ARG002
-        # Arrange: 10日前に完了したタスク(アーカイブ対象)
+    def test_execute_archives_old_done_todos(self, mock_lotion, mock_jst_today_datetime):  # noqa: ARG002
+        # Arrange: 10日前に完了したタスク(archive_days=7: threshold=2024-03-14T00:00)
         old_end_date = datetime(2024, 3, 10, 12, 0, 0, tzinfo=JST)
         page = self._create_mock_page("page-1", "古いタスク", "Done", old_end_date)
         mock_lotion.retrieve_database.return_value = [page]
@@ -83,7 +90,7 @@ class TestArchiveOldTodos:
         mock_lotion.create_page.assert_called_once()
         mock_lotion.remove_page.assert_called_once_with("page-1")
 
-    def test_execute_skips_non_done_todos(self, mock_lotion, mock_jst_now):  # noqa: ARG002
+    def test_execute_skips_non_done_todos(self, mock_lotion, mock_jst_today_datetime):  # noqa: ARG002
         # Arrange: 10日前に完了したが、ステータスがToDo
         old_end_date = datetime(2024, 3, 10, 12, 0, 0, tzinfo=JST)
         page = self._create_mock_page("page-1", "未完了タスク", "ToDo", old_end_date)
@@ -98,8 +105,8 @@ class TestArchiveOldTodos:
         mock_lotion.create_page.assert_not_called()
         mock_lotion.remove_page.assert_not_called()
 
-    def test_execute_skips_recent_done_todos(self, mock_lotion, mock_jst_now):  # noqa: ARG002
-        # Arrange: 3日前に完了(7日未満なのでアーカイブ対象外)
+    def test_execute_skips_recent_done_todos(self, mock_lotion, mock_jst_today_datetime):  # noqa: ARG002
+        # Arrange: 3日前に完了(archive_days=7: threshold=2024-03-14T00:00 を超えていない)
         recent_end_date = datetime(2024, 3, 17, 12, 0, 0, tzinfo=JST)
         page = self._create_mock_page("page-1", "最近のタスク", "Done", recent_end_date)
         mock_lotion.retrieve_database.return_value = [page]
@@ -113,7 +120,7 @@ class TestArchiveOldTodos:
         mock_lotion.create_page.assert_not_called()
         mock_lotion.remove_page.assert_not_called()
 
-    def test_execute_skips_done_todos_without_end_date(self, mock_lotion, mock_jst_now):  # noqa: ARG002
+    def test_execute_skips_done_todos_without_end_date(self, mock_lotion, mock_jst_today_datetime):  # noqa: ARG002
         # Arrange: Doneだが終了日時がない
         page = self._create_mock_page("page-1", "終了日なしタスク", "Done", None)
         mock_lotion.retrieve_database.return_value = [page]
@@ -127,7 +134,7 @@ class TestArchiveOldTodos:
         mock_lotion.create_page.assert_not_called()
         mock_lotion.remove_page.assert_not_called()
 
-    def test_execute_with_dry_run(self, mock_lotion, mock_jst_now):  # noqa: ARG002
+    def test_execute_with_dry_run(self, mock_lotion, mock_jst_today_datetime):  # noqa: ARG002
         # Arrange: アーカイブ対象のタスク
         old_end_date = datetime(2024, 3, 10, 12, 0, 0, tzinfo=JST)
         page = self._create_mock_page("page-1", "古いタスク", "Done", old_end_date)
@@ -143,7 +150,7 @@ class TestArchiveOldTodos:
         mock_lotion.create_page.assert_not_called()
         mock_lotion.remove_page.assert_not_called()
 
-    def test_execute_with_empty_database(self, mock_lotion, mock_jst_now):  # noqa: ARG002
+    def test_execute_with_empty_database(self, mock_lotion, mock_jst_today_datetime):  # noqa: ARG002
         # Arrange
         mock_lotion.retrieve_database.return_value = []
 
@@ -155,8 +162,8 @@ class TestArchiveOldTodos:
         assert result.archived_count == 0
         assert len(result.archived_titles) == 0
 
-    def test_execute_with_custom_archive_days(self, mock_lotion, mock_jst_now):  # noqa: ARG002
-        # Arrange: 5日前に完了(14日のしきい値未満)
+    def test_execute_with_custom_archive_days(self, mock_lotion, mock_jst_today_datetime):  # noqa: ARG002
+        # Arrange: 5日前に完了(archive_days=14: threshold=2024-03-07T00:00 を超えていない)
         end_date = datetime(2024, 3, 15, 12, 0, 0, tzinfo=JST)
         page = self._create_mock_page("page-1", "5日前タスク", "Done", end_date)
         mock_lotion.retrieve_database.return_value = [page]
@@ -168,8 +175,9 @@ class TestArchiveOldTodos:
         # Assert: 5日前なので14日のしきい値を超えていない
         assert result.archived_count == 0
 
-    def test_execute_archives_multiple_old_todos(self, mock_lotion, mock_jst_now):  # noqa: ARG002
+    def test_execute_archives_multiple_old_todos(self, mock_lotion, mock_jst_today_datetime):  # noqa: ARG002
         # Arrange: 複数のアーカイブ対象タスク
+        # archive_days=7: threshold = 2024-03-20T00:00 - 6days = 2024-03-14T00:00
         old_date1 = datetime(2024, 3, 5, 12, 0, 0, tzinfo=JST)
         old_date2 = datetime(2024, 3, 8, 12, 0, 0, tzinfo=JST)
         recent_date = datetime(2024, 3, 18, 12, 0, 0, tzinfo=JST)
@@ -193,8 +201,8 @@ class TestArchiveOldTodos:
         assert "未完了タスク" not in result.archived_titles
 
     def test_default_archive_days(self):
-        # Assert
-        assert DEFAULT_ARCHIVE_DAYS == 7
+        # Assert: デフォルトは1日(前日以前を対象)
+        assert DEFAULT_ARCHIVE_DAYS == 1
 
     def test_uses_default_archive_days_when_not_provided(self, mock_lotion):  # noqa: ARG002
         # Act
@@ -202,3 +210,58 @@ class TestArchiveOldTodos:
 
         # Assert
         assert usecase.archive_days == DEFAULT_ARCHIVE_DAYS
+
+    def test_routine_todo_is_deleted_not_archived(self, mock_lotion, mock_jst_today_datetime):  # noqa: ARG002
+        # Arrange: リピート種別の古いタスク
+        old_end_date = datetime(2024, 3, 10, 12, 0, 0, tzinfo=JST)
+        page = self._create_mock_page(
+            "page-routine", "ルーティンタスク", "Done", old_end_date, kind=ToDoKind.REPEAT.value
+        )
+        mock_lotion.retrieve_database.return_value = [page]
+
+        # Act
+        usecase = ArchiveOldTodos(archive_days=7)
+        result = usecase.execute()
+
+        # Assert: アーカイブDBへのコピーなし、削除のみ
+        assert result.archived_count == 0
+        assert result.deleted_routine_count == 1
+        assert "ルーティンタスク" in result.deleted_routine_titles
+        mock_lotion.create_page.assert_not_called()
+        mock_lotion.remove_page.assert_called_once_with("page-routine")
+
+    def test_routine_dry_run_detected_but_not_deleted(self, mock_lotion, mock_jst_today_datetime):  # noqa: ARG002
+        # Arrange
+        old_end_date = datetime(2024, 3, 10, 12, 0, 0, tzinfo=JST)
+        page = self._create_mock_page(
+            "page-routine", "ルーティンタスク", "Done", old_end_date, kind=ToDoKind.REPEAT.value
+        )
+        mock_lotion.retrieve_database.return_value = [page]
+
+        # Act
+        usecase = ArchiveOldTodos(archive_days=7)
+        result = usecase.execute(dry_run=True)
+
+        # Assert: 対象として検出されるが削除されない
+        assert result.deleted_routine_count == 1
+        mock_lotion.remove_page.assert_not_called()
+
+    def test_mixed_routine_and_normal_todos(self, mock_lotion, mock_jst_today_datetime):  # noqa: ARG002
+        # Arrange: 通常タスクとルーティンタスクが混在
+        old_end_date = datetime(2024, 3, 10, 12, 0, 0, tzinfo=JST)
+        normal_page = self._create_mock_page("page-normal", "通常タスク", "Done", old_end_date)
+        routine_page = self._create_mock_page(
+            "page-routine", "ルーティンタスク", "Done", old_end_date, kind=ToDoKind.REPEAT.value
+        )
+        mock_lotion.retrieve_database.return_value = [normal_page, routine_page]
+
+        # Act
+        usecase = ArchiveOldTodos(archive_days=7)
+        result = usecase.execute()
+
+        # Assert
+        assert result.archived_count == 1
+        assert result.deleted_routine_count == 1
+        assert "通常タスク" in result.archived_titles
+        assert "ルーティンタスク" in result.deleted_routine_titles
+        mock_lotion.create_page.assert_called_once()  # 通常タスクのみアーカイブ
