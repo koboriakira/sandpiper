@@ -16,6 +16,7 @@ from sandpiper.shared.notion.databases.todo import (
 )
 from sandpiper.shared.valueobject.context import Context
 from sandpiper.shared.valueobject.task_chute_section import TaskChuteSection
+from sandpiper.shared.valueobject.todo_kind import ToDoKind
 from sandpiper.shared.valueobject.todo_status_enum import ToDoStatusEnum
 
 
@@ -31,6 +32,7 @@ class TodoPage(BasePage):  # type: ignore[misc]
 
     def to_domain(self) -> ToDo:
         section_name = self.get_select("セクション").selected_name
+        kind_name = self.get_select("タスク種別").selected_name
         log_start_datetime = self.get_date("実施期間").start_datetime
         log_end_datetime = self.get_date("実施期間").end_datetime
         project_task = self.get_relation("プロジェクトタスク").id_list
@@ -43,6 +45,7 @@ class TodoPage(BasePage):  # type: ignore[misc]
             id=self.id,
             title=self.get_title_text(),
             status=ToDoStatusEnum(self.get_status("ステータス").status_name),
+            kind=ToDoKind(kind_name) if kind_name else None,
             section=TaskChuteSection(section_name) if section_name else None,
             log_start_datetime=log_start_datetime,
             log_end_datetime=log_end_datetime,

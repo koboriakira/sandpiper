@@ -1416,6 +1416,7 @@ def todo_list(
                     "id": t.id,
                     "title": t.title,
                     "status": t.status.value,
+                    "kind": t.kind.value if t.kind else None,
                     "section": t.section.value if t.section else None,
                     "scheduled_start": t.scheduled_start_datetime.isoformat() if t.scheduled_start_datetime else None,
                     "scheduled_end": t.scheduled_end_datetime.isoformat() if t.scheduled_end_datetime else None,

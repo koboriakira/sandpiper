@@ -109,6 +109,7 @@ class TestToDo:
             "id",
             "title",
             "status",
+            "kind",
             "section",
             "log_start_datetime",
             "log_end_datetime",
