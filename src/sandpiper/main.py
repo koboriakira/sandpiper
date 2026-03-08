@@ -27,7 +27,7 @@ from . import __version__
 load_dotenv()
 
 # デフォルトSlackチャンネルID
-_DEFAULT_SLACK_CHANNEL_ID = "C04Q3AV4TA5"
+_DEFAULT_SLACK_CHANNEL_ID = "C0AJQR86PK9"
 
 
 def _create_notifier() -> CronNotifier:
