@@ -6,6 +6,7 @@ from sandpiper.perform.domain.todo import ToDo
 from sandpiper.shared.notion.databases import todo as todo_db
 from sandpiper.shared.notion.databases.todo import (
     TodoClaudeUrl,
+    TodoIsDeleted,
     TodoIsTodayProp,
     TodoLogDate,
     TodoName,
@@ -29,6 +30,7 @@ class TodoPage(BasePage):  # type: ignore[misc]
     project_task_relation: TodoProjectTaskProp | None = None
     scheduled_date: TodoScheduledDate | None = None
     claude_url: TodoClaudeUrl | None = None
+    is_deleted: TodoIsDeleted | None = None
 
     def to_domain(self) -> ToDo:
         section_name = self.get_select("セクション").selected_name
@@ -104,6 +106,8 @@ class NotionTodoRepository:
             page_status = ToDoStatusEnum(page.get_status("ステータス").status_name)
             if page_status == status:
                 todo_page = self.client.retrieve_page(page.id, TodoPage)
+                if todo_page.is_deleted and todo_page.is_deleted.checked:
+                    continue
                 result.append(todo_page.to_domain())
         return result
 
@@ -115,7 +119,7 @@ class NotionTodoRepository:
 
     def fetch_all(self) -> list[ToDo]:
         pages: list[TodoPage] = self.client.retrieve_database(todo_db.DATABASE_ID, cls=TodoPage)
-        return [page.to_domain() for page in pages]  # type: ignore[return-value]
+        return [page.to_domain() for page in pages if not (page.is_deleted and page.is_deleted.checked)]  # type: ignore[return-value]
 
     def update_status(self, page_id: str, status: ToDoStatusEnum) -> None:
         page = self.client.retrieve_page(page_id, TodoPage)

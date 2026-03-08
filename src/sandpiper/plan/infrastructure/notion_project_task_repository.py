@@ -4,6 +4,7 @@ from lotion.filter import Builder, Cond
 from sandpiper.plan.domain.project_task import InsertedProjectTask, ProjectTask
 from sandpiper.shared.notion.databases import project_task as project_task_db
 from sandpiper.shared.notion.databases.project_task import (
+    ProjectTaskIsDeleted,
     ProjectTaskName,
     ProjectTaskProjectProp,
     ProjectTaskStatus,
@@ -16,6 +17,7 @@ class ProjectTaskPage(BasePage):  # type: ignore[misc]
     name: ProjectTaskName
     status: ProjectTaskStatus
     project_relation: ProjectTaskProjectProp
+    is_deleted: ProjectTaskIsDeleted | None = None
 
     @staticmethod
     def generate(project_task: ProjectTask) -> "ProjectTaskPage":
@@ -77,6 +79,8 @@ class NotionProjectTaskRepository:
         )
         results: list[InsertedProjectTask] = []
         for page in pages:
+            if page.is_deleted and page.is_deleted.checked:
+                continue
             status = page.get_status("ステータス")
             project = page.get_relation("プロジェクト").id_list
             results.append(
@@ -103,6 +107,8 @@ class NotionProjectTaskRepository:
         )
         results: list[InsertedProjectTask] = []
         for page in pages:
+            if page.is_deleted and page.is_deleted.checked:
+                continue
             status = page.get_status("ステータス")
             project = page.get_relation("プロジェクト").id_list
             results.append(
