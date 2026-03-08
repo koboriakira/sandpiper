@@ -1484,5 +1484,42 @@ def todo_update(
     console.print(f"[green]更新しました: {page_id}[/green]")
 
 
+@app.command()
+def obsidian(
+    status: str | None = typer.Option(None, "--status", help="ステータスで絞り込み (例: 未移行, 移行済み)"),
+    with_body: bool = typer.Option(False, "--with-body", help="ボディ(本文)も取得する"),
+) -> None:
+    """Fetch and display notes from Obsidian Inbox in Notion.
+
+    Default: show all notes.
+    Use --status to filter, --with-body to include body content.
+    """
+    notes = sandpiper_app.list_obsidian_notes.execute(status=status, with_body=with_body)
+
+    if not notes:
+        console.print("[yellow]ノートが見つかりません[/yellow]")
+        return
+
+    console.print(f"[bold]Obsidian Inbox: {len(notes)}件[/bold]\n")
+    for note in notes:
+        console.print(f"[cyan bold]{note.title}[/cyan bold]")
+        console.print(f"  ID: {note.page_id}")
+        if note.status:
+            console.print(f"  ステータス: {note.status}")
+        if note.tags:
+            console.print(f"  タグ: {', '.join(note.tags)}")
+        if note.project_name:
+            console.print(f"  プロジェクト名: {note.project_name}")
+        if note.created_date:
+            console.print(f"  作成日: {note.created_date}")
+        if note.is_project_session:
+            console.print("  プロジェクトセッション: ✓")
+        if with_body and note.body:
+            console.print("\n  [dim]--- ボディ ---[/dim]")
+            for line in note.body.splitlines():
+                console.print(f"  {line}")
+        console.print()
+
+
 if __name__ == "__main__":
     app()

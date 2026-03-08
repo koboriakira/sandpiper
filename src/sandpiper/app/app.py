@@ -8,6 +8,8 @@ from sandpiper.clips.application.create_clip import CreateClip
 from sandpiper.clips.application.list_unprocessed_clips import ListUnprocessedClips
 from sandpiper.clips.infrastructure.notion_clips_repository import NotionClipsRepository
 from sandpiper.clips.query.clips_query import NotionClipsQuery
+from sandpiper.obsidian.application.list_obsidian_notes import ListObsidianNotes
+from sandpiper.obsidian.query.obsidian_query import NotionObsidianQuery
 from sandpiper.perform.application.complete_todo import CompleteTodo
 from sandpiper.perform.application.handle_todo_created import HandleTodoCreated
 from sandpiper.perform.application.handle_todo_started import HandleTodoStarted
@@ -86,6 +88,7 @@ class SandPiperApp:
         override_section_by_schedule: OverrideSectionBySchedule,
         prepare_tomorrow_todos: PrepareTomorrowTodos,
         cleanup_project_tasks: CleanupProjectTasks,
+        list_obsidian_notes: ListObsidianNotes,
     ) -> None:
         self.create_todo = create_todo
         self.create_project = create_project
@@ -112,6 +115,7 @@ class SandPiperApp:
         self.override_section_by_schedule = override_section_by_schedule
         self.prepare_tomorrow_todos = prepare_tomorrow_todos
         self.cleanup_project_tasks = cleanup_project_tasks
+        self.list_obsidian_notes = list_obsidian_notes
 
 
 def bootstrap() -> SandPiperApp:
@@ -281,5 +285,8 @@ def bootstrap() -> SandPiperApp:
         cleanup_project_tasks=CleanupProjectTasks(
             project_task_repository=project_task_repository,
             project_repository=project_repository,
+        ),
+        list_obsidian_notes=ListObsidianNotes(
+            obsidian_query=NotionObsidianQuery(),
         ),
     )
