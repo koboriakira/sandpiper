@@ -1713,6 +1713,20 @@ def page_get(
 # --- grocery ---
 
 
+@_grocery_app.command("list")
+def grocery_list() -> None:
+    """「買う」チェックボックスがONのアイテム一覧を表示します"""
+    from sandpiper.recipe.infrastructure.notion_shopping_repository import NotionShoppingRepository
+
+    repo = NotionShoppingRepository()
+    items = repo.list_want()
+    if not items:
+        console.print("[yellow]買う予定のアイテムはありません[/yellow]")
+        return
+    for item in items:
+        console.print(f"- {item}")
+
+
 @_grocery_app.command("buy")
 def grocery_buy(
     names: list[str] = typer.Argument(..., help="購入済みにするアイテム名 (複数指定可)"),

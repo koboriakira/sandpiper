@@ -1,4 +1,5 @@
 from lotion import BasePage, Lotion, notion_database
+from lotion.filter import Builder, Cond
 
 from sandpiper.shared.notion.databases import shopping as shopping_db
 from sandpiper.shared.notion.databases.shopping import PURCHASED_STATUS, ShoppingName, ShoppingPurchased, ShoppingWant
@@ -35,6 +36,14 @@ class NotionShoppingRepository:
         shopping_page = ShoppingPage.generate(name)
         page = self.client.create_page(shopping_page)
         return page.id  # type: ignore[no-any-return]
+
+    def list_want(self) -> list[str]:
+        """「買う」チェックボックスがONのアイテム名一覧を返す。"""
+        filter_param = Builder.create().add(ShoppingWant.true(), Cond.CHECKBOX).build()
+        pages: list[ShoppingPage] = self.client.retrieve_database(
+            database_id=shopping_db.DATABASE_ID, filter_param=filter_param, cls=ShoppingPage
+        )
+        return [page.get_title_text() for page in pages]
 
     def buy(self, name: str) -> str | None:
         """買い物アイテムを名前で検索し、「購入済」ステータスに変更する。見つからない場合はNoneを返す。"""
