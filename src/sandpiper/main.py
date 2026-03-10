@@ -1448,6 +1448,15 @@ def todo_list(
     )
 
 
+@_todo_app.command("start")
+def todo_start(
+    page_id: str = typer.Argument(..., help="TODOのNotionページID"),
+) -> None:
+    """TODOを開始します（ステータスをIN_PROGRESSに変更し、開始時刻を記録）"""
+    sandpiper_app.start_todo.execute(page_id)
+    console.print(f"[green]開始しました: {page_id}[/green]")
+
+
 @_todo_app.command("update")
 def todo_update(
     page_id: str = typer.Argument(..., help="TODOのNotionページID"),
