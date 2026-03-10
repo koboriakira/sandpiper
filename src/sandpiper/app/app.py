@@ -59,6 +59,9 @@ from sandpiper.shared.infrastructure.event_bus import EventBus
 from sandpiper.shared.infrastructure.github_client import GitHubClient
 from sandpiper.shared.infrastructure.notion_commentator import NotionCommentator
 from sandpiper.shared.infrastructure.slack_notice_messanger import SlackNoticeMessanger
+from sandpiper.taste.application.add_taste import AddTaste
+from sandpiper.taste.application.list_taste import ListTaste
+from sandpiper.taste.infrastructure.notion_taste_repository import NotionTasteRepository
 
 
 class SandPiperApp:
@@ -91,6 +94,8 @@ class SandPiperApp:
         prepare_tomorrow_todos: PrepareTomorrowTodos,
         cleanup_project_tasks: CleanupProjectTasks,
         list_obsidian_notes: ListObsidianNotes,
+        add_taste: AddTaste,
+        list_taste: ListTaste,
     ) -> None:
         self.create_todo = create_todo
         self.create_project = create_project
@@ -119,6 +124,8 @@ class SandPiperApp:
         self.prepare_tomorrow_todos = prepare_tomorrow_todos
         self.cleanup_project_tasks = cleanup_project_tasks
         self.list_obsidian_notes = list_obsidian_notes
+        self.add_taste = add_taste
+        self.list_taste = list_taste
 
 
 def bootstrap() -> SandPiperApp:
@@ -295,4 +302,6 @@ def bootstrap() -> SandPiperApp:
         list_obsidian_notes=ListObsidianNotes(
             obsidian_query=NotionObsidianQuery(),
         ),
+        add_taste=AddTaste(repository=NotionTasteRepository()),
+        list_taste=ListTaste(repository=NotionTasteRepository()),
     )

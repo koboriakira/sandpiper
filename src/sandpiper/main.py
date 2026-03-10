@@ -1150,6 +1150,7 @@ _todo_app = typer.Typer(help="TODOのプロパティを取得・更新します"
 _page_app = typer.Typer(help="Notionページの取得")
 _obsidian_app = typer.Typer(help="Obsidian Inbox notes management")
 _grocery_app = typer.Typer(help="買い物リストを管理します")
+_taste_app = typer.Typer(help="飲食記録を管理します")
 
 app.add_typer(_project_app, name="project")
 app.add_typer(_project_task_app, name="project-task")
@@ -1157,6 +1158,7 @@ app.add_typer(_todo_app, name="todo")
 app.add_typer(_page_app, name="page")
 app.add_typer(_obsidian_app, name="obsidian")
 app.add_typer(_grocery_app, name="grocery")
+app.add_typer(_taste_app, name="taste")
 
 
 # --- project ---
@@ -1823,6 +1825,44 @@ def grocery_want(
     repo = NotionShoppingRepository()
     page_id = repo.want(name)
     console.print(f"[green]「{name}」を買い物リストに追加しました: {page_id}[/green]")
+
+
+# ---------------------------------------------------------------------------
+# Sub-app: taste
+# ---------------------------------------------------------------------------
+
+
+@_taste_app.command("list")
+def taste_list() -> None:
+    """飲食記録の一覧を表示します"""
+    items = sandpiper_app.list_taste.execute()
+    if not items:
+        console.print("[yellow]記録がありません[/yellow]")
+        return
+    for item in items:
+        tags = ", ".join(item.tags) if item.tags else "-"
+        impression = item.impression or "-"
+        comment = item.comment or "-"
+        console.print(f"[bold]{item.title}[/bold]  tags=[{tags}]  感想={impression}  コメント={comment}")
+
+
+@_taste_app.command("add")
+def taste_add(
+    title: str = typer.Argument(..., help="飲食の名前"),
+    tags: list[str] = typer.Option([], "--tag", "-t", help="タグ (複数指定可)"),
+    comment: str = typer.Option(None, "--comment", "-c", help="一言コメント"),
+    place: str = typer.Option(None, "--place", "-p", help="場所のNotionページID"),
+    impression: str = typer.Option(None, "--impression", "-i", help="感想"),
+) -> None:
+    """飲食記録を追加します"""
+    result = sandpiper_app.add_taste.execute(
+        title=title,
+        tags=list(tags),
+        comment=comment,
+        place_page_id=place,
+        impression=impression,
+    )
+    console.print(f"[green]追加しました: {result.title} (id={result.id})[/green]")
 
 
 if __name__ == "__main__":
