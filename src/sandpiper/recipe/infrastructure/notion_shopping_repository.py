@@ -1,13 +1,14 @@
 from lotion import BasePage, Lotion, notion_database
 
 from sandpiper.shared.notion.databases import shopping as shopping_db
-from sandpiper.shared.notion.databases.shopping import ShoppingName, ShoppingWant
+from sandpiper.shared.notion.databases.shopping import PURCHASED_STATUS, ShoppingName, ShoppingPurchased, ShoppingWant
 
 
 @notion_database(shopping_db.DATABASE_ID)
 class ShoppingPage(BasePage):  # type: ignore[misc]
     name: ShoppingName
     want: ShoppingWant | None = None
+    purchased: ShoppingPurchased | None = None
 
     @staticmethod
     def generate(name: str) -> "ShoppingPage":
@@ -33,6 +34,19 @@ class NotionShoppingRepository:
 
         shopping_page = ShoppingPage.generate(name)
         page = self.client.create_page(shopping_page)
+        return page.id  # type: ignore[no-any-return]
+
+    def buy(self, name: str) -> str | None:
+        """買い物アイテムを名前で検索し、「購入済」ステータスに変更する。見つからない場合はNoneを返す。"""
+        existing_pages = self.client.search_pages(
+            cls=ShoppingPage,
+            props=[ShoppingName.from_plain_text(name)],
+        )
+        if not existing_pages:
+            return None
+        page = existing_pages[0]
+        page.set_prop(ShoppingPurchased.from_status_name(PURCHASED_STATUS))
+        self.client.update(page)
         return page.id  # type: ignore[no-any-return]
 
     def want(self, name: str) -> str:

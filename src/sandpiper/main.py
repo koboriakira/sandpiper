@@ -1713,6 +1713,22 @@ def page_get(
 # --- grocery ---
 
 
+@_grocery_app.command("buy")
+def grocery_buy(
+    names: list[str] = typer.Argument(..., help="購入済みにするアイテム名 (複数指定可)"),
+) -> None:
+    """指定したアイテムの「購入済」ステータスに変更します (複数指定可)"""
+    from sandpiper.recipe.infrastructure.notion_shopping_repository import NotionShoppingRepository
+
+    repo = NotionShoppingRepository()
+    for name in names:
+        page_id = repo.buy(name)
+        if page_id:
+            console.print(f"[green]「{name}」を購入済みにしました[/green]")
+        else:
+            console.print(f"[yellow]「{name}」が見つかりませんでした (スキップ)[/yellow]")
+
+
 @_grocery_app.command("want")
 def grocery_want(
     name: str = typer.Argument(..., help="買い物アイテム名"),
