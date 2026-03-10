@@ -39,7 +39,11 @@ class NotionShoppingRepository:
 
     def list_want(self) -> list[str]:
         """「買う」チェックボックスがONのアイテム名一覧を返す。"""
-        filter_param = Builder.create().add(ShoppingWant.true(), Cond.CHECKBOX).build()
+        filter_param = (
+            Builder.create()
+            .add_filter_param({"property": ShoppingWant.PROP_NAME, "checkbox": {"equals": True}})
+            .build()
+        )
         pages: list[ShoppingPage] = self.client.retrieve_database(
             database_id=shopping_db.DATABASE_ID, filter_param=filter_param, cls=ShoppingPage
         )
