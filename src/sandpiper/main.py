@@ -1,5 +1,7 @@
 """メインアプリケーション"""
 
+import subprocess
+import sys
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -1867,5 +1869,23 @@ def taste_add(
     console.print(f"[green]追加しました: {result.title} (id={result.id})[/green]")
 
 
-if __name__ == "__main__":
+def main() -> None:
+    """CLIエントリーポイント。--async フラグを事前処理する。"""
+    if "--async" in sys.argv:
+        args = [a for a in sys.argv if a != "--async"]
+        log_path = Path("/tmp/sandpiper-async.log")
+        with log_path.open("a") as log:
+            subprocess.Popen(
+                args,
+                stdout=log,
+                stderr=log,
+                close_fds=True,
+                start_new_session=True,
+            )
+        console.print("[green]受け付けました (バックグラウンドで実行中...)[/green]")
+        raise SystemExit(0)
     app()
+
+
+if __name__ == "__main__":
+    main()

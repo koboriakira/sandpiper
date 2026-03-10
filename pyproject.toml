@@ -72,7 +72,7 @@ Documentation = "https://username.github.io/sandpiper"
 Issues = "https://github.com/username/sandpiper/issues"
 
 [project.scripts]
-sandpiper = "sandpiper.main:app"
+sandpiper = "sandpiper.main:main"
 sandpiper-mcp = "sandpiper.mcp_server:main"
 
 [tool.uv]
