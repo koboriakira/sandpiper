@@ -5,6 +5,77 @@
 このプロジェクトは[セマンティックバージョニング](https://semver.org/spec/v2.0.0.html)に従い、
 [Conventional Commits](https://conventionalcommits.org/)を使用して自動的にリリースを生成します。
 
+## [0.20.0](https://github.com/koboriakira/sandpiper/compare/sandpiper-v0.19.0...sandpiper-v0.20.0) (2026-03-10)
+
+
+### Features
+
+* Add 12 new MCP server tools for task management ([37dc678](https://github.com/koboriakira/sandpiper/commit/37dc678bad765654fa85a07ac6e4d7a9aeb83315))
+* Add claude_url property to Project for Claude project chat links ([5ff8da1](https://github.com/koboriakira/sandpiper/commit/5ff8da153a57065f9036d8ae9331c8072fd5ecc1))
+* Add claude_url property to ToDo for Claude project chat links ([508a1f8](https://github.com/koboriakira/sandpiper/commit/508a1f8da175d30f32f63b7e1d84cf44c891e121))
+* Add create_next_todo MCP tool for interruption tasks ([143b3f4](https://github.com/koboriakira/sandpiper/commit/143b3f48fdfb0af723f85076c9e8d2128c5abecd))
+* Add create-clip CLI command for saving web clips to Notion ([59fe4d7](https://github.com/koboriakira/sandpiper/commit/59fe4d7082438869038106b41e2d0988c6da91da)), closes [#127](https://github.com/koboriakira/sandpiper/issues/127)
+* Add cron runner script and Slack notification for scheduled tasks ([800df57](https://github.com/koboriakira/sandpiper/commit/800df57f61789cf3a9720e4bc98a9b43e3d3884b))
+* Add MCP server for exposing in-progress todos ([da1ad69](https://github.com/koboriakira/sandpiper/commit/da1ad691782b98a99487e06177cea5d36d1fa60b))
+* Add PrepareTomorrowTodos use case with MCP tool and CLI command ([d56406c](https://github.com/koboriakira/sandpiper/commit/d56406c1a5d513862f784b7c28a42f001d5f5400))
+* Add scheduled_start_datetime to ToDo in next_todo_rule ([#116](https://github.com/koboriakira/sandpiper/issues/116)) ([db38607](https://github.com/koboriakira/sandpiper/commit/db3860775b97d83e87fd59750ddac91c1fcfb69c))
+* Add unprocessed flag to Clip, always enabled on creation ([ed66258](https://github.com/koboriakira/sandpiper/commit/ed662581db077c6bb778e864ec308d177a97e1db))
+* archive-old-todos を毎日3時実行・前日以前対象・ルーティン削除のみに変更 ([045ff3a](https://github.com/koboriakira/sandpiper/commit/045ff3a388dd12e885f6988dfdcb44433e506bb8))
+* CLIにcreate-clipコマンドを追加 ([#128](https://github.com/koboriakira/sandpiper/issues/128)) ([59fe4d7](https://github.com/koboriakira/sandpiper/commit/59fe4d7082438869038106b41e2d0988c6da91da))
+* export-donelist CLIコマンドを追加 ([ce808c0](https://github.com/koboriakira/sandpiper/commit/ce808c090ec11c60244329ea0b757c5ae07f2883))
+* export-donelist実行後にSlack通知を追加 ([394c4b1](https://github.com/koboriakira/sandpiper/commit/394c4b124a8e6ff7bf3c275a178d3d5aa2f7eab1))
+* Jira完了チケットのNotion自動完了同期を追加 ([7231845](https://github.com/koboriakira/sandpiper/commit/723184577cb46e6056f3dcb01e0f9bc0187f5261))
+* Mark incomplete todos with "今日中にやる" flag before preparing tomorrow list ([d0ec15b](https://github.com/koboriakira/sandpiper/commit/d0ec15bcf29447d90db6e6c5e7f897d83c45929b))
+* MCPサーバーにプロジェクト一覧取得ツール(get_projects)を追加 ([4336346](https://github.com/koboriakira/sandpiper/commit/43363464b3ac9c3cca9bad51089c4f77b22c3db3))
+* project/project-task/todo サブコマンドを追加 ([78412d0](https://github.com/koboriakira/sandpiper/commit/78412d09ecf0d265122752e6b1c9315d0d4442b4))
+* Rename MCP tools to intent-based names and enhance docstrings ([90121a2](https://github.com/koboriakira/sandpiper/commit/90121a2d97fc7d2f310cb3763ddbd79279cd65b7))
+* sandpiper grocery buy コマンドを追加 ([5670c08](https://github.com/koboriakira/sandpiper/commit/5670c08233a6736f084670fb05a9d72fc190584d))
+* sandpiper grocery list コマンドを追加 ([6db6ef9](https://github.com/koboriakira/sandpiper/commit/6db6ef9731d9e615c9bad10cc1fd562f9ccfe789))
+* sandpiper grocery want コマンドを追加 ([8ee4631](https://github.com/koboriakira/sandpiper/commit/8ee4631aa3031268608fb2e7fccbd62d6beb73fd))
+* sandpiper obsidian complete コマンドを追加 ([ca0e73e](https://github.com/koboriakira/sandpiper/commit/ca0e73ed6d846a2557f1ca73b9c053448c933aae))
+* sandpiper obsidian migrate コマンドを追加 ([0176fa9](https://github.com/koboriakira/sandpiper/commit/0176fa90d242d79370400b22918c289589b4506c))
+* sandpiper obsidian コマンドを追加 ([3ee02e1](https://github.com/koboriakira/sandpiper/commit/3ee02e1c600ced8f3dbe7ef5f255144a7aeefbf0))
+* sandpiper page get コマンドを追加 ([cc0523e](https://github.com/koboriakira/sandpiper/commit/cc0523eb79d7156cf11896b6bcac997db4615435))
+* sandpiper taste コマンドを追加（飲食記録管理） ([03cdfc3](https://github.com/koboriakira/sandpiper/commit/03cdfc3c0f3f735e7e97106dec51fe16606a7bda))
+* sandpiper todo complete コマンドを追加 ([871a511](https://github.com/koboriakira/sandpiper/commit/871a511840a31f134b167e3f89d320efeb37cff9))
+* sandpiper todo delete コマンドを追加 ([b88a529](https://github.com/koboriakira/sandpiper/commit/b88a529d1c7762b10fa7bce0d83c433d89f2a124))
+* sandpiper todo start コマンドを追加 ([f877581](https://github.com/koboriakira/sandpiper/commit/f877581deee22de71316e785b950201c901db519))
+* taste add コマンドに画像アップロード機能を追加 ([83828f9](https://github.com/koboriakira/sandpiper/commit/83828f9b2c835eb7268e7bb670691aac4012e901))
+* todo list コマンドにタスク種別(kind)を出力追加 ([97b6f62](https://github.com/koboriakira/sandpiper/commit/97b6f6266b472eee3e2aa3e39538988c2e3c2fe6))
+* todo list に予定プロパティフィルタを追加 ([a04a39f](https://github.com/koboriakira/sandpiper/commit/a04a39f00c08322b8af31efa0d57e0f6a945f124))
+* todo start コマンドに --start オプションを追加 ([fa5e5e3](https://github.com/koboriakira/sandpiper/commit/fa5e5e3928478ed06e1e461c36f3a4a81bff66b1))
+* プロジェクトタスク自動整理機能を追加 ([f16337f](https://github.com/koboriakira/sandpiper/commit/f16337f5f1f16daf9a662b944310b3a9aa23d340))
+* 全CLIコマンドに --async オプションを追加 ([e2f0a63](https://github.com/koboriakira/sandpiper/commit/e2f0a63de40fb007755c632cbff02f5bea2a1918))
+* 平日朝10時の打刻未完了チェックCLIコマンドとcronジョブを追加 ([0c94853](https://github.com/koboriakira/sandpiper/commit/0c94853990813b9e5713bf11ad2b19b93c22a560))
+* 未処理Clips一覧表示CLIコマンドを追加 ([#130](https://github.com/koboriakira/sandpiper/issues/130)) ([02dfc68](https://github.com/koboriakira/sandpiper/commit/02dfc6840688dc43ce9813f028a7500c9e294d09)), closes [#129](https://github.com/koboriakira/sandpiper/issues/129)
+
+
+### Bug Fixes
+
+* Clips から「タイトル自動取得」プロパティを削除 ([f2f33b5](https://github.com/koboriakira/sandpiper/commit/f2f33b50b722150d4a6d5e17f86ae9c94a21e1cb))
+* Cond.NOT_EQUALSをCond.DOES_NOT_EQUALに修正 ([53c8082](https://github.com/koboriakira/sandpiper/commit/53c8082c92e239cb7bae9a50db971a0c808d0d56))
+* get-todo-logの時刻表示をUTCからJSTに修正 ([98985ef](https://github.com/koboriakira/sandpiper/commit/98985ef98a2861690cada2905bc5c9622efeb022))
+* grocery list のチェックボックスフィルタを修正 ([155de1e](https://github.com/koboriakira/sandpiper/commit/155de1e5f955526a604163bfdba3a98e4bfaf850))
+* Handle missing start_date in Notion projects gracefully ([#120](https://github.com/koboriakira/sandpiper/issues/120)) ([098527e](https://github.com/koboriakira/sandpiper/commit/098527e64059bc699c63f912e7d902e833012fa1))
+* Notionのみに存在するプロジェクトからDoneステータスを除外 ([6eda8f4](https://github.com/koboriakira/sandpiper/commit/6eda8f47c6412eb06935e4ffd85563d477695d40))
+* page get コマンドのデフォルト出力をマークダウン形式に変更 ([8cd5be5](https://github.com/koboriakira/sandpiper/commit/8cd5be521aa88e5df037346391978ae03ae94a6f))
+* Skip projects without start_date in JIRA sync ([098527e](https://github.com/koboriakira/sandpiper/commit/098527e64059bc699c63f912e7d902e833012fa1))
+* todo list / project-task list から論理削除済みのページを除外 ([0e96d67](https://github.com/koboriakira/sandpiper/commit/0e96d67af7a59c60a1ecd91eaf8954275bfa149a))
+* デフォルトSlack通知チャンネルをC0AJQR86PK9に変更 ([2ba9ee1](https://github.com/koboriakira/sandpiper/commit/2ba9ee1e2d5d948709f2dee1ed118cd0457eff50))
+
+
+### Performance Improvements
+
+* Reduce redundant API calls in Notion repositories ([#119](https://github.com/koboriakira/sandpiper/issues/119)) ([41c516c](https://github.com/koboriakira/sandpiper/commit/41c516cf613f9628f4e6225367890da26fbddaab))
+* Reduce redundant Notion API calls in create-repeat-tasks ([41c516c](https://github.com/koboriakira/sandpiper/commit/41c516cf613f9628f4e6225367890da26fbddaab))
+
+
+### Documentation
+
+* AIエージェント向けCLIコマンド仕様書を追加 ([ee4ee5b](https://github.com/koboriakira/sandpiper/commit/ee4ee5bbffab67b131956789080b96a9e6a19834))
+* Clarify prepare_tomorrow_todos docstring for reliable MCP invocation ([02e2990](https://github.com/koboriakira/sandpiper/commit/02e29903fd5a23f811b1b2c8a3de4a24956ecd67))
+* Simplify CLAUDE.md to concise reference format ([3a6176a](https://github.com/koboriakira/sandpiper/commit/3a6176ac2160dee91048f684847353540f75ba85))
+
 ## [0.19.0](https://github.com/koboriakira/sandpiper/compare/sandpiper-v0.18.0...sandpiper-v0.19.0) (2026-02-03)
 
 
