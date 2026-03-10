@@ -1149,12 +1149,14 @@ _project_task_app = typer.Typer(help="プロジェクトタスクのプロパテ
 _todo_app = typer.Typer(help="TODOのプロパティを取得・更新します")
 _page_app = typer.Typer(help="Notionページの取得")
 _obsidian_app = typer.Typer(help="Obsidian Inbox notes management")
+_grocery_app = typer.Typer(help="買い物リストを管理します")
 
 app.add_typer(_project_app, name="project")
 app.add_typer(_project_task_app, name="project-task")
 app.add_typer(_todo_app, name="todo")
 app.add_typer(_page_app, name="page")
 app.add_typer(_obsidian_app, name="obsidian")
+app.add_typer(_grocery_app, name="grocery")
 
 
 # --- project ---
@@ -1706,6 +1708,21 @@ def page_get(
         print(body)
     else:
         console.print(Markdown(body))
+
+
+# --- grocery ---
+
+
+@_grocery_app.command("want")
+def grocery_want(
+    name: str = typer.Argument(..., help="買い物アイテム名"),
+) -> None:
+    """買い物アイテムの「買う」チェックボックスをONにします。存在しない場合は新規作成します。"""
+    from sandpiper.recipe.infrastructure.notion_shopping_repository import NotionShoppingRepository
+
+    repo = NotionShoppingRepository()
+    page_id = repo.want(name)
+    console.print(f"[green]「{name}」を買い物リストに追加しました: {page_id}[/green]")
 
 
 if __name__ == "__main__":
