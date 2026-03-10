@@ -1,6 +1,6 @@
 """メインアプリケーション"""
 
-from datetime import UTC
+from datetime import UTC, datetime
 from pathlib import Path
 
 import typer
@@ -1448,13 +1448,43 @@ def todo_list(
     )
 
 
+def _parse_hhmm_to_jst(time_str: str) -> datetime:
+    """HH:MM 形式の文字列を今日のJST datetimeに変換する"""
+    from sandpiper.shared.utils.date_utils import JST
+
+    try:
+        hour, minute = (int(x) for x in time_str.split(":"))
+    except ValueError:
+        msg = f"時刻の形式が不正です: {time_str} (HH:MM 形式で指定してください)"
+        raise typer.BadParameter(msg)
+    now = jst_now()
+    return now.replace(hour=hour, minute=minute, second=0, microsecond=0, tzinfo=JST)
+
+
 @_todo_app.command("start")
 def todo_start(
     page_id: str = typer.Argument(..., help="TODOのNotionページID"),
 ) -> None:
-    """TODOを開始します（ステータスをIN_PROGRESSに変更し、開始時刻を記録）"""
+    """TODOを開始します (ステータスをIN_PROGRESSに変更し、開始時刻を記録)"""
     sandpiper_app.start_todo.execute(page_id)
     console.print(f"[green]開始しました: {page_id}[/green]")
+
+
+@_todo_app.command("complete")
+def todo_complete(
+    page_id: str = typer.Argument(..., help="TODOのNotionページID"),
+    start: str = typer.Option(None, "--start", help="開始時刻 HH:MM (ステータスがTODOの場合は必須)"),
+    end: str = typer.Option(None, "--end", help="終了時刻 HH:MM (省略時は現在時刻)"),
+) -> None:
+    """TODOを完了します (終了時刻を記録。ステータスがTODOの場合は--startも必須)"""
+    start_dt = _parse_hhmm_to_jst(start) if start else None
+    end_dt = _parse_hhmm_to_jst(end) if end else None
+    try:
+        sandpiper_app.complete_todo.execute(page_id, start_datetime=start_dt, end_datetime=end_dt)
+    except ValueError as e:
+        console.print(f"[red]エラー: {e}[/red]")
+        raise typer.Exit(code=1)
+    console.print(f"[green]完了しました: {page_id}[/green]")
 
 
 @_todo_app.command("update")

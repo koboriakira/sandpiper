@@ -29,9 +29,15 @@ class ToDo:
         self.log_start_datetime = jst_now()
         self.log_end_datetime = None
 
-    def complete(self) -> None:
+    def complete(
+        self,
+        start_datetime: datetime | None = None,
+        end_datetime: datetime | None = None,
+    ) -> None:
+        if start_datetime is not None:
+            self.log_start_datetime = start_datetime
         self.status = ToDoStatusEnum.DONE
-        self.log_end_datetime = jst_now()
+        self.log_end_datetime = end_datetime if end_datetime is not None else jst_now()
 
     @property
     def scheduled_duration(self) -> timedelta | None:
