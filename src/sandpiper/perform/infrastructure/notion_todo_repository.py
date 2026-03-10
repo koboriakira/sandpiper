@@ -130,3 +130,9 @@ class NotionTodoRepository:
         page = self.client.retrieve_page(page_id, TodoPage)
         page.set_prop(TodoName.from_plain_text(title))
         self.client.update(page)
+
+    def delete(self, page_id: str) -> None:
+        """論理削除: is_deleted フラグを true に設定する"""
+        page = self.client.retrieve_page(page_id, TodoPage)
+        page.set_prop(TodoIsDeleted.true())
+        self.client.update(page)

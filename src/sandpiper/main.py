@@ -1533,6 +1533,15 @@ def todo_start(
     console.print(f"[green]開始しました: {page_id}[/green]")
 
 
+@_todo_app.command("delete")
+def todo_delete(
+    page_id: str = typer.Argument(..., help="TODOのNotionページID"),
+) -> None:
+    """TODOを論理削除します (is_deletedフラグをtrueに設定)"""
+    sandpiper_app.delete_todo.execute(page_id)
+    console.print(f"[green]削除しました: {page_id}[/green]")
+
+
 @_todo_app.command("complete")
 def todo_complete(
     page_id: str = typer.Argument(..., help="TODOのNotionページID"),
