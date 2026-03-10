@@ -1,4 +1,5 @@
 from lotion import BasePage, Lotion, notion_database
+from lotion.block.image import Image
 
 from sandpiper.shared.notion.databases import taste as taste_db
 from sandpiper.shared.notion.databases.taste import (
@@ -55,6 +56,11 @@ class NotionTasteRepository:
     def save(self, item: TasteItem) -> InsertedTasteItem:
         page = TastePage.generate(item)
         created = self._client.create_page(page)
+
+        for image_path in item.image_paths:
+            file_upload = self._client.upload_file(image_path)
+            self._client.append_block(created.id, Image.from_file_upload(file_upload))
+
         result = self._client.retrieve_page(created.id, TastePage)
         return result.to_domain()  # type: ignore[no-any-return]
 

@@ -1,4 +1,5 @@
 from dataclasses import dataclass, field
+from pathlib import Path
 
 
 @dataclass(frozen=True)
@@ -8,6 +9,7 @@ class TasteItem:
     comment: str | None = None
     place_page_id: str | None = None
     impression: str | None = None
+    image_paths: list[Path] = field(default_factory=list)
 
 
 @dataclass(frozen=True)

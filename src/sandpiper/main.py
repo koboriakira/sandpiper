@@ -1853,14 +1853,16 @@ def taste_add(
     comment: str = typer.Option(None, "--comment", "-c", help="一言コメント"),
     place: str = typer.Option(None, "--place", "-p", help="場所のNotionページID"),
     impression: str = typer.Option(None, "--impression", "-i", help="感想"),
+    images: list[Path] = typer.Option([], "--image", help="添付画像ファイルパス (複数指定可)"),
 ) -> None:
-    """飲食記録を追加します"""
+    """飲食記録を追加します (画像ファイルはNotionページにアップロードされます)"""
     result = sandpiper_app.add_taste.execute(
         title=title,
         tags=list(tags),
         comment=comment,
         place_page_id=place,
         impression=impression,
+        image_paths=list(images),
     )
     console.print(f"[green]追加しました: {result.title} (id={result.id})[/green]")
 
