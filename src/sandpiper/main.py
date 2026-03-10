@@ -1402,11 +1402,68 @@ def todo_get(
     )
 
 
+def _filter_todos_by_schedule(
+    todos: list,
+    scheduled: bool,
+    all_day: bool,
+    from_time: str | None,
+    to_time: str | None,
+) -> list:
+    """予定プロパティでTODOリストを絞り込む"""
+    result = todos
+
+    if scheduled:
+        result = [t for t in result if t.scheduled_start_datetime is not None]
+
+    if all_day:
+        result = [
+            t
+            for t in result
+            if t.scheduled_start_datetime is not None
+            and t.scheduled_start_datetime.hour == 0
+            and t.scheduled_start_datetime.minute == 0
+        ]
+
+    if from_time is not None:
+        try:
+            fh, fm = (int(x) for x in from_time.split(":"))
+        except ValueError:
+            msg = f"--from の形式が不正です: {from_time} (HH:MM 形式で指定してください)"
+            raise typer.BadParameter(msg)
+        from_minutes = fh * 60 + fm
+        result = [
+            t
+            for t in result
+            if t.scheduled_start_datetime is not None
+            and t.scheduled_start_datetime.hour * 60 + t.scheduled_start_datetime.minute >= from_minutes
+        ]
+
+    if to_time is not None:
+        try:
+            th, tm = (int(x) for x in to_time.split(":"))
+        except ValueError:
+            msg = f"--to の形式が不正です: {to_time} (HH:MM 形式で指定してください)"
+            raise typer.BadParameter(msg)
+        to_minutes = th * 60 + tm
+        result = [
+            t
+            for t in result
+            if t.scheduled_start_datetime is not None
+            and t.scheduled_start_datetime.hour * 60 + t.scheduled_start_datetime.minute <= to_minutes
+        ]
+
+    return result
+
+
 @_todo_app.command("list")
 def todo_list(
     status: str = typer.Option(
         None, "--status", help="ステータスフィルター (TODO/IN_PROGRESS/DONE/ALL, デフォルト: TODO)"
     ),
+    scheduled: bool = typer.Option(False, "--scheduled", help="予定が設定されているものだけ表示する"),
+    all_day: bool = typer.Option(False, "--all-day", help="終日予定のものだけ表示する"),
+    from_time: str | None = typer.Option(None, "--from", help="予定開始時刻の下限 (HH:MM形式)"),
+    to_time: str | None = typer.Option(None, "--to", help="予定開始時刻の上限 (HH:MM形式)"),
 ) -> None:
     """TODO一覧をJSON形式で取得します (デフォルト: ステータスがTODOのもの)"""
     import json as _json
@@ -1427,6 +1484,8 @@ def todo_list(
             console.print("[yellow]有効な値: TODO, IN_PROGRESS, DONE, ALL[/yellow]")
             raise typer.Exit(code=1)
         todos = repo.find_by_status(status_enum)
+
+    todos = _filter_todos_by_schedule(todos, scheduled, all_day, from_time, to_time)
 
     print(
         _json.dumps(
