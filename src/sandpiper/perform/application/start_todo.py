@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from sandpiper.app.message_dispatcher import MessageDispatcher
 from sandpiper.perform.domain.todo_repository import TodoRepository
 from sandpiper.shared.event.todo_started import TodoStarted
@@ -21,9 +23,9 @@ class StartTodo:
         self._project_task_repository = project_task_repository
         self._dispatcher = dispatcher
 
-    def execute(self, page_id: str) -> None:
+    def execute(self, page_id: str, start_datetime: datetime | None = None) -> None:
         todo = self._todo_repository.find(page_id)
-        todo.start()
+        todo.start(start_datetime=start_datetime)
         self._todo_repository.save(todo)
 
         if todo.project_task_page_id:

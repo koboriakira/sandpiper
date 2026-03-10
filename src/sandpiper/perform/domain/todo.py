@@ -23,10 +23,10 @@ class ToDo:
     scheduled_end_datetime: datetime | None = None
     claude_url: str | None = None
 
-    def start(self) -> None:
+    def start(self, start_datetime: datetime | None = None) -> None:
         self.status = ToDoStatusEnum.IN_PROGRESS
         self.section = TaskChuteSection.new()
-        self.log_start_datetime = jst_now()
+        self.log_start_datetime = start_datetime if start_datetime is not None else jst_now()
         self.log_end_datetime = None
 
     def complete(

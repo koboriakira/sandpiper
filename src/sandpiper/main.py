@@ -1525,9 +1525,11 @@ def _parse_hhmm_to_jst(time_str: str) -> datetime:
 @_todo_app.command("start")
 def todo_start(
     page_id: str = typer.Argument(..., help="TODOのNotionページID"),
+    start: str = typer.Option(None, "--start", help="開始時刻 HH:MM (省略時は現在時刻)"),
 ) -> None:
     """TODOを開始します (ステータスをIN_PROGRESSに変更し、開始時刻を記録)"""
-    sandpiper_app.start_todo.execute(page_id)
+    start_dt = _parse_hhmm_to_jst(start) if start else None
+    sandpiper_app.start_todo.execute(page_id, start_datetime=start_dt)
     console.print(f"[green]開始しました: {page_id}[/green]")
 
 

@@ -1,5 +1,5 @@
 from lotion import BasePage, Lotion, notion_database
-from lotion.filter import Builder, Cond
+from lotion.filter import Builder
 
 from sandpiper.shared.notion.databases import shopping as shopping_db
 from sandpiper.shared.notion.databases.shopping import PURCHASED_STATUS, ShoppingName, ShoppingPurchased, ShoppingWant
