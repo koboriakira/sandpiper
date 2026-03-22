@@ -48,6 +48,9 @@ console = Console()
 
 sandpiper_app = bootstrap()
 
+jira_app = typer.Typer(name="jira", help="Jira 操作コマンド")
+app.add_typer(jira_app, name="jira")
+
 
 @app.command()
 def hello(name: str = typer.Option("World", help="挨拶する相手の名前")) -> None:
@@ -1915,6 +1918,46 @@ def taste_add(
         image_paths=list(images),
     )
     console.print(f"[green]追加しました: {result.title} (id={result.id})[/green]")
+
+
+@jira_app.command("get")
+def jira_get(
+    ticket: str = typer.Argument(..., help="チケットキー (例: SU-1234) または Jira URL"),
+    output: Path = typer.Option(None, "-o", "--output", help="出力ファイルパス(省略時は標準出力)"),
+) -> None:
+    """Jira チケットの情報を JSON 形式で取得します"""
+    import json
+    import re
+
+    from sandpiper.plan.query.jira_ticket_query import RestApiJiraTicketQuery
+
+    # URL からチケットキーを抽出
+    url_match = re.search(r"/browse/([A-Z]+-\d+)", ticket)
+    issue_key = url_match.group(1) if url_match else ticket
+
+    try:
+        query = RestApiJiraTicketQuery()
+        result = query.get_ticket(issue_key)
+
+        if not result:
+            console.print(f"[red]チケット {issue_key} が見つかりませんでした[/red]")
+            raise typer.Exit(code=1)
+
+        json_str = json.dumps(result.to_dict(), ensure_ascii=False, indent=2)
+
+        if output:
+            output.write_text(json_str, encoding="utf-8")
+            console.print(f"[green]{output} に書き出しました[/green]")
+        else:
+            print(json_str)
+
+    except ValueError as e:
+        console.print(f"[red]設定エラー: {e}[/red]")
+        console.print("[yellow]BUSINESS_JIRA_USERNAME と BUSINESS_JIRA_API_TOKEN の環境変数を設定してください[/yellow]")
+        raise typer.Exit(code=1)
+    except Exception as e:
+        console.print(f"[red]エラー: {e}[/red]")
+        raise typer.Exit(code=1)
 
 
 def main() -> None:
