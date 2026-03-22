@@ -691,6 +691,54 @@ def get_jira_ticket(
 
 
 @app.command()
+def fetch_jira_tickets(
+    project: str = typer.Option(
+        None, "--project", "-p", help="Jiraプロジェクトキー(省略時はBUSINESS_JIRA_PROJECT環境変数)"
+    ),
+    jql: str = typer.Option(None, help="JQLで絞り込む場合"),
+    status: str = typer.Option(None, help="ステータスフィルタ(カンマ区切りで複数指定可)"),
+    max_results: int = typer.Option(50, help="最大取得件数"),
+    output: str = typer.Option(None, "--output", "-o", help="出力ファイルパス(省略時は標準出力)"),
+) -> None:
+    """JIRAのチケット情報をJSON形式で取得します(パイプ向け純粋JSON出力)"""
+    import json
+    import os
+    import sys
+
+    from sandpiper.plan.query.jira_ticket_query import RestApiJiraTicketQuery
+
+    try:
+        query = RestApiJiraTicketQuery()
+
+        effective_project = project or os.getenv("BUSINESS_JIRA_PROJECT")
+
+        tickets = query.search_tickets(
+            jql=jql,
+            project=effective_project,
+            status=status,
+            max_results=max_results,
+        )
+
+        tickets_data = [ticket.to_dict() for ticket in tickets]
+        json_str = json.dumps(tickets_data, ensure_ascii=False, indent=2)
+
+        if output:
+            from pathlib import Path
+
+            Path(output).write_text(json_str, encoding="utf-8")
+        else:
+            print(json_str)
+
+    except ValueError as e:
+        print(f"設定エラー: {e}", file=sys.stderr)
+        print("BUSINESS_JIRA_USERNAME と BUSINESS_JIRA_API_TOKEN の環境変数を設定してください", file=sys.stderr)
+        raise typer.Exit(code=1)
+    except Exception as e:
+        print(f"エラー: {e}", file=sys.stderr)
+        raise typer.Exit(code=1)
+
+
+@app.command()
 def create_notion_pages(
     file_path: str = typer.Argument(..., help="JSONファイルのパス"),
 ) -> None:
