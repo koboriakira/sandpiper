@@ -1920,6 +1920,89 @@ def taste_add(
     console.print(f"[green]追加しました: {result.title} (id={result.id})[/green]")
 
 
+@jira_app.command("search")
+def jira_search(
+    assignee: str = typer.Option("currentUser()", "-a", "--assignee", help="担当者 (デフォルト: currentUser())"),
+    issue_type: str = typer.Option(
+        "Epic,Task", "-t", "--type", help="issueタイプ (カンマ区切り、デフォルト: Epic,Task)"
+    ),
+    no_sprint: bool = typer.Option(False, "--no-sprint", help="アクティブスプリント縛りを外す"),
+    jql: str = typer.Option(None, "--jql", help="生のJQLクエリ (指定時は他フィルタを無視)"),
+    project: str = typer.Option(None, "-p", "--project", help="プロジェクトキー (省略時はデフォルトプロジェクト)"),
+    output: str = typer.Option("table", "-o", "--output", help="出力形式 (table または json)"),
+) -> None:
+    """Jira チケットを検索してテーブルまたは JSON で表示します"""
+    import json as _json
+
+    from rich.table import Table
+
+    from sandpiper.plan.query.jira_ticket_query import RestApiJiraTicketQuery
+
+    try:
+        query = RestApiJiraTicketQuery()
+
+        if jql is None:
+            # JQL を組み立てる
+            conditions = []
+
+            if assignee:
+                if assignee.lower() == "currentuser()":
+                    conditions.append("assignee = currentUser()")
+                else:
+                    conditions.append(f'assignee = "{assignee}"')
+
+            if not no_sprint:
+                conditions.append("sprint in openSprints()")
+
+            if issue_type:
+                types = [f'"{t.strip()}"' for t in issue_type.split(",")]
+                conditions.append(f"issuetype IN ({','.join(types)})")
+
+            if project:
+                conditions.append(f'project = "{project}"')
+
+            built_jql = " AND ".join(conditions) + " ORDER BY created DESC" if conditions else "ORDER BY created DESC"
+        else:
+            built_jql = jql
+
+        tickets = query.search_tickets(jql=built_jql)
+
+        if not tickets:
+            console.print("[yellow]チケットが見つかりませんでした[/yellow]")
+            return
+
+        if output.lower() == "json":
+            tickets_data = [ticket.to_dict() for ticket in tickets]
+            print(_json.dumps(tickets_data, ensure_ascii=False, indent=2))
+        else:
+            table = Table(title=f"JIRA Tickets ({len(tickets)} 件)")
+            table.add_column("Key", style="cyan", no_wrap=True)
+            table.add_column("Summary", style="white")
+            table.add_column("Type", style="green")
+            table.add_column("Status", style="yellow")
+            table.add_column("Sprint", style="blue")
+
+            for ticket in tickets:
+                table.add_row(
+                    ticket.issue_key,
+                    ticket.summary[:50] + "..." if len(ticket.summary) > 50 else ticket.summary,
+                    ticket.issue_type,
+                    ticket.status,
+                    ticket.sprint or "",
+                )
+
+            console.print(table)
+            console.print(f"\n[bold]合計: {len(tickets)} 件[/bold]")
+
+    except ValueError as e:
+        console.print(f"[red]設定エラー: {e}[/red]")
+        console.print("[yellow]BUSINESS_JIRA_USERNAME と BUSINESS_JIRA_API_TOKEN の環境変数を設定してください[/yellow]")
+        raise typer.Exit(code=1)
+    except Exception as e:
+        console.print(f"[red]エラー: {e}[/red]")
+        raise typer.Exit(code=1)
+
+
 @jira_app.command("get")
 def jira_get(
     ticket: str = typer.Argument(..., help="チケットキー (例: SU-1234) または Jira URL"),
