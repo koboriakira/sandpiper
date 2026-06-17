@@ -1139,7 +1139,7 @@ def export_donelist(
         content = "\n".join(lines) + "\n" if lines else ""
 
         # Obsidian Vault に書き出し
-        vault_path = Path.home() / "Library/Mobile Documents/iCloud~md~obsidian/Documents/my-vault"
+        vault_path = Path.home() / "obsidian/my-vault"
         output_path = vault_path / "dailynote" / f"{target_date:%Y/%m/%d}" / "donelist.md"
         output_path.parent.mkdir(parents=True, exist_ok=True)
         output_path.write_text(content, encoding="utf-8")
@@ -1689,7 +1689,7 @@ def obsidian_list(
 
 
 _OBSIDIAN_SLACK_CHANNEL_ID = "C0AK05ELVM1"
-_VAULT_PATH = Path.home() / "Library/Mobile Documents/iCloud~md~obsidian/Documents/my-vault"
+_VAULT_PATH = Path.home() / "obsidian/my-vault"
 
 
 @_obsidian_app.command("migrate")
